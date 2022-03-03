@@ -1,0 +1,4 @@
+-r common.txt
+pytest ~= 3.0.3
+tox ~= 3.24.5
+
