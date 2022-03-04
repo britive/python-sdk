@@ -124,4 +124,12 @@ class MyAccess:
 
         return self.britive.get(f'{self.base_url}/favorites')
 
+    def whoami(self) -> dict:
+        """
+        Return details about the currently authenticated identity (user or service).
+
+        :return: Details of the currently authenticated identity.
+        """
+
+        return self.britive.post(f'{self.britive.base_url}/auth/validate')['authenticationResult']
 

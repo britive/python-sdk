@@ -61,16 +61,14 @@ PATH magic in `tests/__init__.py`.
 export BRITIVE_UNIT_TESTING=true
 ~~~
 
-You will also need to other environment variables.
+You will also need other environment variables.
 
 1. The AWS account that will be used to create test applications/environments/etc. This is being added as an 
-environment variable, so it is not hardcoded into the tests and store in the repo as a result.
+environment variable, so it is not hardcoded into the tests and stored in the repo as a result.
 
-2. Your Britive user email address - this will be used to find your user ID when the checkout/checkins are performed.
 
 ~~~
 export BRITIVE_TEST_ENV_ACCOUNT_ID=<12 digit AWS account id>
-export BRITIVE_USER_EMAIL=<your email address>
 ~~~
 
 Then run these in order or as required.

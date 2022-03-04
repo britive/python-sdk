@@ -303,8 +303,7 @@ def cached_scim_token(pytestconfig, cached_identity_provider):
 @cached_resource(name='checked-out-profile')
 def cached_checked_out_profile(pytestconfig, cached_profile, cached_user, cached_environment):
     # add the currently authenticated user
-    email = os.environ['BRITIVE_USER_EMAIL']
-    user_id = britive.users.search(email)[0]['userId']
+    user_id = britive.my_access.whoami()['userId']
 
     try:
         britive.profiles.identities.add(
