@@ -1,4 +1,11 @@
 from .cache import *  # will also import some globals like `britive`
+import json
+
+
+def test_whoami():
+    me = britive.my_access.whoami()
+    assert isinstance(me, dict)
+    print(json.dumps(me, indent=2, default=str))
 
 
 def test_list_profiles():
