@@ -67,6 +67,18 @@ class TransactionNotFound(Exception):
     pass
 
 
+class ApprovalRequiredButNoJustificationProvided(Exception):
+    pass
+
+
+class ApprovalWorkflowTimedOut(Exception):
+    pass
+
+
+class AccessDenied(Exception):
+    pass
+
+
 # from https://docs.britive.com/docs/restapi-status-codes
 allowed_exceptions = {
     400: InvalidRequest,

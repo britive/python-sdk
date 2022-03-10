@@ -68,6 +68,8 @@ environment variable, so it is not hardcoded into the tests and stored in the re
 
 
 ~~~
+export BRITIVE_API_TOKEN=...
+export BRITIVE_TENANT=...
 export BRITIVE_TEST_ENV_ACCOUNT_ID=<12 digit AWS account id>
 ~~~
 
@@ -97,9 +99,20 @@ pytest tests/test_200-reports.py -v
 pytest tests/test_210-identity_providers.py -v
 pytest tests/test_220-my_access.py -v
 pytest tests/test_230-notifications.py -v
+pytest tests/test_240-my_secrets.py -v
 
 pytest tests/test_990-delete_all_resources.py -v
 ~~~
 
 Or you can simply run `pytest -v` to test everything all at once. The above commands however allow you to halt
 testing to fix issues that might arise.
+
+## Secrets Manager Testing
+
+Since the admin API actions for Secrets Manager are not yet built into this Python API Wrapper then
+some manual setup has to occur in the tenant used for testing. Specifically these tests will need at
+least 1 secret available to the calling user/service identity and one of those secrets has to be named
+"/Test".
+
+This will change once the admin API actions are built into this package as we can then programmatically create
+the vault and secrets before testing the britive.my_secrets functionality.

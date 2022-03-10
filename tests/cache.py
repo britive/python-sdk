@@ -265,8 +265,10 @@ def cached_task(pytestconfig, cached_task_service, cached_application, cached_en
 @pytest.fixture(scope='session')
 @cached_resource(name='security-policy')
 def cached_security_policy(pytestconfig, cached_service_identity_token):
+    r = str(random.randint(0, 1000000))
+
     return britive.security_policies.create(
-            name='test',
+            name=f'test-{r}',
             description='test',
             ips=['1.1.1.1', '10.0.0.0/16'],
             effect='Allow',
