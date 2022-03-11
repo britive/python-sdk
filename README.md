@@ -65,6 +65,7 @@ where they exist.
 * Identity Attributes
 * Identity Providers
 * My Access (access granted to the given identity (user or service))
+* My Secrets (access granted to the given identity (user or service))
 * Notifications
 * Profiles
 * Reports

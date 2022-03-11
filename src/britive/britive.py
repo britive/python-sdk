@@ -25,6 +25,8 @@ from .reports import Reports
 from .identity_providers import IdentityProviders
 from .my_access import MyAccess
 from .notifications import Notifications
+from .my_secrets import MySecrets
+
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
 BRITIVE_TOKEN_ENV_NAME = 'BRITIVE_API_TOKEN'
@@ -119,6 +121,7 @@ class Britive:
         self.identity_providers = IdentityProviders(self)
         self.my_access = MyAccess(self)
         self.notifications = Notifications(self)
+        self.my_secrets = MySecrets(self)
 
     def get(self, url, params=None):
         """Internal use only."""
@@ -198,6 +201,8 @@ class Britive:
             return 'report'
         if has_next_page_header:  # this interesting way of paginating is how audit_logs.query() does it
             return 'audit'
+        if is_dict and all(x in result.keys() for x in ['result', 'pagination']):
+            return 'secmgr'
         return 'none'
 
     def __request(self, method, url, params=None, data=None, json=None):
@@ -246,6 +251,13 @@ class Britive:
                 url = response.headers['next-page']
                 params = {}  # the next-page header has all the URL parameters we need so unset them here
                 return_data += result['data']
+            elif pagination_type == 'secmgr':
+                return_data += result['result']
+                next_page = result['pagination'].get('next', '')
+                if next_page == '':
+                    break
+                else:
+                    params['pageToken'] = next_page
             else:  # we are not dealing with pagination so just return the response as-is
                 return_data = result
                 break

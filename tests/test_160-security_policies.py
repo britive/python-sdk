@@ -3,7 +3,6 @@ from .cache import *  # will also import some globals like `britive`
 
 def test_create(cached_security_policy):
     assert isinstance(cached_security_policy, dict)
-    assert cached_security_policy['name'] == 'test'
 
 
 def test_list(cached_security_policy):
@@ -15,7 +14,6 @@ def test_list(cached_security_policy):
 def test_get(cached_security_policy):
     policy = britive.security_policies.get(security_policy_id=cached_security_policy['id'])
     assert isinstance(policy, dict)
-    assert policy['name'] == 'test'
 
 
 def test_disable(cached_security_policy):
