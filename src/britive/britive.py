@@ -44,10 +44,8 @@ class Britive:
     the developer/end user experience. Some APIs may also be combined into one Python method with a parameter if and
     where it makes more sense to present the API that way.
 
-    Authentication is handled solely via API tokens. The token can be presented to this class in one of two methods.
+    Authentication is handled solely via API tokens. The token can only be presented in one way.
 
-    - Passed directly into the class constructor (not preferred as credentials have the potential to be saved into
-       a code repository).
     - Injected as an environment variable into the execution context where this package is being run. The
        environment variable name must be BRITIVE_API_TOKEN.
 
@@ -65,7 +63,7 @@ class Britive:
     must persist responses to disk if and when that is required.
     """
 
-    def __init__(self, tenant: str = None, token: str = None):
+    def __init__(self, tenant: str = None):
         """
         Instantiate an authenticated interface that can be used to communicate with the Britive API.
 
@@ -77,7 +75,7 @@ class Britive:
         """
 
         self.tenant = tenant or os.environ.get(BRITIVE_TENANT_ENV_NAME)
-        self.__token = token or os.environ.get(BRITIVE_TOKEN_ENV_NAME)
+        self.__token = os.environ.get(BRITIVE_TOKEN_ENV_NAME)
 
         if not self.tenant:
             raise TenantMissingError(
@@ -87,8 +85,7 @@ class Britive:
 
         if not self.__token:
             raise TokenMissingError(
-                'Token not explicitly provided and could not be sourced '
-                f'from environment variable {BRITIVE_TOKEN_ENV_NAME}'
+                'Token could not be sourced from environment variable {BRITIVE_TOKEN_ENV_NAME}'
             )
 
         self.base_url = f'https://{self.tenant}.britive-app.com/api'
