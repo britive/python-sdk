@@ -77,6 +77,35 @@ where they exist.
 * Tasks
 * Users
 
+## Proxies
+
+Under the covers, python `requests` is being used to communicate with the Britive API. As such, any functionality
+of `requests` can be used, including setting an HTTP proxy. HTTP proxies will be set via environment variables.
+
+* HTTP_PROXY
+* HTTPS_PROXY
+* NO_PROXY
+* http_proxy
+* https_proxy
+* no_proxy
+
+Standard HTTP proxy URLs should be utilized. Examples below.
+
+* Unauthenticated Proxy: `http://internalproxy.domain.com:8080`
+* Authenticated Proxy: `http://user:pass@internalproxy.domain.com:8080`
+
+## Custom TLS Certificates 
+
+Under the covers, python `requests` is being used to communicate with the Britive API. As such, any functionality
+of `requests` can be used, including setting custom TLS certificates. Certificate bundles will be set via environment variables.
+
+* REQUESTS_CA_BUNDLE
+* CURL_CA_BUNDLE (used as a fallback)
+
+The values of these environment variables must be a path to a directory of certificates or a specific certificate. Example...
+
+`/path/to/certfile`
+
 ## Examples
 
 ### Importing
