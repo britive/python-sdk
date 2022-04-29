@@ -338,7 +338,8 @@ def cached_checked_out_profile(pytestconfig, cached_profile, cached_user, cached
 
 @pytest.fixture(scope='session')
 @cached_resource(name='checked-out-profile-by-name')
-def cached_checked_out_profile_by_name(pytestconfig, cached_profile, cached_user, cached_environment):
+def cached_checked_out_profile_by_name(pytestconfig, cached_profile, cached_user, cached_environment,
+                                       cached_application):
 
     # note that cached_checked_out_profile has to be run first so all the permissions and user entitlements
     # are set properly. We are just re-checking out the profile using names instead of IDs here.
@@ -348,6 +349,7 @@ def cached_checked_out_profile_by_name(pytestconfig, cached_profile, cached_user
     return britive.my_access.checkout_by_name(
             profile_name=cached_profile['name'],
             environment_name=f'{account_id} ({cached_environment["name"]})',
+            application_name=cached_application['catalogAppDisplayName'],
             include_credentials=True
         )
 
