@@ -141,7 +141,6 @@ class MyAccess:
         url_part = 'url' if transaction['accessType'] == 'CONSOLE' else 'tokens'
         return self.britive.get(f'{self.base_url}/{transaction_id}/{url_part}')
 
-
     def checkin(self, transaction_id: str) -> dict:
         """
         Check in a checked out profile.
@@ -155,7 +154,7 @@ class MyAccess:
         }
         return self.britive.put(f'{self.base_url}/{transaction_id}', params=params)
 
-    def checkin_by_name(self, profile_name: str, environment_name: str,  application_name: str = None) -> dict:
+    def checkin_by_name(self, profile_name: str, environment_name: str, application_name: str = None) -> dict:
         """
         Check in a checked out profile by supplying the names of entities vs. the IDs of those entities
 
@@ -210,26 +209,42 @@ class MyAccess:
         profile_name = profile_name.lower()
         environment_name = environment_name.lower()
         application_name = application_name.lower() if application_name else None
-        data = self.list_profiles()
-        profiles = {}
-        for app in data:
-            if application_name and app['appName'].lower() != application_name:
+        envs = {}
+
+        # collect all the environment/profile combinations to which the identity is entitled
+        for app in self.list_profiles():
+            app_name = app['appName'].lower()
+            if application_name and app_name != application_name:  # restrict to one app if provided
                 continue
             for profile in app['profiles']:
-                envs = {}
+                prof_name = profile['profileName'].lower()
+                prof_id = profile['profileId']
                 for env in profile['environments']:
-                    envs[env['environmentName'].lower()] = env['environmentId']
-                profiles[profile['profileName'].lower()] = {
-                    'id': profile['profileId'],
-                    'envs': envs
-                }
-        profile_id = profiles.get(profile_name, {'id': None}).get('id')
-        environment_id = profiles.get(profile_name, {'envs': {}})['envs'].get(environment_name)
+                    env_name = env['environmentName'].lower()
+                    if env_name not in envs.keys():
+                        envs[env_name] = {
+                            'profiles': {},
+                            'applications': [],
+                            'id': env['environmentId']
+                        }
+                    envs[env_name]['applications'].append(app_name)
+                    envs[env_name]['profiles'][prof_name] = prof_id
 
+        # now try to find the specific environment and profile provided by the caller
+        env = envs.get(environment_name)
+        if not env:
+            raise ValueError(f'environment with name {environment_name} was not found.')
+        if len(env['applications']) > 1:
+            raise ValueError(f'environment with name {environment_name} exists across '
+                             f'multiple applications: {env["applications"]}. please provide the optional parameter '
+                             '"application_name" to clarify which application the environment belongs to.'
+                             )
+        environment_id = env['id']
+        profile_id = env['profiles'].get(profile_name)
         if not profile_id:
-            raise ValueError(f'profile name {profile_name} was not found as a valid profile')
-        if not environment_id:
-            raise ValueError(f'environment name {environment_name} was not found as a valid environment')
+            raise ValueError(f'profile name {profile_name} was not found as a valid profile '
+                             f'in environment {environment_name}'
+                             )
 
         return {
             'profile_id': profile_id,

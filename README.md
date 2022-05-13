@@ -1,4 +1,4 @@
-# Britive Python API Wrapper
+# Britive Python SDK
 
 Pure Python implementation for interacting with the Britive API.
 
