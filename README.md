@@ -173,3 +173,24 @@ with open('file.csv', 'w') as f:
     f.write(britive.reports.run(report_id='abc123', csv=True))
 ~~~
 
+
+### Create a Profile Policy (profiles v2/enhanced profiles)
+
+The commands below will create a policy on a profile that allows `user@domain.com` to check out the profile but only
+if `approver@domain.com` approves that request within 10 minutes.
+
+~~~python
+from britive.britive import Britive
+
+b = Britive()
+
+policy = b.profiles.policies.build(
+    name='example',
+    users=['user@domain.com'],
+    approval_notification_medium='Email',
+    approver_users=['approver@domain.com'],
+    time_to_approve=10
+)
+
+b.profiles.policies.create(profile_id='...', policy=policy)
+~~~

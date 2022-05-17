@@ -1,5 +1,7 @@
 from . import exceptions
 import datetime
+import json
+
 
 creation_defaults = {
     'expirationDuration': 3600000,
@@ -15,13 +17,28 @@ creation_defaults = {
 
 
 class Profiles:
-    def __init__(self, britive):
+    def __init__(self, britive, version: int = 2):  # default to profiles v2 as v2 will be enabled for new tenants
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
+        self.version = version
+
         self.permissions = ProfilePermissions(britive)
-        self.identities = ProfileIdentities(britive)
-        self.tags = ProfileTags(britive)
         self.session_attributes = ProfileSessionAttributes(britive)
+
+        if self.version == 1:
+            self.identities = ProfileIdentities(britive)
+            self.tags = ProfileTags(britive)
+        elif self.version == 2:
+            self.policies = ProfilePolicies(britive)
+        else:
+            raise Exception(f'invalid profile version - {self.version} - cannot continue')
+
+    def __getattr__(self, name):
+        if name in ['identities', 'tags'] and self.version == 2:
+            raise exceptions.TenantNotEnabledForProfilesVersion1('Tenant not enabled for profiles v1')
+        if name in ['policies'] and self.version == 1:
+            raise exceptions.TenantNotEnabledForProfilesVersion2('Tenant not enabled for profiles v2')
+        raise AttributeError(f"'Profiles' object has no attribute '{name}'")
 
     def create(self, application_id: str, name: str, **kwargs) -> dict:
         """
@@ -284,6 +301,9 @@ class ProfileIdentities:
         """
         Add a user to the profile.
 
+        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
+        `britive.profiles.policies.*` instead.
+
         :param profile_id: The ID of the profile.
         :param user_id: The ID of the user.
         :param start: The optional start time of when the association should be in effect. Providing start implies that
@@ -306,6 +326,9 @@ class ProfileIdentities:
         """
         List the users assigned to the profile.
 
+        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
+        `britive.profiles.policies.*` instead.
+
         :param profile_id: The ID of the profile.
         :param filter_expression: Can filter based on `name`, `status`, `integrity check`. Valid operators are `eq` and
             `co`. Example: name co "Dev Account"
@@ -326,6 +349,9 @@ class ProfileIdentities:
         """
         List users available to be assigned to the profile.
 
+        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
+        `britive.profiles.policies.*` instead.
+
         :param profile_id: The ID of the profile.
         :return: List of users that are available to be assigned to the profile.
         """
@@ -340,6 +366,9 @@ class ProfileIdentities:
     def remove(self, profile_id: str, user_id: str) -> None:
         """
         Remove the user from the profile.
+
+        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
+        `britive.profiles.policies.*` instead.
 
         :param profile_id: The ID of the profile.
         :param user_id: The ID of the user.
@@ -357,6 +386,9 @@ class ProfileTags:
     def add(self, profile_id: str, tag_id: str, start: datetime = None, end: datetime = None) -> dict:
         """
         Add a tag to the profile.
+
+        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
+        `britive.profiles.policies.*` instead.
 
         :param profile_id: The ID of the profile.
         :param tag_id: The ID of the tag.
@@ -380,6 +412,9 @@ class ProfileTags:
         """
         List the tags assigned to the profile.
 
+        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
+        `britive.profiles.policies.*` instead.
+
         :param profile_id: The ID of the profile.
         :param filter_expression: Can filter based on `name`, `status`, `integrity check`. Valid operators are `eq` and
             `co`. Example: name co "Dev Account"
@@ -400,6 +435,9 @@ class ProfileTags:
         """
         List users available to be assigned to the profile.
 
+        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
+        `britive.profiles.policies.*` instead.
+
         :param profile_id: The ID of the profile.
         :return: List of tags that are available to be assigned to the profile.
         """
@@ -414,6 +452,9 @@ class ProfileTags:
     def remove(self, profile_id: str, tag_id: str) -> None:
         """
         Remove the tag from the profile.
+
+        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
+        `britive.profiles.policies.*` instead.
 
         :param profile_id: The ID of the profile.
         :param tag_id: The ID of the tag.
@@ -451,7 +492,7 @@ class ProfileSessionAttributes:
         return self.britive.post(f'{self.base_url}/{profile_id}/session-attributes', json=data)
 
     def add_dynamic(self, profile_id: str, identity_attribute_id: str, tag_name: str,
-                     transitive: bool = False) -> dict:
+                    transitive: bool = False) -> dict:
         """
         AWS ONLY - Add a dynamic session attribute to the profile.
 
@@ -502,7 +543,7 @@ class ProfileSessionAttributes:
 
         return self.britive.put(f'{self.base_url}/{profile_id}/session-attributes', json=data)
 
-    def update_dynamic(self, profile_id: str, attribute_id:str, identity_attribute_id: str, tag_name: str,
+    def update_dynamic(self, profile_id: str, attribute_id: str, identity_attribute_id: str, tag_name: str,
                        transitive: bool = False) -> dict:
         """
         AWS ONLY - Update the dynamic session attribute to the profile.
@@ -549,3 +590,147 @@ class ProfileSessionAttributes:
         """
 
         return self.britive.delete(f'{self.base_url}/{profile_id}/session-attributes/{attribute_id}')
+
+
+class ProfilePolicies:
+    def __init__(self, britive):
+        self.britive = britive
+        self.base_url = f'{self.britive.base_url}/paps'
+
+    def build(self, name: str, description: str = '', draft: bool = False, active: bool = True,
+              read_only: bool = False, users: list = None, tags: list = None,
+              service_identities: list = None, ips: list = None, from_time: str = None,
+              to_time: str = None, approval_notification_medium: str = None, time_to_approve: int = 5,
+              approver_users: list = None, approver_tags: list = None, access_type: str = 'Allow') -> dict:
+        """
+        Build a policy document that can be applied to a profile.
+
+        :param name: The name of the policy.
+        :param description: An optional description of the policy.
+        :param draft: Indicates if the policy is a draft. Defaults to `False`.
+        :param active: Indicates if the policy is a active. Defaults to `True`.
+        :param read_only: Indicates if the policy is a read only. Defaults to `False`.
+        :param users: Optional list of user names to which this policy applies.
+        :param tags: Optional list of tag names to which this policy applies.
+        :param service_identities: Optional list of service identity names to which this policy applies.
+        :param ips: Optional list of IP addresses for which this policy applies. Provide in CIDR notation
+            or dotted decimal format for individual (/32) IP addresses.
+        :param from_time: The start date/time of when the policy is in effect. If a date is provided
+            (`YYYY-MM-DD HH:MM:SS`) this will represent the start date/time of 1 contiguous time range. If just a
+            time is provided (`HH:MM:SS`) this will represent the daily recurring start time. If this parameter is
+            provided then `to_time` must also be provided.
+        :param to_time: The end date/time of when the policy is in effect. If a date is provided
+            (`YYYY-MM-DD HH:MM:SS`) this will represent the end date/time of 1 contiguous time range. If just a
+            time is provided (`HH:MM:SS`) this will represent the daily recurring end time. If this parameter is
+            provided then `from_time` must also be provided.
+        :param approval_notification_medium: Optional notification medium name to which approval requests will be
+            delivered. Specifying this parameter indicates the desire to enable approvals for this policy.
+        :param time_to_approve: Optional number of minutes to wait for an approval before denying the action.
+        :param approver_users: Optional list of user names who are to be considered approvers.
+        :param approver_tags: Option list of tag names who are considered approvers.
+        :param access_type: The type of access this policy provides. Valid values are `Allow` and `Deny`. Defaults
+            to `Allow`.
+        :return: A dict which can be provided as a profile policy to `create` and `update`.
+        """
+
+        policy = self.britive.policies.build(
+            name=name,
+            description=description,
+            draft=draft,
+            active=active,
+            read_only=read_only,
+            users=users,
+            tags=tags,
+            service_identities=service_identities,
+            ips=ips,
+            from_time=from_time,
+            to_time=to_time,
+            approval_notification_medium=approval_notification_medium,
+            time_to_approve=time_to_approve,
+            approver_users=approver_users,
+            approver_tags=approver_tags,
+            access_type=access_type
+        )
+
+        # clean up the generic policy response and customize for profiles
+        policy.pop('permissions', None)
+        policy.pop('roles', None)
+        policy['consumer'] = 'papservice'
+
+        if 'condition' in policy.keys():
+            condition = json.loads(policy['condition'])
+            if 'approval' in condition.keys():
+                condition['approval'].pop('validFor', None)
+            policy['condition'] = json.dumps(condition, default=str)
+
+        return policy
+
+    def list(self, profile_id: str) -> list:
+        """
+        List all policies associated with the provided profile.
+
+        Only applicable to tenants using version 2 of profiles. If the tenant is on version 1 of profiles then use
+        `britive.profiles.tags.*` and `britive.profiles.identities.*` instead.
+
+        :param profile_id: The ID of the profile.
+        :return: List of policies.
+        """
+
+        return self.britive.get(f'{self.base_url}/{profile_id}/policies')
+
+    def get(self, profile_id: str, policy_id: str) -> dict:
+        """
+        Retrieve details about a specific policy which is associated with the provided profile.
+
+        Only applicable to tenants using version 2 of profiles. If the tenant is on version 1 of profiles then use
+        `britive.profiles.tags.*` and `britive.profiles.identities.*` instead.
+
+        :param profile_id: The ID of the profile.
+        :param policy_id: The ID of the policy.
+        "return: Details of the policy.
+        """
+
+        return self.britive.get(f'{self.base_url}/{profile_id}/policies/{policy_id}')
+
+    def create(self, profile_id: str, policy: dict) -> dict:
+        """
+        Create a policy associated with the provided profile.
+
+        Only applicable to tenants using version 2 of profiles. If the tenant is on version 1 of profiles then use
+        `britive.profiles.tags.*` and `britive.profiles.identities.*` instead.
+
+        :param profile_id: The ID of the profile.
+        :param policy: The policy contents to create.
+        :return: Details of the newly created policy.
+        """
+
+        return self.britive.post(f'{self.base_url}/{profile_id}/policies', json=policy)
+
+    def update(self, profile_id: str, policy_id: str, policy: dict) -> dict:
+        """
+        Update the contents of the provided policy associated with the provided profile.
+
+        Only applicable to tenants using version 2 of profiles. If the tenant is on version 1 of profiles then use
+        `britive.profiles.tags.*` and `britive.profiles.identities.*` instead.
+
+        :param profile_id: The ID of the profile.
+        :param policy_id: The ID of the policy.
+        :param policy: The policy to update.
+        :return: Details of the updated policy.
+        """
+
+        return self.britive.put(f'{self.base_url}/{profile_id}/policies/{policy_id}', data=policy)
+
+    def delete(self, profile_id: str, policy_id: str) -> None:
+        """
+        Delete the provided policy associated with the provided profile.
+
+        Only applicable to tenants using version 2 of profiles. If the tenant is on version 1 of profiles then use
+        `britive.profiles.tags.*` and `britive.profiles.identities.*` instead.
+
+        :param profile_id: The ID of the profile.
+        :param policy_id: The ID of the policy.
+        :return: None.
+        """
+
+        return self.britive.delete(f'{self.base_url}/{profile_id}/policies/{policy_id}')

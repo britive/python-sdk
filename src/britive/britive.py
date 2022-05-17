@@ -26,6 +26,7 @@ from .identity_providers import IdentityProviders
 from .my_access import MyAccess
 from .notifications import Notifications
 from .my_secrets import MySecrets
+from .policies import  Policies
 
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
@@ -95,6 +96,8 @@ class Britive:
             'Content-Type': 'application/json'
         })
 
+        self.feature_flags = self.features()
+
         self.users = Users(self)
         self.service_identity_tokens = ServiceIdentityTokens(self)
         self.service_identities = ServiceIdentities(self)
@@ -107,7 +110,7 @@ class Britive:
         self.permissions = Permissions(self)
         self.groups = Groups(self)
         self.identity_attributes = IdentityAttributes(self)
-        self.profiles = Profiles(self)
+        self.profiles = Profiles(self, 1 if self.feature_flags['profile-v1'] else 2)
         self.task_services = TaskServices(self)
         self.tasks = Tasks(self)
         self.security_policies = SecurityPolicies(self)
@@ -119,6 +122,13 @@ class Britive:
         self.my_access = MyAccess(self)
         self.notifications = Notifications(self)
         self.my_secrets = MySecrets(self)
+        self.policies = Policies(self)
+
+    def features(self):
+        features = {}
+        for feature in self.get(f'{self.base_url}/features'):
+            features[feature['name']] = feature['enabled']
+        return features
 
     def get(self, url, params=None):
         """Internal use only."""
