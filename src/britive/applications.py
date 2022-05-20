@@ -160,6 +160,9 @@ class Applications:
         For applications which have `catalogApplication.supportsEnvironmentScanning` set to `False` do not scan the
         application. Instead scan the environment(s) associated with the application.
 
+        For AWS (not AWS standalone) application types, this method will initiate an organization scan to collect
+        the accounts in the org and their place in the OU structure.
+
         Scans are asynchronous operations. The response will include a `taskId` which can be used to make calls
         to `britive.scans.status()` to obtain the current status of the scan.
 

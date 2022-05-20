@@ -206,47 +206,49 @@ class MyAccess:
 
     def _get_profile_and_environment_ids_given_names(self, profile_name: str, environment_name: str,
                                                      application_name: str = None) -> dict:
-        profile_name = profile_name.lower()
-        environment_name = environment_name.lower()
-        application_name = application_name.lower() if application_name else None
-        envs = {}
+        ids = None
+        profile_found = False
+        environment_found = False
 
-        # collect all the environment/profile combinations to which the identity is entitled
+        # collect relevant profile/environment combinations to which the identity is entitled
         for app in self.list_profiles():
             app_name = app['appName'].lower()
-            if application_name and app_name != application_name:  # restrict to one app if provided
+            if application_name and app_name != application_name.lower():  # restrict to one app if provided
                 continue
             for profile in app['profiles']:
                 prof_name = profile['profileName'].lower()
                 prof_id = profile['profileId']
-                for env in profile['environments']:
-                    env_name = env['environmentName'].lower()
-                    if env_name not in envs.keys():
-                        envs[env_name] = {
-                            'profiles': {},
-                            'applications': [],
-                            'id': env['environmentId']
-                        }
-                    envs[env_name]['applications'].append(app_name)
-                    envs[env_name]['profiles'][prof_name] = prof_id
 
-        # now try to find the specific environment and profile provided by the caller
-        env = envs.get(environment_name)
-        if not env:
-            raise ValueError(f'environment with name {environment_name} was not found.')
-        if len(env['applications']) > 1:
-            raise ValueError(f'environment with name {environment_name} exists across '
-                             f'multiple applications: {env["applications"]}. please provide the optional parameter '
-                             '"application_name" to clarify which application the environment belongs to.'
-                             )
-        environment_id = env['id']
-        profile_id = env['profiles'].get(profile_name)
-        if not profile_id:
-            raise ValueError(f'profile name {profile_name} was not found as a valid profile '
-                             f'in environment {environment_name}'
-                             )
+                if prof_name == profile_name.lower():
+                    profile_found = True
+                    for env in profile['environments']:
+                        env_name = env['environmentName'].lower()
+                        env_id = env['environmentId']
 
-        return {
-            'profile_id': profile_id,
-            'environment_id': environment_id
-        }
+                        if env_name == environment_name.lower():
+                            environment_found = True
+                            # lets check to see if `ids` has already been set
+                            # if so we should error because we don't know which name combo to use
+                            if ids:
+                                raise ValueError(
+                                    f'multiple combinations of profile `{profile_name}` and environment '
+                                    f'`{environment_name}` exist so no unique combination can be determined. Please '
+                                    f'provide the optional parameter `application_name` to clarify which application '
+                                    f'the environment belongs to.'
+                                )
+                            # set the IDs the first time
+                            ids = {
+                                'profile_id': prof_id,
+                                'environment_id': env_id
+                            }
+
+        # do some error checking
+        if not profile_found:
+            raise ValueError(f'profile `{profile_name}` not found.')
+
+        if profile_found and not environment_found:
+            raise ValueError(f'profile `{profile_name}` found but not in environment `{environment_name}`.')
+
+        # if we get here we found both the profile and environment and they are unique so
+        # we can use the `ids` dict with confidence
+        return ids
