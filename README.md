@@ -20,7 +20,7 @@ Official API documentation can be found at https://docs.britive.com/v1/docs/en/o
 ## Authentication
 
 Authentication is handled solely via API tokens. The token must be provided in one of two methods.
-* 
+
 * Passed directly into the class constructor. 
 * Injected as an environment variable into the execution context where this package is being run. The
    environment variable name must be BRITIVE_API_TOKEN.
