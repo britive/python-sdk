@@ -19,10 +19,11 @@ Official API documentation can be found at https://docs.britive.com/v1/docs/en/o
 
 ## Authentication
 
-Authentication is handled solely via API tokens. The token can only be presented in one way.
+Authentication is handled solely via API tokens. The token must be provided in one of two methods.
 
-* Injected as an environment variable into the execution context where this package is being run. The environment variable 
-  name must be BRITIVE_API_TOKEN.
+* Passed directly into the class constructor. 
+* Injected as an environment variable into the execution context where this package is being run. The
+   environment variable name must be BRITIVE_API_TOKEN.
 
 All Britive API tokens are authenticated against a specific Britive tenant. The name of the tenant must be presented
 in one of two methods.
@@ -144,7 +145,7 @@ print(json.dumps(britive.users.list(), indent=2, default=str))
 from britive.britive import Britive
 import json
 
-britive = Britive(tenant='example') # source only the API token from environment variables
+britive = Britive(tenant='example', token='...') # source token and tenant locally (not from environment variables)
 
 print(json.dumps(britive.users.list(), indent=2, default=str))
 ~~~
