@@ -21,6 +21,18 @@ def test_checkout(cached_checked_out_profile):
     assert 'credentials' in cached_checked_out_profile.keys()
 
 
+def test_checkout_again(cached_profile, cached_environment):
+    response = britive.my_access.checkout(
+            profile_id=cached_profile['papId'],
+            environment_id=cached_environment['id'],
+            include_credentials=True
+        )
+
+    assert isinstance(response, dict)
+    assert response['accessType'] == 'PROGRAMMATIC'
+    assert 'credentials' in response.keys()
+
+
 def test_list_checked_out_profiles():
     profiles = britive.my_access.list_checked_out_profiles()
     assert isinstance(profiles, list)

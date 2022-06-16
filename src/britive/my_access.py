@@ -56,6 +56,8 @@ class MyAccess:
         """
         Checkout a profile.
 
+        If the profile has already been checked out this method will return the details of the checked out profile.
+
         Programmatic access is only available for the following cloud providers.
 
         - AWS
@@ -76,13 +78,37 @@ class MyAccess:
             'accessType': 'PROGRAMMATIC' if programmatic else 'CONSOLE'
         }
 
-        transaction = self.britive.post(f'{self.base_url}/{profile_id}/environments/{environment_id}', params=params)
+        transaction = None
 
+        # let's see if there is already a checked out profile
+        while True:  # will break the loop when needed
+            loop = False
+            for p in self.list_checked_out_profiles():
+                if p['papId'] == profile_id and p['environmentId'] == environment_id:
+                    if p['checkedIn'] is None:  # still currently checked out so we can move on
+                        transaction = p
+                        break
+                    else:  # we are in the middle of a profile being checked in so cannot check it out yet
+                        loop = True
+            if loop:
+                time.sleep(1)
+            else:
+                break
+
+        # if not check it out
+        if not transaction:
+            transaction = self.britive.post(
+                f'{self.base_url}/{profile_id}/environments/{environment_id}',
+                params=params
+            )
+
+        # inject credentials if asked
         if include_credentials:
             credentials = self.credentials(transaction['transactionId'])
             if transaction['status'] != 'checkedOut':  # we need to pull update details
                 transaction = self.get_checked_out_profile(transaction_id=transaction['transactionId'])
             transaction['credentials'] = credentials
+
         return transaction
 
     def checkout_by_name(self, profile_name: str, environment_name: str, application_name: str = None,
