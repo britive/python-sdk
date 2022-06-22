@@ -51,6 +51,9 @@ class Britive:
     - Injected as an environment variable into the execution context where this package is being run. The
        environment variable name must be BRITIVE_API_TOKEN.
 
+    As of v2.5.0 a `Bearer` token can be provided as well. A `Bearer` token is generated as part of an interactive
+    login process and is temporary in nature. This change is to allow for an upcoming Python CLI application.
+
     All Britive API tokens are authenticated against a specific Britive tenant. The name of the tenant must be provided
     in one of two methods.
 
@@ -65,7 +68,7 @@ class Britive:
     must persist responses to disk if and when that is required.
     """
 
-    def __init__(self, tenant: str = None, token: str = None):
+    def __init__(self, tenant: str = None, token: str = None, query_features: bool = True):
         """
         Instantiate an authenticated interface that can be used to communicate with the Britive API.
 
@@ -73,6 +76,10 @@ class Britive:
             https://example.britive-app.com then your tenant name is `example` and is what you would provide here.
             If not provided then environment variable BRITIVE_TENANT will be used.
         :param token: The API token. If not provided then environment variable BRITIVE_API_TOKEN will be used.
+        :param query_features: Indicates whether the SDK will query for features of the tenant (things like profile v1
+            vs v2, secrets manager enabled,etc.). True by default but can be disabled as needed if the end user does not
+            want to wait for that API call. Querying for features will help instruct the SDK as to what API calls are
+            allowed to be used based on the features enabled, vs. attempting to make the API call and getting an error.
         :raises: TenantMissingError, TokenMissingError
         """
 
@@ -93,12 +100,14 @@ class Britive:
 
         self.base_url = f'https://{self.tenant}.britive-app.com/api'
         self.session = requests.Session()
+
+        token_type = 'TOKEN' if len(self.__token) < 50 else 'Bearer'
         self.session.headers.update({
-            'Authorization': f'TOKEN {self.__token}',
+            'Authorization': f'{token_type} {self.__token}',
             'Content-Type': 'application/json'
         })
 
-        self.feature_flags = self.features()
+        self.feature_flags = self.features() if query_features else {}
 
         self.users = Users(self)
         self.service_identity_tokens = ServiceIdentityTokens(self)
@@ -112,7 +121,7 @@ class Britive:
         self.permissions = Permissions(self)
         self.groups = Groups(self)
         self.identity_attributes = IdentityAttributes(self)
-        self.profiles = Profiles(self, 1 if self.feature_flags['profile-v1'] else 2)
+        self.profiles = Profiles(self, 1 if self.feature_flags.get('profile-v1') else 2)
         self.task_services = TaskServices(self)
         self.tasks = Tasks(self)
         self.security_policies = SecurityPolicies(self)
