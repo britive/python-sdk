@@ -51,6 +51,9 @@ class Britive:
     - Injected as an environment variable into the execution context where this package is being run. The
        environment variable name must be BRITIVE_API_TOKEN.
 
+    As of v2.5.0 a `Bearer` token can be provided as well. A `Bearer` token is generated as part of an interactive
+    login process and is temporary in nature. This change is to allow for an upcoming Python CLI application.
+
     All Britive API tokens are authenticated against a specific Britive tenant. The name of the tenant must be provided
     in one of two methods.
 
