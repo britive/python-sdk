@@ -93,8 +93,10 @@ class Britive:
 
         self.base_url = f'https://{self.tenant}.britive-app.com/api'
         self.session = requests.Session()
+
+        token_type = 'TOKEN' if len(self.__token) < 50 else 'Bearer'
         self.session.headers.update({
-            'Authorization': f'TOKEN {self.__token}',
+            'Authorization': f'{token_type} {self.__token}',
             'Content-Type': 'application/json'
         })
 
