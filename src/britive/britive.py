@@ -27,6 +27,11 @@ from .my_access import MyAccess
 from .notifications import Notifications
 from .my_secrets import MySecrets
 from .policies import  Policies
+<<<<<<< Updated upstream
+=======
+from .secrets_manager import SecretsManager
+from .notification_mediums import NotificationMediums
+>>>>>>> Stashed changes
 
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
@@ -134,6 +139,11 @@ class Britive:
         self.notifications = Notifications(self)
         self.my_secrets = MySecrets(self)
         self.policies = Policies(self)
+<<<<<<< Updated upstream
+=======
+        self.secrets_manager = SecretsManager(self)
+        self.notification_mediums = NotificationMediums(self)
+>>>>>>> Stashed changes
 
     def features(self):
         features = {}
