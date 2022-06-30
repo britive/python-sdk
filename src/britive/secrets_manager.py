@@ -2,7 +2,8 @@ class SecretsManager:
     def __init__(self, britive):
         self.vaults = Vaults(britive)
         self.password_policies = PasswordPolicies(britive)
-
+        self.nodes = Nodes(britive)
+        self.secrets = Secrets(britive)
 
 class Vaults():
     def __init__(self, britive) -> None:
@@ -206,5 +207,43 @@ class PasswordPolicies():
             'passwordOrPin': password
         }
         return self.britive.post(f'{self.base_url}?action=validatePasswordOrPin', json=params)
+
+class Nodes():
+    def __init__(self, britive) -> None:
+        self.britive = britive
+        self.base_url = f'{self.britive.base_url}/v1/secretmanager/vault'
+    def create(self, name : str, vault_id : str, path : str = "/"):
+        """
+        Creates a new node in the vault.
+
+        :param name: name of the node
+        :param vault_id: ID of the vault
+        :param path: path of the node
+
+        :return: Details of the newly created node. 
+        
+        """
+        self.britive.post(f'{self.base_url}/{vault_id}/secrets?path={path}', json={'name': name, 'entityType': 'node'})
+
+class Secrets():
+    def __init__(self, britive) -> None:
+        self.britive = britive
+        self.base_url = f'{self.britive.base_url}/v1/secretmanager/vault'
+    
+    def create(self, name : str, vault_id : str, static_secret_template_id : str, secretMode : str = "shared", secretNature : str = "static", value : dict = {}):
+        """
+        Creates a new secret in the vault.
+
+        :param name: name of the secret
+        :param vault_id: ID of the vault to create the secret in
+        :param static_secret_template_id: ID of the static secret template to use for the secret
+        :param secretMode: mode of the secret (shared or private)
+        :param secretNature: nature of the secret (static or dynamic)
+        :param value: value of the secret
+
+        :return: Details of the newly created secret.
+        
+        """
+        self.britive.post(f'{self.base_url}/{vault_id}/secrets?path={name}', json={'name': name, 'entityType': 'node', 'static_secret_template_id' : static_secret_template_id, 'secretMode' : secretMode, 'secretNature' : secretNature, 'value' : value})
     
     
