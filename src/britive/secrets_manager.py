@@ -2,7 +2,6 @@ class SecretsManager:
     def __init__(self, britive):
         self.vaults = Vaults(britive)
         self.password_policies = PasswordPolicies(britive)
-        self.nodes = Nodes(britive)
         self.secrets = Secrets(britive)
 
 class Vaults():
@@ -208,42 +207,90 @@ class PasswordPolicies():
         }
         return self.britive.post(f'{self.base_url}?action=validatePasswordOrPin', json=params)
 
-class Nodes():
-    def __init__(self, britive) -> None:
-        self.britive = britive
-        self.base_url = f'{self.britive.base_url}/v1/secretmanager/vault'
-    def create(self, name : str, vault_id : str, path : str = "/"):
-        """
-        Creates a new node in the vault.
-
-        :param name: name of the node
-        :param vault_id: ID of the vault
-        :param path: path of the node
-
-        :return: Details of the newly created node. 
-        
-        """
-        self.britive.post(f'{self.base_url}/{vault_id}/secrets?path={path}', json={'name': name, 'entityType': 'node'})
-
 class Secrets():
     def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/v1/secretmanager/vault'
-    
-    def create(self, name : str, vault_id : str, static_secret_template_id : str, secretMode : str = "shared", secretNature : str = "static", value : dict = {}):
+    def create_folder(self, name : str, vault_id : str, path : str = "/"):
+        """
+        Creates a new folder in the vault.
+
+        :param path: path of the folder, include the / the beginning
+        :param vault_id: ID of the vault
+
+        :return: Details of the newly created folder. 
+        
+        """
+        return self.britive.post(f'{self.base_url}/{vault_id}/secrets?path={path}', json={'entityType': 'node', 'name': name})
+
+    def create(self, name : str, vault_id : str, path : str = "/", static_secret_template_id : str = "7a5f41d8-f7af-46a0-88f7-edf0403607ae", secretMode : str = "shared", secretNature : str = "static", value : dict = {"Note" : "This is the default note"}):
         """
         Creates a new secret in the vault.
 
-        :param name: name of the secret
+        :param path: path of the secret, include the / at the beginning
         :param vault_id: ID of the vault to create the secret in
-        :param static_secret_template_id: ID of the static secret template to use for the secret
+        :param static_secret_template_id: ID of the static secret template to use for the secret (defaults to generic note)
         :param secretMode: mode of the secret (shared or private)
         :param secretNature: nature of the secret (static or dynamic)
         :param value: value of the secret
 
+
         :return: Details of the newly created secret.
         
         """
-        self.britive.post(f'{self.base_url}/{vault_id}/secrets?path={name}', json={'name': name, 'entityType': 'node', 'static_secret_template_id' : static_secret_template_id, 'secretMode' : secretMode, 'secretNature' : secretNature, 'value' : value})
+        return self.britive.post(f'{self.base_url}/{vault_id}/secrets?path={path}', json={'name': name, 'entityType': 'secret', 'staticSecretTemplateId' : static_secret_template_id, 'secretMode' : secretMode, 'secretNature' : secretNature, 'value' : value})
     
+    def update(self, vault_id : str, path : str = "/", value : dict = {}):
+        """
+        Updates a secret's value
+
+        :param vault_id: ID of the vault to update the secret in
+        :param path: path of the secret, include the / at the beginning
+        :param value: value of the secret
+
+        :return: none
+        
+        """
+        return self.britive.patch(f'{self.base_url}/{vault_id}/secrets?path={path}', json={'value' : value})
     
+    def get(self, vault_id : str, path : str, type : str = "node", filter : str = None , recursivesecrets : bool = False, getmetadata : bool  = False, pageToken : str = None):
+        """
+        Gets a secret from the vault.
+
+        :param vault_id: ID of the vault to get the secret from
+        :param path: path of the secret, include the / at the beginning
+        :param type: type of the secret (node or secret)
+        :param filter: filter to apply to the secret (NONE, ALL, SHARED, PRIVATE)
+        :param recursivesecrets: whether or not to recursively get all secrets in the folder
+        :param getmetadata: whether or not to get the metadata of the secret
+        :param pageToken: page token to use for pagination
+        
+        :return: Details of the secret.
+        
+        """
+        params = {'type' : type, 'filter' : filter, 'recursiveSecrets' : (str(recursivesecrets)).lower(), 'getMetadata' : getmetadata, 'pageToken' : pageToken}
+        return self.britive.get(f'{self.base_url}/{vault_id}/secrets?path={path}', params=params)
+    def delete(self, vault_id : str, path : str):
+        """
+        Deletes a secret from the vault.
+
+        :param vault_id: ID of the vault to delete the secret from
+        :param path: path of the secret, include the / at the beginning
+        
+        :return: none
+        
+        """
+        return self.britive.delete(f'{self.base_url}/{vault_id}/secrets?path={path}')
+    
+    def access(self, vault_id : str, path : str, getmetadata : bool = False):
+        """
+        Accesses a secret from the vault.
+
+        :param vault_id: ID of the vault to get the secret from
+        :param path: path of the secret, include the / at the beginning
+
+        :return: Details of the secret.
+        
+        """
+        params = {'getmetadata' : getmetadata}
+        return self.britive.get(f'{self.base_url}/{vault_id}/secrets?path={path}', params=params)
