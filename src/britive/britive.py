@@ -184,6 +184,11 @@ class Britive:
             return response.json()
         except native_json.decoder.JSONDecodeError:  # if we cannot decode json then the response isn't json
             return response.content.decode('utf-8')
+            
+    def post_upload(self, url, params=None, files=None):
+        """Internal use only."""
+        
+        return self.session.post(url, params=params, files=files, headers={'Authorization': 'Bearer ' + self.__token})
 
     @staticmethod
     def __check_response_for_error(response):
