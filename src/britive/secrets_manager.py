@@ -3,6 +3,7 @@ class SecretsManager:
         self.vaults = Vaults(britive)
         self.password_policies = PasswordPolicies(britive)
         self.secrets = Secrets(britive)
+        self.policies = Policies(britive)
 
 class Vaults():
     def __init__(self, britive) -> None:
@@ -294,3 +295,28 @@ class Secrets():
         """
         params = {'getmetadata' : getmetadata}
         return self.britive.get(f'{self.base_url}/{vault_id}/secrets?path={path}', params=params)
+
+    def create_file(self, vault_id : str, name : str,  path : str = "/", file_contents = None, static_secret_template_id : str = "7a5f41d8-f7af-46a0-88f7-edf0403607ae", secretMode : str = "shared", secretNature : str = "static", value : dict = {"Note" : "This is the default note"}):
+        #TODO: Fix invalid secretData error
+        secret_data = {"entityType": "secret", "name": name, "staticSecretTemplateId" : static_secret_template_id, "secretMode" : secretMode, "secretNature" : secretNature, "value" : value}
+        return self.britive.post_upload(f'{self.base_url}/{vault_id}/secrets/file?path={path}', files = {'file' : file_contents, 'secretData' : (None, str(secret_data))})
+class Policies():
+    def __init__(self, britive) -> None:
+        self.britive = britive
+        self.base_url = f'{self.britive.base_url}/v1/policy-admin/policies'
+    def get(self, pageToken : str = None, path : str = "/", filter : str = None):
+        params = {
+            'pageToken' : pageToken,
+            'resource' : path,
+            'consumer' : "secretmanager"
+        }
+        if(filter):
+            params['filter'] = filter
+        return self.britive.get(f'{self.base_url}', params=params)
+    def delete(self, policy_id : str, path : str = "/"):
+        params = {
+            'consumer' : "secretmanager",
+            'resource' : path
+        }
+        return self.britive.delete(f'{self.base_url}/{policy_id}', params=params)
+    
