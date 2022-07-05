@@ -188,7 +188,7 @@ class Britive:
     def post_upload(self, url, params=None, files=None):
         """Internal use only."""
         
-        return self.session.post(url, params=params, files=files, headers={'Authorization': 'Bearer ' + self.__token})
+        return self.session.post(url, params=params, files=files, headers={'Authorization': 'TOKEN ' + self.__token})
 
     @staticmethod
     def __check_response_for_error(response):

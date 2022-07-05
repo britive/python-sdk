@@ -1,9 +1,11 @@
+import json
 class SecretsManager:
     def __init__(self, britive):
         self.vaults = Vaults(britive)
         self.password_policies = PasswordPolicies(britive)
         self.secrets = Secrets(britive)
         self.policies = Policies(britive)
+        self.static_secret_templates = StaticSecretTemplates(britive)
 
 class Vaults():
     def __init__(self, britive) -> None:
@@ -297,9 +299,9 @@ class Secrets():
         return self.britive.get(f'{self.base_url}/{vault_id}/secrets?path={path}', params=params)
 
     def create_file(self, vault_id : str, name : str,  path : str = "/", file_contents = None, static_secret_template_id : str = "7a5f41d8-f7af-46a0-88f7-edf0403607ae", secretMode : str = "shared", secretNature : str = "static", value : dict = {"Note" : "This is the default note"}):
-        #TODO: Fix invalid secretData error
+        #TODO: Fix invalid secretData error, and merge with create function
         secret_data = {"entityType": "secret", "name": name, "staticSecretTemplateId" : static_secret_template_id, "secretMode" : secretMode, "secretNature" : secretNature, "value" : value}
-        return self.britive.post_upload(f'{self.base_url}/{vault_id}/secrets/file?path={path}', files = {'file' : file_contents, 'secretData' : (None, str(secret_data))})
+        return self.britive.post_upload(f'{self.base_url}/{vault_id}/secrets/file?path={path}', files = {'file' : file_contents, 'secretData' : (None, json.dumps(secret_data))})
 class Policies():
     def __init__(self, britive) -> None:
         self.britive = britive
@@ -319,4 +321,69 @@ class Policies():
             'resource' : path
         }
         return self.britive.delete(f'{self.base_url}/{policy_id}', params=params)
+    def build(self, name: str, description: str = '', draft: bool = False, active: bool = True,
+              read_only: bool = False, users: list = None, tags: list = None,
+              service_identities: list = None, ips: list = None, from_time: str = None,
+              to_time: str = None, approval_notification_medium: str = None, time_to_approve: int = 5,
+              approver_users: list = None, approver_tags: list = None, access_type: str = 'Allow', 
+              ) -> dict:
+        
+
+        policy = self.britive.policies.build(
+            name=name,
+            active=active,
+            description=description,
+            draft=draft,
+            access_type=access_type,
+            read_only=read_only,
+            users=users,
+            tags=tags,
+            service_identities=service_identities,
+            ips=ips,
+            from_time=from_time,
+            to_time=to_time,
+            approval_notification_medium=approval_notification_medium,
+            time_to_approve=time_to_approve,
+            approver_users=approver_users,
+            approver_tags=approver_tags,
+
+        )
+        policy.pop('permissions', None)
+        policy.pop('roles', None)
+        policy["accessLevel"] = "SM_Manage"
+        return policy
+
+    def create(self, policy: dict, path : str = "/") -> dict:
+        return self.britive.post(f'{self.base_url}?resource={path}&consumer=secretmanager', json=policy)
+
+class StaticSecretTemplates():
+    def __init__(self, britive) -> None:
+        self.britive = britive
+        self.base_url = f'{self.britive.base_url}/v1/secretmanager/secret-templates/static'
+    def get(self, secret_template_id : str):
+        return self.britive.get(f'{self.base_url}/{secret_template_id}')
+    def list(self, pageToken : str = None, filter : str = None):
+        params = {'pageToken' : pageToken, 'filter' : filter}
+        return self.britive.get(f'{self.base_url}', params=params)
+    def delete(self, secret_template_id : str):
+        return self.britive.delete(f'{self.base_url}/{secret_template_id}')
+    def create(self, name : str,  passwordPolicyId : str, description : str = "", rotationInterval : int = 30, parameters : list = None):
+        params = {
+
+            'secretType' : name,
+            'passwordPolicyId' : passwordPolicyId,
+            'description' : description,
+            'rotationInterval' : rotationInterval,
+            'parameters' : parameters
+
+        }
+
+        return self.britive.post(f'{self.base_url}', json=params)
+
+    def update(self,static_secret_template_id : str, **kwargs):
+        creation_defaults = self.get(static_secret_template_id)
+        data = {**creation_defaults, **kwargs}
+        return self.britive.patch(f'{self.base_url}/{static_secret_template_id}', json=data)
+
+
     
