@@ -6,6 +6,7 @@ class SecretsManager:
         self.secrets = Secrets(britive)
         self.policies = Policies(britive)
         self.static_secret_templates = StaticSecretTemplates(britive)
+        self.resources = Resources(britive)
 
 class Vaults():
     def __init__(self, britive) -> None:
@@ -226,22 +227,28 @@ class Secrets():
         """
         return self.britive.post(f'{self.base_url}/{vault_id}/secrets?path={path}', json={'entityType': 'node', 'name': name})
 
-    def create(self, name : str, vault_id : str, path : str = "/", static_secret_template_id : str = "7a5f41d8-f7af-46a0-88f7-edf0403607ae", secretMode : str = "shared", secretNature : str = "static", value : dict = {"Note" : "This is the default note"}):
+    def create(self, name : str, vault_id : str, path : str = "/", static_secret_template_id : str = "7a5f41d8-f7af-46a0-88f7-edf0403607ae", secretMode : str = "shared", secretNature : str = "static", value : dict = {"Note" : "This is the default note"}, file = None):
         """
         Creates a new secret in the vault.
 
-        :param path: path of the secret, include the / at the beginning
-        :param vault_id: ID of the vault to create the secret in
-        :param static_secret_template_id: ID of the static secret template to use for the secret (defaults to generic note)
-        :param secretMode: mode of the secret (shared or private)
-        :param secretNature: nature of the secret (static or dynamic)
-        :param value: value of the secret
+        :param name: name of the secret
+        :param vault_id: ID of the vault
+        :param path: path of the secret, include the / the beginning
+        :param static_secret_template_id: ID of the static secret template
+        :param secretMode: mode of the secret
+        :param secretNature: nature of the secret
+        :param value: value of the secret (must be in the format of the static secret template)
+        :param file: file to upload as the secret 
 
 
         :return: Details of the newly created secret.
         
         """
-        return self.britive.post(f'{self.base_url}/{vault_id}/secrets?path={path}', json={'name': name, 'entityType': 'secret', 'staticSecretTemplateId' : static_secret_template_id, 'secretMode' : secretMode, 'secretNature' : secretNature, 'value' : value})
+        if(not file):
+            return self.britive.post(f'{self.base_url}/{vault_id}/secrets?path={path}', json={'name': name, 'entityType': 'secret', 'staticSecretTemplateId' : static_secret_template_id, 'secretMode' : secretMode, 'secretNature' : secretNature, 'value' : value})
+        else:
+            secret_data = {"entityType": "secret", "name": name, "staticSecretTemplateId" : static_secret_template_id, "secretMode" : secretMode, "secretNature" : secretNature, "value" : value}
+            return self.britive.post_upload(f'{self.base_url}/{vault_id}/secrets/file?path={path}', files = {'file' : file, 'secretData' : (None, json.dumps(secret_data))})
     
     def update(self, vault_id : str, path : str = "/", value : dict = {}):
         """
@@ -298,15 +305,22 @@ class Secrets():
         params = {'getmetadata' : getmetadata}
         return self.britive.get(f'{self.base_url}/{vault_id}/secrets?path={path}', params=params)
 
-    def create_file(self, vault_id : str, name : str,  path : str = "/", file_contents = None, static_secret_template_id : str = "7a5f41d8-f7af-46a0-88f7-edf0403607ae", secretMode : str = "shared", secretNature : str = "static", value : dict = {"Note" : "This is the default note"}):
-        #TODO: Fix invalid secretData error, and merge with create function
-        secret_data = {"entityType": "secret", "name": name, "staticSecretTemplateId" : static_secret_template_id, "secretMode" : secretMode, "secretNature" : secretNature, "value" : value}
-        return self.britive.post_upload(f'{self.base_url}/{vault_id}/secrets/file?path={path}', files = {'file' : file_contents, 'secretData' : (None, json.dumps(secret_data))})
+
 class Policies():
     def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/v1/policy-admin/policies'
-    def get(self, pageToken : str = None, path : str = "/", filter : str = None):
+    def list(self, pageToken : str = None, path : str = "/", filter : str = None):
+        """
+        Gets all policies in the vault.
+
+        :param pageToken: page token to use for pagination
+        :param path: path of the policy, include the / at the beginning
+        :param filter: filter to apply to the listing
+
+        :return: Details of the policies.
+        
+        """
         params = {
             'pageToken' : pageToken,
             'resource' : path,
@@ -316,6 +330,14 @@ class Policies():
             params['filter'] = filter
         return self.britive.get(f'{self.base_url}', params=params)
     def delete(self, policy_id : str, path : str = "/"):
+        """
+        Deletes a policy from the vault.
+
+        :param policy_id: ID of the policy to delete
+        :param path: path of the policy, include the / at the beginning
+
+        :return: none
+        """
         params = {
             'consumer' : "secretmanager",
             'resource' : path
@@ -328,6 +350,28 @@ class Policies():
               approver_users: list = None, approver_tags: list = None, access_type: str = 'Allow', 
               ) -> dict:
         
+        """
+        Builds a policy to be uploaded to the vault.
+
+        :param name: name of the policy
+        :param description: description of the policy
+        :param draft: whether or not the policy is a draft
+        :param active: whether or not the policy is active
+        :param read_only: whether or not the policy is read only
+        :param users: list of users to apply the policy to
+        :param tags: list of tags to apply the policy to
+        :param service_identities: list of service identities to apply the policy to
+        :param ips: list of IPs to apply the policy to
+        :param from_time: start time of the policy
+        :param to_time: end time of the policy
+        :param approval_notification_medium: notification medium to use for approval
+        :param time_to_approve: time to approve the policy
+        :param approver_users: list of users to approve the policy
+        :param approver_tags: list of tags to approve the policy
+        :param access_type: access type of the policy
+
+        :return: policy to be uploaded to the vault. 
+        """
 
         policy = self.britive.policies.build(
             name=name,
@@ -354,6 +398,15 @@ class Policies():
         return policy
 
     def create(self, policy: dict, path : str = "/") -> dict:
+        """
+        Creates  a policy in the vault.
+
+        :param policy: policy to create
+        :param path: path of the policy, include the / at the beginning
+
+        :return: Details of the policy.
+        
+        """
         return self.britive.post(f'{self.base_url}?resource={path}&consumer=secretmanager', json=policy)
 
 class StaticSecretTemplates():
@@ -361,13 +414,48 @@ class StaticSecretTemplates():
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/v1/secretmanager/secret-templates/static'
     def get(self, secret_template_id : str):
+        """
+        Gets a secret template from the vault.
+
+        :param secret_template_id: ID of the secret template to get
+
+        :return: Details of the secret template.
+        """
         return self.britive.get(f'{self.base_url}/{secret_template_id}')
     def list(self, pageToken : str = None, filter : str = None):
+        """
+        Lists all secret templates in the vault.
+
+        :param pageToken: page token to use for pagination
+        :param filter: filter to apply to the listing
+
+        :return: Details of the secret templates.
+        
+        """
         params = {'pageToken' : pageToken, 'filter' : filter}
         return self.britive.get(f'{self.base_url}', params=params)
     def delete(self, secret_template_id : str):
+        """
+        Deletes a secret template from the vault.
+
+        :param secret_template_id: ID of the secret template to delete
+
+        :return: none
+        """
         return self.britive.delete(f'{self.base_url}/{secret_template_id}')
     def create(self, name : str,  passwordPolicyId : str, description : str = "", rotationInterval : int = 30, parameters : list = None):
+        """
+        Creates a secret template
+
+        :param name: name of the secret template
+        :param passwordPolicyId: ID of the password policy to use
+        :param description: description of the secret template
+        :param rotationInterval: rotation interval of the secret template
+        :param parameters: list of parameters to use in the secret template
+
+        :return: Details of the secret template.
+        """
+
         params = {
 
             'secretType' : name,
@@ -381,9 +469,37 @@ class StaticSecretTemplates():
         return self.britive.post(f'{self.base_url}', json=params)
 
     def update(self,static_secret_template_id : str, **kwargs):
+        """
+        Updates a secret template
+
+        :param static_secret_template_id: ID of the secret template to update
+        :param kwargs: key-value pairs to update the secret template with
+                valid keys are:
+                    name: name of the secret template
+                    passwordPolicyId: ID of the password policy to use
+                    description: description of the secret template
+                    rotationInterval: rotation interval of the secret template
+                    parameters: list of parameters to use in the secret template
+
+        :return: Details of the secret template.
+        """
         creation_defaults = self.get(static_secret_template_id)
         data = {**creation_defaults, **kwargs}
         return self.britive.patch(f'{self.base_url}/{static_secret_template_id}', json=data)
+class Resources():
+    def __init__(self, britive) -> None:
+        self.britive = britive
+        self.base_url = f'{self.britive.base_url}/v1/secretmanager/resourceContainers'
 
+    def get(self, path : str = "/"):
+        """
+        Gets a resource from the vault
+
+        :param path: path of the resource, include the / at the beginning
+
+        :return: Details of the resource.
+        """
+        params = {'path' : path}
+        return self.britive.get(f'{self.base_url}', params=params)
 
     
