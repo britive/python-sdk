@@ -59,7 +59,7 @@ class NotificationMediums:
         Update a notification medium.
 
         :param notification_medium_id: The ID of the notification medium.
-        :param parameters: Valid fields are...
+        :param parameters: Parameters to update, valid fields are...
             name: the name of the notification medium
             description: the description of the notification medium
             connectionParameters: the connection parameters of the notification medium
