@@ -29,7 +29,7 @@ from .my_secrets import MySecrets
 from .policies import  Policies
 from .secrets_manager import SecretsManager
 from .notification_mediums import NotificationMediums
-
+from .approvals import Approvals
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
 BRITIVE_TOKEN_ENV_NAME = 'BRITIVE_API_TOKEN'
@@ -138,6 +138,7 @@ class Britive:
         self.policies = Policies(self)
         self.secrets_manager = SecretsManager(self)
         self.notification_mediums = NotificationMediums(self)
+        self.approvals = Approvals(self)
 
     def features(self):
         features = {}
@@ -184,7 +185,8 @@ class Britive:
             return response.json()
         except native_json.decoder.JSONDecodeError:  # if we cannot decode json then the response isn't json
             return response.content.decode('utf-8')
-            
+    
+    #note - this method is only used to upload a file when creating a secret
     def post_upload(self, url, params=None, files=None):
         """Internal use only."""
         response = self.session.post(url, params=params, files=files, headers={'Content-Type': None})
@@ -192,6 +194,7 @@ class Britive:
             return response.json()
         except native_json.decoder.JSONDecodeError:  # if we cannot decode json then the response isn't json
             return response.content.decode('utf-8')
+
     @staticmethod
     def __check_response_for_error(response):
         if response.status_code in allowed_exceptions.keys():
