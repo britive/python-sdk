@@ -29,7 +29,7 @@ from .my_secrets import MySecrets
 from .policies import  Policies
 from .secrets_manager import SecretsManager
 from .notification_mediums import NotificationMediums
-from .approvals import Approvals
+#from .approvals import Approvals
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
 BRITIVE_TOKEN_ENV_NAME = 'BRITIVE_API_TOKEN'
