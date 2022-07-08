@@ -138,7 +138,7 @@ class Britive:
         self.policies = Policies(self)
         self.secrets_manager = SecretsManager(self)
         self.notification_mediums = NotificationMediums(self)
-        self.approvals = Approvals(self)
+        #self.approvals = Approvals(self)
 
     def features(self):
         features = {}
