@@ -14,7 +14,7 @@ class SecretsManager:
 class Vaults:
     def __init__(self, britive) -> None:
         self.britive = britive
-        self.base_url = f"{self.britive.base_url}/v1/secretmanager/vault"
+        self.base_url = f'{self.britive.base_url}/v1/secretmanager/vault'
 
     def list(self) -> list:
         """
@@ -23,7 +23,7 @@ class Vaults:
         :return: List of all vaults
         """
 
-        params = {"getmetadata": "true"}
+        params = {'getmetadata': 'true'}
         return self.britive.get(self.base_url, params=params)
 
     def get_vault_by_id(self, vault_id: str) -> dict:
@@ -35,15 +35,15 @@ class Vaults:
         :return: Details of the specified vault.
         """
 
-        return self.britive.get(f"{self.base_url}/{vault_id}")
+        return self.britive.get(f'{self.base_url}/{vault_id}')
 
     def create(
         self,
         name: str,
-        description: str = "Default vault description",
+        description: str = 'Default vault description',
         rotationTime: int = 30,
-        encryptionAlgorithm: str = "AES_256",
-        defaultNotificationMediumId: str = "",
+        encryptionAlgorithm: str = 'AES_256',
+        defaultNotificationMediumId: str = '',
         users: list = [],
         tags: list = [],
         channels: list = [],
@@ -64,17 +64,17 @@ class Vaults:
         :return: Details of the newly created vault.
         """
 
-        if defaultNotificationMediumId == "":
+        if defaultNotificationMediumId == '':
             for medium in self.britive.notification_mediums.list():
-                if medium["name"] == "Email":
-                    defaultNotificationMediumId = medium["id"]
+                if medium['name'] == 'Email':
+                    defaultNotificationMediumId = medium['id']
         params = {
-            "name": name,
-            "description": description,
-            "rotationTime": rotationTime,
-            "encryptionAlgorithm": encryptionAlgorithm,
-            "defaultNotificationMediumId": defaultNotificationMediumId,
-            "recipients": {"userIds": users, "tags": tags, "channelIds": channels},
+            'name': name,
+            'description': description,
+            'rotationTime': rotationTime,
+            'encryptionAlgorithm': encryptionAlgorithm,
+            'defaultNotificationMediumId': defaultNotificationMediumId,
+            'recipients': {'userIds': users, 'tags': tags, 'channelIds': channels},
         }
         return self.britive.post(self.base_url, json=params)
 
@@ -87,9 +87,9 @@ class Vaults:
         :return: None
         """
 
-        return self.britive.delete(f"{self.base_url}/{vault_id}")
+        return self.britive.delete(f'{self.base_url}/{vault_id}')
 
-    def update(self, vault_id: str, **kwargs) -> dict:
+    def update(self, vault_id: str, **kwargs) -> None:
         """
         Updates a vault. If not all kwargs a provided,
         the vault will update with the default values of the unprovided kwargs
@@ -102,12 +102,10 @@ class Vaults:
             defaultNotificationMediumId - the default notification medium to use for the vault
             recipients - a list of user IDs or tags to recieve notifications for the vault
 
-        :return: Details of the updated vault.
+        :return: None
         """
 
-        creation_defaults = self.get_vault_by_id(vault_id)
-        data = {**creation_defaults, **kwargs}
-        return self.britive.patch(f"{self.base_url}/{vault_id}", json=data)
+        return self.britive.patch(f'{self.base_url}/{vault_id}', json=kwargs)
 
     def rotate_keys(self):
         """
@@ -117,14 +115,14 @@ class Vaults:
         """
 
         return self.britive.post(
-            f"{self.britive.base_url}/v1/secretmanager/keys/rotate"
+            f'{self.britive.base_url}/v1/secretmanager/keys/rotate'
         )
 
 
 class PasswordPolicies:
     def __init__(self, britive) -> None:
         self.britive = britive
-        self.base_url = f"{self.britive.base_url}/v1/secretmanager/pwdpolicies"
+        self.base_url = f'{self.britive.base_url}/v1/secretmanager/pwdpolicies'
 
     def get(self, password_policy_id: str) -> dict:
         """
@@ -135,7 +133,7 @@ class PasswordPolicies:
         :return: Details of the specified password policy.
         """
 
-        return self.britive.get(f"{self.base_url}/{password_policy_id}")
+        return self.britive.get(f'{self.base_url}/{password_policy_id}')
 
     def list(self) -> list:
         """
@@ -149,14 +147,14 @@ class PasswordPolicies:
     def create(
         self,
         name: str,
-        description: str = "Default description",
-        passwordType: str = "alphanumeric",
+        description: str = 'Default description',
+        passwordType: str = 'alphanumeric',
         minPasswordLength: int = 8,
         hasUpperCaseChars: bool = True,
         hasLowercaseChars: bool = True,
         hasNumbers: bool = True,
         hasSpecialChars: bool = True,
-        allowedSpecialChars: str = "@#$%\(",) -> dict:
+        allowedSpecialChars: str = '@#$%\(',) -> dict:
         """
         Creates a new password policy.
 
@@ -175,22 +173,22 @@ class PasswordPolicies:
         """
 
         params = {
-            "name": name,
-            "description": description,
-            "passwordType": passwordType,
-            "minPasswordLength": minPasswordLength,
-            "hasUpperCaseChars": hasUpperCaseChars,
-            "hasLowercaseChars": hasLowercaseChars,
-            "hasNumbers": hasNumbers,
-            "hasSpecialChars": hasSpecialChars,
-            "allowedSpecialChars": allowedSpecialChars,
+            'name': name,
+            'description': description,
+            'passwordType': passwordType,
+            'minPasswordLength': minPasswordLength,
+            'hasUpperCaseChars': hasUpperCaseChars,
+            'hasLowercaseChars': hasLowercaseChars,
+            'hasNumbers': hasNumbers,
+            'hasSpecialChars': hasSpecialChars,
+            'allowedSpecialChars': allowedSpecialChars,
         }
         return self.britive.post(self.base_url, json=params)
 
     def create_pin(
         self, 
         name: str, 
-        description: str = "Default description", 
+        description: str = 'Default description', 
         pinLength: int = 4) -> dict:
         """
         Creates a new pin password policy.
@@ -203,14 +201,14 @@ class PasswordPolicies:
         """
 
         params = {
-            "name": name,
-            "description": description,
-            "pinLength": pinLength,
-            "passwordType": "pin",
+            'name': name,
+            'description': description,
+            'pinLength': pinLength,
+            'passwordType': 'pin',
         }
         return self.britive.post(self.base_url, json=params)
 
-    def update(self, password_policy_id: str, **kwargs) -> dict:
+    def update(self, password_policy_id: str, **kwargs)->None:
         """
         Updates a passsworld policy
 
@@ -227,12 +225,10 @@ class PasswordPolicies:
             allowedSpecialChars: a string of special characters to allow in the password
             pinLength: the length of the pin to use for the policy (only for pins)
 
-        :return: Details of the updated password policy.
+        :return: None
         """
 
-        creation_defaults = self.get(password_policy_id)
-        data = {**creation_defaults, **kwargs}
-        return self.britive.patch(f"{self.base_url}/{password_policy_id}", json=data)
+        return self.britive.patch(f'{self.base_url}/{password_policy_id}', json=kwargs)
 
     def delete(self, password_policy_id: str):
         """
@@ -243,7 +239,7 @@ class PasswordPolicies:
         :return: None
         """
 
-        return self.britive.delete(f"{self.base_url}/{password_policy_id}")
+        return self.britive.delete(f'{self.base_url}/{password_policy_id}')
 
     def generate_password(self, password_policy_id: str) -> dict:
         """
@@ -254,9 +250,9 @@ class PasswordPolicies:
         :return: the generated the generated password
         """
 
-        params = {"action": "generatePasswordOrPin"}
-        return self.britive.get(f"{self.base_url}/{password_policy_id}", params=params)[
-            "passwordOrPin"
+        params = {'action': 'generatePasswordOrPin'}
+        return self.britive.get(f'{self.base_url}/{password_policy_id}', params=params)[
+            'passwordOrPin'
         ]
 
     def validate(self, password_policy_id: str, password: str) -> dict:
@@ -269,15 +265,15 @@ class PasswordPolicies:
         :return: whether or not the password is valid
         """
 
-        params = {"id": password_policy_id, "passwordOrPin": password}
+        params = {'id': password_policy_id, 'passwordOrPin': password}
         return self.britive.post(
-            f"{self.base_url}?action=validatePasswordOrPin", json=params
+            f'{self.base_url}?action=validatePasswordOrPin', json=params
         )
 class Folders:
     def __init__(self, britive) -> None:
         self.britive = britive
-        self.base_url = f"{self.britive.base_url}/v1/secretmanager/vault"
-    def create(self, name: str, vault_id: str, path: str = "/") -> dict:
+        self.base_url = f'{self.britive.base_url}/v1/secretmanager/vault'
+    def create(self, name: str, vault_id: str, path: str = '/') -> dict:
         """
         Creates a new folder in the vault.
 
@@ -286,10 +282,8 @@ class Folders:
 
         :return: Details of the newly created folder.
         """
-
-        return self.britive.post(
-            f"{self.base_url}/{vault_id}/secrets?path={path}",
-            json={"entityType": "node", "name": name})
+        data = {'entityType': 'node', 'name': name}
+        return self.britive.post(f'{self.base_url}/{vault_id}/secrets?path={path}',json=data)
 
     def delete(self, vault_id: str, path: str):
         """
@@ -301,26 +295,28 @@ class Folders:
         :return: None
         """
 
-        return self.britive.delete(f"{self.base_url}/{vault_id}/secrets?path={path}")
+        return self.britive.delete(f'{self.base_url}/{vault_id}/secrets?path={path}')
 
 class Secrets:
     def __init__(self, britive) -> None:
         self.britive = britive
-        self.base_url = f"{self.britive.base_url}/v1/secretmanager/vault"
+        self.base_url = f'{self.britive.base_url}/v1/secretmanager/vault'
 
     def create(
         self,
         name: str,
         vault_id: str,
-        path: str = "/",
-        static_secret_template_id: str = "7a5f41d8-f7af-46a0-88f7-edf0403607ae",
-        secretMode: str = "shared",
-        secretNature: str = "static",
-        value: dict = {"Note": "This is the default note"},
-        file=None,
-    ):
+        path: str = '/',
+        static_secret_template_id: str = '7a5f41d8-f7af-46a0-88f7-edf0403607ae',
+        secretMode: str = 'shared',
+        secretNature: str = 'static',
+        value: dict = {'Note': 'This is the default note'},
+        file : bytes = None) -> dict:
         """
         Creates a new secret in the vault.
+
+        For creating a secret with a file, you must read the file in with:
+            file_in = open(file_path, 'rb'), and pass file_in as the file parameter.
 
         :param name: name of the secret
         :param vault_id: ID of the vault
@@ -336,31 +332,31 @@ class Secrets:
 
         if not file:
             return self.britive.post(
-                f"{self.base_url}/{vault_id}/secrets?path={path}",
+                f'{self.base_url}/{vault_id}/secrets?path={path}',
                 json={
-                    "name": name,
-                    "entityType": "secret",
-                    "staticSecretTemplateId": static_secret_template_id,
-                    "secretMode": secretMode,
-                    "secretNature": secretNature,
-                    "value": value,
+                    'name': name,
+                    'entityType': 'secret',
+                    'staticSecretTemplateId': static_secret_template_id,
+                    'secretMode': secretMode,
+                    'secretNature': secretNature,
+                    'value': value,
                 },
             )
         else:
             secret_data = {
-                "entityType": "secret",
-                "name": name,
-                "staticSecretTemplateId": static_secret_template_id,
-                "secretMode": secretMode,
-                "secretNature": secretNature,
-                "value": value,
+                'entityType': 'secret',
+                'name': name,
+                'staticSecretTemplateId': static_secret_template_id,
+                'secretMode': secretMode,
+                'secretNature': secretNature,
+                'value': value,
             }
             return self.britive.post_upload(
-                f"{self.base_url}/{vault_id}/secrets/file?path={path}",
-                files={"file": file, "secretData": (None, json.dumps(secret_data))},
+                f'{self.base_url}/{vault_id}/secrets/file?path={path}',
+                files={'file': file, 'secretData': (None, json.dumps(secret_data))},
             )
 
-    def update(self, vault_id: str, path: str = "/", value: dict = {}) -> dict:
+    def update(self, vault_id: str, path: str = '/', value: dict = {}) -> None:
         """
         Updates a secret's value
 
@@ -368,18 +364,18 @@ class Secrets:
         :param path: path of the secret, include the / at the beginning
         :param value: value of the secret
 
-        :return: Details of the updated secret.
+        :return: None
         """
 
         return self.britive.patch(
-            f"{self.base_url}/{vault_id}/secrets?path={path}", json={"value": value}
+            f'{self.base_url}/{vault_id}/secrets?path={path}', json={'value': value}
         )
 
     def get(
         self,
         vault_id: str,
         path: str,
-        type: str = "node",
+        type: str = 'node',
         filter: str = None,
         recursivesecrets: bool = False,
         getmetadata: bool = False) -> dict:
@@ -397,13 +393,13 @@ class Secrets:
         """
 
         params = {
-            "type": type,
-            "filter": filter,
-            "recursiveSecrets": (str(recursivesecrets)).lower(),
-            "getMetadata": getmetadata,
+            'type': type,
+            'filter': filter,
+            'recursiveSecrets': (str(recursivesecrets)).lower(),
+            'getMetadata': getmetadata,
         }
         return self.britive.get(
-            f"{self.base_url}/{vault_id}/secrets?path={path}", params=params
+            f'{self.base_url}/{vault_id}/secrets?path={path}', params=params
         )
 
     def delete(self, vault_id: str, path: str):
@@ -416,7 +412,7 @@ class Secrets:
         :return: None
         """
 
-        return self.britive.delete(f"{self.base_url}/{vault_id}/secrets?path={path}")
+        return self.britive.delete(f'{self.base_url}/{vault_id}/secrets?path={path}')
 
     def access(self, vault_id: str, path: str, getmetadata: bool = False) -> dict:
         """
@@ -428,18 +424,18 @@ class Secrets:
         :return: Details of the secret.
         """
 
-        params = {"getmetadata": getmetadata}
+        params = {'getmetadata': getmetadata}
         return self.britive.get(
-            f"{self.base_url}/{vault_id}/secrets?path={path}", params=params
+            f'{self.base_url}/{vault_id}/secrets?path={path}', params=params
         )
 
 
 class Policies:
     def __init__(self, britive) -> None:
         self.britive = britive
-        self.base_url = f"{self.britive.base_url}/v1/policy-admin/policies"
+        self.base_url = f'{self.britive.base_url}/v1/policy-admin/policies'
 
-    def list(self, path: str = "/", filter: str = None):
+    def list(self, path: str = '/', filter: str = None) -> dict:
         """
         Gets all policies in the vault.
 
@@ -449,28 +445,28 @@ class Policies:
         :return: Details of the policies.
         """
 
-        params = {"resource": path, "consumer": "secretmanager"}
+        params = {'resource': path, 'consumer': 'secretmanager'}
         if filter:
-            params["filter"] = filter
-        return self.britive.get(f"{self.base_url}", params=params)
+            params['filter'] = filter
+        return self.britive.get(f'{self.base_url}', params=params)
 
-    def delete(self, policy_id: str, path: str = "/"):
+    def delete(self, policy_id: str, path: str = '/'):
         """
         Deletes a policy from the vault.
 
         :param policy_id: ID of the policy to delete
         :param path: path of the policy, include the / at the beginning
 
-        :return: none
+        :return: None
         """
 
-        params = {"consumer": "secretmanager", "resource": path}
-        return self.britive.delete(f"{self.base_url}/{policy_id}", params=params)
+        params = {'consumer': 'secretmanager', 'resource': path}
+        return self.britive.delete(f'{self.base_url}/{policy_id}', params=params)
 
     def build(
         self,
         name: str,
-        description: str = "",
+        description: str = '',
         draft: bool = False,
         active: bool = True,
         read_only: bool = False,
@@ -484,7 +480,7 @@ class Policies:
         time_to_approve: int = 5,
         approver_users: list = None,
         approver_tags: list = None,
-        access_type: str = "Allow",
+        access_type: str = 'Allow',
     ) -> dict:
 
         """
@@ -528,12 +524,12 @@ class Policies:
             approver_users=approver_users,
             approver_tags=approver_tags,
         )
-        policy.pop("permissions", None)
-        policy.pop("roles", None)
-        policy["accessLevel"] = "SM_Manage"
+        policy.pop('permissions', None)
+        policy.pop('roles', None)
+        policy['accessLevel'] = 'SM_Manage'
         return policy
 
-    def create(self, policy: dict, path: str = "/") -> dict:
+    def create(self, policy: dict, path: str = '/') -> dict:
         """
         Creates  a policy in the vault.
 
@@ -550,7 +546,7 @@ class StaticSecretTemplates:
     def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = (
-            f"{self.britive.base_url}/v1/secretmanager/secret-templates/static"
+            f'{self.britive.base_url}/v1/secretmanager/secret-templates/static'
         )
 
     def get(self, secret_template_id: str) -> dict:
@@ -562,7 +558,7 @@ class StaticSecretTemplates:
         :return: Details of the secret template.
         """
 
-        return self.britive.get(f"{self.base_url}/{secret_template_id}")
+        return self.britive.get(f'{self.base_url}/{secret_template_id}')
 
     def list(self, filter: str = None) -> dict:
         """
@@ -573,8 +569,8 @@ class StaticSecretTemplates:
         :return: Details of the secret templates.
         """
 
-        params = {"filter": filter}
-        return self.britive.get(f"{self.base_url}", params=params)
+        params = {'filter': filter}
+        return self.britive.get(f'{self.base_url}', params=params)
 
     def delete(self, secret_template_id: str):
         """
@@ -585,13 +581,13 @@ class StaticSecretTemplates:
         :return: None
         """
 
-        return self.britive.delete(f"{self.base_url}/{secret_template_id}")
+        return self.britive.delete(f'{self.base_url}/{secret_template_id}')
 
     def create(
         self,
         name: str,
         passwordPolicyId: str,
-        description: str = "",
+        description: str = '',
         rotationInterval: int = 30,
         parameters: list = None) -> dict:
         """
@@ -607,16 +603,16 @@ class StaticSecretTemplates:
         """
 
         params = {
-            "secretType": name,
-            "passwordPolicyId": passwordPolicyId,
-            "description": description,
-            "rotationInterval": rotationInterval,
-            "parameters": parameters,
+            'secretType': name,
+            'passwordPolicyId': passwordPolicyId,
+            'description': description,
+            'rotationInterval': rotationInterval,
+            'parameters': parameters,
         }
 
-        return self.britive.post(f"{self.base_url}", json=params)
+        return self.britive.post(f'{self.base_url}', json=params)
 
-    def update(self, static_secret_template_id: str, **kwargs) -> dict:
+    def update(self, static_secret_template_id: str, **kwargs) -> None:
         """
         Updates a secret template
 
@@ -629,22 +625,20 @@ class StaticSecretTemplates:
                     rotationInterval: rotation interval of the secret template
                     parameters: list of parameters to use in the secret template
 
-        :return: Details of the secret template.
+        :return: None
         """
 
-        creation_defaults = self.get(static_secret_template_id)
-        data = {**creation_defaults, **kwargs}
         return self.britive.patch(
-            f"{self.base_url}/{static_secret_template_id}", json=data
+            f'{self.base_url}/{static_secret_template_id}', json=kwargs
         )
 
 
 class Resources:
     def __init__(self, britive) -> None:
         self.britive = britive
-        self.base_url = f"{self.britive.base_url}/v1/secretmanager/resourceContainers"
+        self.base_url = f'{self.britive.base_url}/v1/secretmanager/resourceContainers'
 
-    def get(self, path: str = "/") -> dict:
+    def get(self, path: str = '/') -> dict:
         """
         Gets a resource from the vault
 
@@ -653,5 +647,5 @@ class Resources:
         :return: Details of the resource.
         """
 
-        params = {"path": path}
-        return self.britive.get(f"{self.base_url}", params=params)
+        params = {'path': path}
+        return self.britive.get(f'{self.base_url}', params=params)
