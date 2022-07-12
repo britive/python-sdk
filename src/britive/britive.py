@@ -229,10 +229,16 @@ class Britive:
         pagination_type = None
         while True:  # infinite loop in case of pagination - we will break the loop when needed
             response = self.session.request(method, url, params=params, data=data, json=json)
-
             self.__check_response_for_error(response)   # handle an error response
             if self.__response_has_no_content(response):  # handle no content responses
                 return None
+
+            # handle secrets file download
+            lowercase_headers = {h.lower(): v.lower() for h, v in response.headers.items()}
+            url = response.request.url
+            if 'attachment' in lowercase_headers.get('content-disposition', '') and 'downloadfile' in url:
+                filename = response.headers.get('content-disposition').split('=')[1].replace('"', '').strip()
+                return {'filename': filename, 'content_bytes': bytes(response.content)}
 
             # load the result as a dict
             try:

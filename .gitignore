@@ -4,6 +4,8 @@
 .out
 .idea/
 .tox/
+test.py
+
 
 # Created by https://www.toptal.com/developers/gitignore/api/pycharm+all,pycharm,macos,windows,python,visualstudiocode,virtualenv,venv
 # Edit at https://www.toptal.com/developers/gitignore?templates=pycharm+all,pycharm,macos,windows,python,visualstudiocode,virtualenv,venv
