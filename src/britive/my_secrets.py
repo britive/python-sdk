@@ -23,7 +23,11 @@ class MySecrets:
 
     def __get_vault_id(self):
         # only 1 vault is allowed per tenant so we can reliably grab the ID of that vault
-        return self.britive.get(f'{self.base_url}/vault')['id']
+        try:
+            return self.britive.get(f'{self.base_url}/vault')['id']
+        except KeyError as e:
+            if 'id' in str(e):
+                raise exceptions.NoSecretsVaultFound()
 
     def list(self, path: str = '/', search: str = None) -> list:
         """
