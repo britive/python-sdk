@@ -87,6 +87,10 @@ class TenantNotEnabledForProfilesVersion2(Exception):
     pass
 
 
+class ApprovalWorkflowRejected(Exception):
+    pass
+
+
 # from https://docs.britive.com/docs/restapi-status-codes
 allowed_exceptions = {
     400: InvalidRequest,
