@@ -188,8 +188,9 @@ class Britive:
                 content = native_json.loads(response.content.decode('utf-8'))
                 message = f"{response.status_code} - " \
                           f"{content.get('errorCode') or 'E0000'} - " \
-                          f"{content.get('message') or 'no message available'} - " \
-                          f"{content.get('details') or 'no further details available'}"
+                          f"{content.get('message') or 'no message available'}"
+                if content.get('details'):
+                    message += f" - {content.get('details')}"
                 raise allowed_exceptions[response.status_code](message)
             except native_json.decoder.JSONDecodeError as e:
                 content = response.content.decode('utf-8')
@@ -229,10 +230,16 @@ class Britive:
         pagination_type = None
         while True:  # infinite loop in case of pagination - we will break the loop when needed
             response = self.session.request(method, url, params=params, data=data, json=json)
-
             self.__check_response_for_error(response)   # handle an error response
             if self.__response_has_no_content(response):  # handle no content responses
                 return None
+
+            # handle secrets file download
+            lowercase_headers = {h.lower(): v.lower() for h, v in response.headers.items()}
+            content_disposition = lowercase_headers.get('content-disposition', '')
+            if 'attachment' in content_disposition and 'downloadfile' in response.request.url:
+                filename = response.headers.get('content-disposition').split('=')[1].replace('"', '').strip()
+                return {'filename': filename, 'content_bytes': bytes(response.content)}
 
             # load the result as a dict
             try:

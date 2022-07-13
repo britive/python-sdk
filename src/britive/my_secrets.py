@@ -23,7 +23,11 @@ class MySecrets:
 
     def __get_vault_id(self):
         # only 1 vault is allowed per tenant so we can reliably grab the ID of that vault
-        return self.britive.get(f'{self.base_url}/vault')['id']
+        try:
+            return self.britive.get(f'{self.base_url}/vault')['id']
+        except KeyError as e:
+            if 'id' in str(e):
+                raise exceptions.NoSecretsVaultFound()
 
     def list(self, path: str = '/', search: str = None) -> list:
         """
@@ -97,3 +101,59 @@ class MySecrets:
                     time.sleep(wait_time)
                 else:
                     raise e
+
+    def download(self, path: str, justification: str = None, wait_time: int = 60, max_wait_time: int = 600) -> any:
+        """
+        Retrieve the decrypted secret file.
+
+        It is left to the caller of this method to persist the file contents to disk. Example of usage is below.
+
+        r = b.my_secrets.download(path='/examplefile')
+        with open(r['filename'], 'wb') as f:
+            f.write(r['content_bytes'])
+
+        :param path: The path to the secret. Include the leading /.
+        :param justification: Optional justification if viewing the secret requires approval.
+        :param wait_time: The number of seconds to sleep/wait between polling to check if the secret
+            request was approved.
+        :param max_wait_time: The maximum number of seconds to wait for an approval before throwing
+            an exception.
+        :return: Dict containing the filename of the downloaded file and the content of the file as bytes.
+        :raises ApprovalRequiredButNoJustificationProvided: if approval is required but no justification is provided.
+        :raises AccessDenied: if the caller does not have access to the secret being requested.
+        :raises ApprovalWorkflowTimedOut: if max_wait_time has been reached while waiting for approval.
+        """
+
+        vault_id = self.__get_vault_id()
+        quit_time = datetime.now(timezone.utc) + timedelta(seconds=max_wait_time)
+        params = {
+            'path': path
+        }
+
+        try:
+            # attempt to get the secret file and return it
+
+            return self.britive.get(
+                f'{self.base_url}/vault/{vault_id}/downloadfile',
+                params=params
+            )
+        # 403 will be returned when approval is required or access is denied
+        except exceptions.ForbiddenRequest as e:
+            if 'PE-0011' in str(e):  # justification is required which means we have an approval workflow to deal with
+                # lets call view so we can go through the full approval process
+                self.view(
+                    path=path,
+                    justification=justification,
+                    wait_time=wait_time,
+                    max_wait_time=max_wait_time
+                )
+
+                # and then we can get the file again
+                return self.britive.get(
+                    f'{self.base_url}/vault/{vault_id}/downloadfile',
+                    params=params
+                )
+            if 'PE-0002' in str(e):
+                raise exceptions.AccessDenied()
+            else:
+                raise e
