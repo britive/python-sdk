@@ -143,9 +143,7 @@ class MyAccess:
 
         # inject credentials if asked
         if include_credentials:
-            credentials = self.credentials(
-                transaction_id=transaction_id
-            )
+            credentials = self.credentials(transaction_id=transaction_id)
             if transaction['status'] != 'checkedOut':  # we need to pull update details
                 transaction = self.get_checked_out_profile(transaction_id=transaction_id)
             transaction['credentials'] = credentials
@@ -204,8 +202,6 @@ class MyAccess:
 
         Will automatically determine the type of checkout (programmatic or console) and return the appropriate
         details.
-
-        Will wait for approval to occur for profiles that require approval.
 
         :param transaction_id: The ID of the transaction.
         :return: Credentials associated with the checked out profile represented by the specified transaction.
