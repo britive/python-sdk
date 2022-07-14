@@ -99,7 +99,10 @@ class MyAccess:
         while True:  # will break the loop when needed
             loop = False
             for p in self.list_checked_out_profiles():
-                if p['papId'] == profile_id and p['environmentId'] == environment_id:
+                right_profile = p['papId'] == profile_id
+                right_env = p['environmentId'] == environment_id
+                right_type = p['accessType'] == params['accessType']
+                if all([right_profile, right_env, right_type]):
                     if p['checkedIn'] is None:  # still currently checked out so we can move on
                         transaction = p
                         break
