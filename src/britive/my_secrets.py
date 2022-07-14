@@ -102,7 +102,7 @@ class MySecrets:
                 else:
                     raise e
 
-    def download(self, path: str, justification: str = None, wait_time: int = 60, max_wait_time: int = 600) -> any:
+    def download(self, path: str, justification: str = None, wait_time: int = 60, max_wait_time: int = 600) -> dict:
         """
         Retrieve the decrypted secret file.
 

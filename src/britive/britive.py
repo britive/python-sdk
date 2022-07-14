@@ -237,7 +237,7 @@ class Britive:
             # handle secrets file download
             lowercase_headers = {h.lower(): v.lower() for h, v in response.headers.items()}
             content_disposition = lowercase_headers.get('content-disposition', '')
-            if 'attachment' in content_disposition and 'downloadfile' in response.request.url:
+            if 'attachment' in content_disposition and 'downloadfile' in url:
                 filename = response.headers.get('content-disposition').split('=')[1].replace('"', '').strip()
                 return {'filename': filename, 'content_bytes': bytes(response.content)}
 
