@@ -108,7 +108,7 @@ class Britive:
             version = pkg_resources.get_distribution('britive').version
         except Exception:
             version = 'unknown'
-            
+
         self.session.headers.update({
             'Authorization': f'{token_type} {self.__token}',
             'Content-Type': 'application/json',
