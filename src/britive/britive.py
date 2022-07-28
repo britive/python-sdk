@@ -1,6 +1,7 @@
 import os
 import requests
 import json as native_json
+import pkg_resources
 from .users import Users
 from .service_identity_tokens import ServiceIdentityTokens
 from .service_identities import ServiceIdentities
@@ -102,9 +103,16 @@ class Britive:
         self.session = requests.Session()
 
         token_type = 'TOKEN' if len(self.__token) < 50 else 'Bearer'
+
+        try:
+            version = pkg_resources.get_distribution('britive').version
+        except Exception:
+            version = 'unknown'
+
         self.session.headers.update({
             'Authorization': f'{token_type} {self.__token}',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'User-Agent': f'britive-python-sdk/{version} {requests.utils.default_user_agent()}'
         })
 
         self.feature_flags = self.features() if query_features else {}
