@@ -719,7 +719,7 @@ class ProfilePolicies:
         :return: Details of the updated policy.
         """
 
-        return self.britive.put(f'{self.base_url}/{profile_id}/policies/{policy_id}', data=policy)
+        return self.britive.patch(f'{self.base_url}/{profile_id}/policies/{policy_id}', data=policy)
 
     def delete(self, profile_id: str, policy_id: str) -> None:
         """
