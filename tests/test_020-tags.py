@@ -87,6 +87,8 @@ def test_update(cached_tag):
     assert isinstance(tag, dict)
     assert set(tag_keys).issubset(tag.keys())
     assert tag['name'] == f'testpythonapteiwrappertag-{r}'
+    # set it back for downstream processes
+    britive.tags.update(cached_tag['userTagId'], name=cached_tag['name'])
 
 
 

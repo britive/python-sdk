@@ -63,9 +63,15 @@ export BRITIVE_UNIT_TESTING=true
 
 You will also need other environment variables.
 
-1. The AWS account that will be used to create test applications/environments/etc. This is being added as an 
+* The AWS account that will be used to create test applications/environments/etc. This is being added as an 
 environment variable, so it is not hardcoded into the tests and stored in the repo as a result.
 
+Note that this AWS account will need 2 IAM resources.
+
+* Identity Provider: name of BritivePythonApiWrapperTesting-{tenant}
+* Role: name of britive-integration-role-{tenant}
+
+where {tenant} is the lowercase tenant and is also what is set below in the BRITIVE_TENANT env var
 
 ~~~
 export BRITIVE_API_TOKEN=...

@@ -9,6 +9,18 @@ where it makes more sense to present the API that way.
 
 This package supports Python 3.7 and higher.
 
+## Installation
+
+Execute one of the following. Or navigate to Releases and use the URL of the tarball release that is needed, if not the lastest.
+
+~~~bash
+pip install $(curl -s https://api.github.com/repos/britive/python-sdk/releases/latest | jq -r '.assets[] | select(.content_type == "application/x-gzip") | .browser_download_url')
+
+OR
+
+pip install $(curl -s https://api.github.com/repos/britive/python-sdk/releases/latest | grep "browser_download_url.*.tar.gz" | cut -d : -f 2,3 | tr -d \")
+~~~
+
 
 ## Documentation
 

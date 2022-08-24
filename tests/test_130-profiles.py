@@ -67,6 +67,7 @@ def test_enable(cached_profile):
     assert profile['status'] == 'active'
 
 
+@pytest.mark.skipif(profiles_v2, reason=profile_v2_skip)
 def test_identities_add(cached_profile, cached_user):
     user = britive.profiles.identities.add(
         profile_id=cached_profile['papId'],
@@ -76,6 +77,7 @@ def test_identities_add(cached_profile, cached_user):
     assert user['userId'] == cached_user['userId']
 
 
+@pytest.mark.skipif(profiles_v2, reason=profile_v2_skip)
 def test_identities_list_assigned(cached_profile, cached_user):
     users = britive.profiles.identities.list_assigned(profile_id=cached_profile['papId'])
     assert isinstance(users, list)
@@ -83,12 +85,14 @@ def test_identities_list_assigned(cached_profile, cached_user):
     assert users[0]['userId'] == cached_user['userId']
 
 
+@pytest.mark.skipif(profiles_v2, reason=profile_v2_skip)
 def test_identities_list_available(cached_profile):
     users = britive.profiles.identities.list_available(profile_id=cached_profile['papId'])
     assert isinstance(users, list)
     assert len(users) > 0
 
 
+@pytest.mark.skipif(profiles_v2, reason=profile_v2_skip)
 def test_identities_remove(cached_profile, cached_user):
     assert britive.profiles.identities.remove(profile_id=cached_profile['papId'], user_id=cached_user['userId']) is None
 
@@ -149,6 +153,7 @@ def test_session_attributes_remove(cached_profile, cached_static_session_attribu
                 os.remove(file)
 
 
+@pytest.mark.skipif(profiles_v2, reason=profile_v2_skip)
 def test_tags_add(cached_profile, cached_tag):
     tag = britive.profiles.tags.add(
         profile_id=cached_profile['papId'],
@@ -158,6 +163,7 @@ def test_tags_add(cached_profile, cached_tag):
     assert tag['userTagId'] == cached_tag['userTagId']
 
 
+@pytest.mark.skipif(profiles_v2, reason=profile_v2_skip)
 def test_tags_list_assigned(cached_profile, cached_tag):
     tags = britive.profiles.tags.list_assigned(profile_id=cached_profile['papId'])
     assert isinstance(tags, list)
@@ -165,12 +171,14 @@ def test_tags_list_assigned(cached_profile, cached_tag):
     assert tags[0]['userTagId'] == cached_tag['userTagId']
 
 
+@pytest.mark.skipif(profiles_v2, reason=profile_v2_skip)
 def test_tags_list_available(cached_profile):
     tags = britive.profiles.tags.list_available(profile_id=cached_profile['papId'])
     assert isinstance(tags, list)
     assert len(tags) > 0
 
 
+@pytest.mark.skipif(profiles_v2, reason=profile_v2_skip)
 def test_tags_remove(cached_profile, cached_tag):
     assert britive.profiles.tags.remove(
         profile_id=cached_profile['papId'],
@@ -178,45 +186,52 @@ def test_tags_remove(cached_profile, cached_tag):
     ) is None
 
 
-def test_policies_create(cached_policy):
-    assert isinstance(cached_policy, dict)
-    assert cached_policy['members']['tags']
+@pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
+def test_policies_create(cached_profile_policy):
+    assert isinstance(cached_profile_policy, dict)
+    assert cached_profile_policy['members']['tags']
 
 
+@pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
 def test_policies_list(cached_profile):
-    policies = britive.profiles.policies(profile_id=cached_profile['papId'])
+    policies = britive.profiles.policies.list(profile_id=cached_profile['papId'])
     assert isinstance(policies, list)
 
 
-def test_policies_get(cached_profile, cached_policy):
-    policy = britive.profiles.profiles.get(
+@pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
+def test_policies_get(cached_profile, cached_profile_policy):
+    policy = britive.profiles.policies.get(
         profile_id=cached_profile['papId'],
-        policy_id=cached_policy['id']
+        policy_id=cached_profile_policy['id']
     )
     assert isinstance(policy, dict)
 
 
-def test_policies_update(cached_profile, cached_policy):
+@pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
+def test_policies_update(cached_profile, cached_profile_policy):
     policy = {
         'members': {
             'tags': [
                 {'id': tag['id']}
-                for tag in cached_policy['members']['tags']
+                for tag in cached_profile_policy['members']['tags']
             ]
         }
     }
     assert britive.profiles.policies.update(
         profile_id=cached_profile['papId'],
-        policy_id=cached_policy['id'],
+        policy_id=cached_profile_policy['id'],
         policy=policy
     ) is None
 
 
-def test_policies_delete(cached_profile, cached_policy):
-    assert britive.profiles.policies.delete(
-        profile_id=cached_profile['papId'],
-        policy_id=cached_policy['id']
-    ) is None
-
+@pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
+def test_policies_delete(cached_profile, cached_profile_policy):
+    try:
+        assert britive.profiles.policies.delete(
+            profile_id=cached_profile['papId'],
+            policy_id=cached_profile_policy['id']
+        ) is None
+    finally:
+        cleanup('profile-policy')
 
 # TODO - test ProfilePermissions on some other non AWS application.

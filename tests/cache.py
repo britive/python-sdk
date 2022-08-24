@@ -1,6 +1,5 @@
 import functools
 import pytest
-import random
 import os
 import string
 import random
@@ -12,6 +11,10 @@ from britive import exceptions  # exceptions used in test files so including her
 
 
 britive = Britive()  # source details from environment variables
+profiles_v1 = britive.feature_flags['profile-v1']
+profiles_v2 = not profiles_v1
+profile_v2_skip = 'requires profiles v1'
+profile_v1_skip = 'requires profiles v2'
 
 
 characters = list(string.ascii_letters + string.digits + "!@#$%^&*()")
@@ -106,15 +109,10 @@ def cached_catalog(pytestconfig):
 @pytest.fixture(scope='session')
 @cached_resource(name='application')
 def cached_application(pytestconfig, cached_catalog):
-    app_to_create = {
-        'name': f'aws-pythonapiwrapper-test-{random.randint(0, 1000000)}',
-        'identity_provider_name': 'BritivePythonApiWrapperTesting',
-        'integration_role_name': 'britive-integration-role'
-    }
     aws_standalone_catalog_id = cached_catalog['AWS Standalone-1.0']['catalogAppId']
     return britive.applications.create(
         catalog_id=aws_standalone_catalog_id,
-        application_name=app_to_create['name']
+        application_name=f'aws-pythonapiwrapper-test-{random.randint(0, 1000000)}'
     )
 
 
@@ -206,12 +204,12 @@ def cached_profile(pytestconfig, cached_application):
 
 
 @pytest.fixture(scope='session')
-@cached_resource(name='policy')
-def cached_policy(pytestconfig, cached_profile, cached_tag):
+@cached_resource(name='profile-policy')
+def cached_profile_policy(pytestconfig, cached_profile, cached_tag):
     policy = britive.profiles.policies.build(
         name=cached_profile['papId'],
         description=cached_tag['name'],
-        tags=cached_tag['name']
+        tags=[cached_tag['name']]
     )
     return britive.profiles.policies.create(
         profile_id=cached_profile['papId'],
@@ -317,18 +315,30 @@ def cached_scim_token(pytestconfig, cached_identity_provider):
 
 @pytest.fixture(scope='session')
 @cached_resource(name='checked-out-profile')
-def cached_checked_out_profile(pytestconfig, cached_profile, cached_user, cached_environment):
+def cached_checked_out_profile(pytestconfig, cached_profile, cached_user, cached_environment, cached_tag):
     # add the currently authenticated user
-    user_id = britive.my_access.whoami()['userId']
 
-    try:
-        britive.profiles.identities.add(
-            profile_id=cached_profile['papId'],
-            user_id=user_id
+    calling_user_details = britive.my_access.whoami()
+
+    if profiles_v1:
+        try:
+            britive.profiles.identities.add(
+                profile_id=cached_profile['papId'],
+                user_id=calling_user_details['userId']
+            )
+        except exceptions.InvalidRequest as e:
+            if str(e) == 'P-0003 - User is already assigned to the profile - no further details available':
+                pass
+    else:
+        policy = britive.profiles.policies.build(
+            name=cached_profile['papId'],
+            users=[calling_user_details['username']],
+            description=cached_tag['name'],
         )
-    except exceptions.InvalidRequest as e:
-        if str(e) == 'P-0003 - User is already assigned to the profile - no further details available':
-            pass
+        britive.profiles.policies.create(
+            profile_id=cached_profile['papId'],
+            policy=policy
+        )
 
     # add a permission (just take the first in the list)
     permissions = britive.profiles.permissions.list_available(profile_id=cached_profile['papId'])
