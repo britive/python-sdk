@@ -72,7 +72,7 @@ def cached_user(pytestconfig):
 @cached_resource(name='tag')
 def cached_tag(pytestconfig):
     tag_to_create = {
-        'name': f'testpythonapteiwrappertag-{random.randint(0, 1000000)}'
+        'name': f'testpythonapiwrappertag-{random.randint(0, 1000000)}'
     }
     return britive.tags.create(**tag_to_create)
 
