@@ -47,7 +47,7 @@ def test_get_checked_out_profile(cached_checked_out_profile):
 def test_checkin(cached_checked_out_profile):
     response = britive.my_access.checkin(transaction_id=cached_checked_out_profile['transactionId'])
     assert isinstance(response, dict)
-    assert response['status'] == 'checkedIn'
+    assert response['status'] in ('checkedIn', 'checkInSubmitted')  # v1, v2
     cleanup('checked-out-profile')
 
 
@@ -65,7 +65,7 @@ def test_checkin_by_name(cached_profile, cached_environment, cached_application)
         application_name=cached_application['catalogAppDisplayName']
     )
     assert isinstance(response, dict)
-    assert response['status'] == 'checkedIn'
+    assert response['status'] in ('checkedIn', 'checkInSubmitted')  # v1, v2
     cleanup('checked-out-profile-by-name')
 
 

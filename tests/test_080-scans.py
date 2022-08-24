@@ -13,6 +13,8 @@ def test_status(cached_scan):
         status = britive.scans.status(task_id=cached_scan['taskId'])
         if status['status'] == 'Success':
             break
+        if status['status'] == 'Error':
+            break
         time.sleep(10)
     assert status['status'] == 'Success'
 

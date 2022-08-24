@@ -54,9 +54,15 @@ def test_test_failure(cached_application):
 
 
 def test_update(cached_application):
+    tenant = britive.tenant
+    idp = f'BritivePythonApiWrapperTesting-{tenant}'
+    role = f'britive-integration-role-{tenant}'
+
     app = britive.applications.update(
         application_id=cached_application['appContainerId'],
-        showAwsAccountNumber=True
+        showAwsAccountNumber=True,
+        identityProvider=idp,
+        roleName=role
     )
     show = None
     for prop in app['catalogApplication']['propertyTypes']:
