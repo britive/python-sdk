@@ -1,5 +1,4 @@
 import os
-import json
 
 from .cache import *  # will also import some globals like `britive`
 
@@ -209,7 +208,7 @@ def test_policies_update(cached_profile, cached_policy):
     assert britive.profiles.policies.update(
         profile_id=cached_profile['papId'],
         policy_id=cached_policy['id'],
-        policy=json.dumps(policy)
+        policy=policy
     ) is None
 
 
