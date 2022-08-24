@@ -1,4 +1,5 @@
 import os
+import json
 
 from .cache import *  # will also import some globals like `britive`
 
@@ -175,6 +176,47 @@ def test_tags_remove(cached_profile, cached_tag):
     assert britive.profiles.tags.remove(
         profile_id=cached_profile['papId'],
         tag_id=cached_tag['userTagId']
+    ) is None
+
+
+def test_policies_create(cached_policy):
+    assert isinstance(cached_policy, dict)
+    assert cached_policy['members']['tags']
+
+
+def test_policies_list(cached_profile):
+    policies = britive.profiles.policies(profile_id=cached_profile['papId'])
+    assert isinstance(policies, list)
+
+
+def test_policies_get(cached_profile, cached_policy):
+    policy = britive.profiles.profiles.get(
+        profile_id=cached_profile['papId'],
+        policy_id=cached_policy['id']
+    )
+    assert isinstance(policy, dict)
+
+
+def test_policies_update(cached_profile, cached_policy):
+    policy = {
+        'members': {
+            'tags': [
+                {'id': tag['id']}
+                for tag in cached_policy['members']['tags']
+            ]
+        }
+    }
+    assert britive.profiles.policies.update(
+        profile_id=cached_profile['papId'],
+        policy_id=cached_policy['id'],
+        policy=json.dumps(policy)
+    ) is None
+
+
+def test_policies_delete(cached_profile, cached_policy):
+    assert britive.profiles.policies.delete(
+        profile_id=cached_profile['papId'],
+        policy_id=cached_policy['id']
     ) is None
 
 

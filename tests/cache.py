@@ -206,6 +206,20 @@ def cached_profile(pytestconfig, cached_application):
 
 
 @pytest.fixture(scope='session')
+@cached_resource(name='policy')
+def cached_policy(pytestconfig, cached_profile, cached_tag):
+    policy = britive.profiles.policies.build(
+        name=cached_profile['papId'],
+        description=cached_tag['name'],
+        tags=cached_tag['name']
+    )
+    return britive.profiles.policies.create(
+        profile_id=cached_profile['papId'],
+        policy=policy
+    )
+
+
+@pytest.fixture(scope='session')
 @cached_resource(name='static-session-attribute')
 def cached_static_session_attribute(pytestconfig, cached_profile):
     return britive.profiles.session_attributes.add_static(
