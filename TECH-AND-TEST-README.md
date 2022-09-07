@@ -32,6 +32,11 @@ We will now have a new `/dist` directory containing a `.tar.gz` tarball and `whl
 a "built distribution" meaning it is compiled for various OSes and architectures. In our case this is a pure Python
 implementation so the wheel is for all OSes and architectures (`-py3-none-any.whl`).
 
+## Github Actions
+There are 2 Github Actions in play that publish to PyPI.
+
+1. Trigger off of a push to the `develop` branch. Will deploy to test PyPI.
+2. Trigger off of a new release being published. Will deploy to real PyPI.
 
 
 ## Testing
