@@ -122,3 +122,42 @@ least 1 secret available to the calling user/service identity and one of those s
 
 This will change once the admin API actions are built into this package as we can then programmatically create
 the vault and secrets before testing the britive.my_secrets functionality.
+
+
+## Docs
+
+https://docs.readthedocs.io/en/stable/intro/getting-started-with-mkdocs.html
+
+To set up the doc infrastructure the first time run the following from the base directory
+
+~~~
+pip install mkdocs
+mkdocs new .
+~~~
+
+For real time local updates in HTML...
+~~~
+mkdocs serve
+~~~
+
+To build...
+
+~~~
+mkdocs build
+~~~
+
+This will create a new directory `site`.
+
+As we are using source code control we have added `site/` to `.gitignore` so you will have to build the docs locally.
+
+We will ultimately deploy via GitHub pages. But you can also copy everything in `site/` and host as a static website anywhere you want.
+
+To deploy to GitHub project pages....
+
+~~~
+# checkout whichever branch is needed (main or develop most likely)
+mkdocs gh-deploy
+~~~
+
+This will build the docs by performing the actions of `mkdocs build` and shove those built docs into the `gh-pages` branch of the repo.
+`gh-pages` is auto-linked to `https://britive.github.io/python-cli/` and will update that site in near real time.
