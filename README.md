@@ -11,7 +11,12 @@ This package supports Python 3.7 and higher.
 
 ## Installation
 
-Execute one of the following. Or navigate to Releases and use the URL of the tarball release that is needed, if not the lastest.
+~~~bash
+pip install britive
+~~~
+
+Or execute one of the following commands if you wish to pull directly from the Github repo instead of PyPi. 
+Or navigate to Releases and use the URL of the tarball release that is needed, if not the lastest.
 
 ~~~bash
 pip install $(curl -s https://api.github.com/repos/britive/python-sdk/releases/latest | jq -r '.assets[] | select(.content_type == "application/x-gzip") | .browser_download_url')
