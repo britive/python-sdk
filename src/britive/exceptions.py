@@ -87,7 +87,19 @@ class TenantNotEnabledForProfilesVersion2(Exception):
     pass
 
 
-class ApprovalWorkflowRejected(Exception):
+class ProfileApprovalTimedOut(Exception):
+    pass
+
+
+class ProfileApprovalRejected(Exception):
+    pass
+
+
+class ProfileApprovalWithdrawn(Exception):
+    pass
+
+
+class ProfileApprovalMaxBlockTimeExceeded(Exception):
     pass
 
 

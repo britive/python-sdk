@@ -291,8 +291,9 @@ def cached_security_policy(pytestconfig, cached_service_identity_token):
 @pytest.fixture(scope='session')
 @cached_resource(name='api-token')
 def cached_api_token(pytestconfig, cached_service_identity_token):
+    r = str(random.randint(0, 1000000))
     return britive.api_tokens.create(
-            name='test',
+            name=f'test-{r}',
             expiration_days=60
         )
 
