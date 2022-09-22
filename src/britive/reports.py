@@ -1,3 +1,14 @@
+import csv as csv_lib
+from io import StringIO
+import json
+
+
+def _json_loads(value):
+    try:
+        return json.loads(value)
+    except:
+        return value
+
 
 class Reports:
     def __init__(self, britive):
@@ -26,8 +37,16 @@ class Reports:
         :return: CSV string or list.
         """
 
-        params = {}
-        if not csv:
-            params['page'] = 0
-            params['size'] = 100  # 100 is max
-        return self.britive.get(f'{self.base_url}/{report_id}{"/csv" if csv else ""}', params=params)
+        csv_results = self.britive.get(f'{self.base_url}/{report_id}/csv')
+
+        # convert csv to json - issue is that JSON response has max of 1k records returned so have to use CSV
+        # as the base and convert to dict if the client asked for dict
+        if csv:
+            return csv_results
+        else:
+            dict_results = []
+            for row in csv_lib.DictReader(StringIO(csv_results), quoting=csv_lib.QUOTE_MINIMAL):
+                dict_results.append({k: _json_loads(v) for k, v in row.items()})
+            return dict_results
+
+
