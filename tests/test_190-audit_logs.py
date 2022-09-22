@@ -17,6 +17,7 @@ def test_query_json():
     events = britive.audit_logs.query()
     assert isinstance(events, list)
     assert isinstance(events[0], dict)
+    assert len(events) % 100 != 0  # v2.8.1 - adding check due to pagination bug not including the last page
 
 
 def test_query_csv():
