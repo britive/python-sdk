@@ -273,17 +273,17 @@ class Britive:
                 else:  # else loop again after incrementing the page number by 1
                     params['page'] = page + 1
             elif pagination_type == 'audit':
-                if 'next-page' not in response.headers.keys():
-                    break
-                url = response.headers['next-page']
-                params = {}  # the next-page header has all the URL parameters we need so unset them here
                 return_data += result  # result is already a list
-            elif pagination_type == 'report':
                 if 'next-page' not in response.headers.keys():
                     break
                 url = response.headers['next-page']
                 params = {}  # the next-page header has all the URL parameters we need so unset them here
+            elif pagination_type == 'report':
                 return_data += result['data']
+                if 'next-page' not in response.headers.keys():
+                    break
+                url = response.headers['next-page']
+                params = {}  # the next-page header has all the URL parameters we need so unset them here
             elif pagination_type == 'secmgr':
                 return_data += result['result']
                 next_page = result['pagination'].get('next', '')
