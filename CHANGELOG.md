@@ -2,12 +2,27 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.9.0 [2022-09-30]
+#### What's New
+* Exponential backoff logic added to all API calls.
+
+#### Enhancements
+* Add `filter_expression` to `britive.reports.run()` to allow filtering the results as required by the caller.
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* None
+
+#### Other
+* None
 
 ## v2.8.1 [2022-09-22]
 #### What's New
 * None
-* 
-### Enhancements
+
+#### Enhancements
 * None
 
 #### Bug Fixes
