@@ -27,17 +27,22 @@ class Reports:
         }
         return self.britive.get(self.base_url, params=params)
 
-    def run(self, report_id: str, csv: bool = False) -> any:
+    def run(self, report_id: str, csv: bool = False, filter_expression: str = None) -> any:
         """
         Run a report.
 
         :param report_id: The ID of the report.
         :param csv: If True the result will be returned as a CSV string. If False (default) the result will be returned
             as a list where each time in the list is a dict representing the row of data.
+        :param filter_expression: The filter to apply to the report. It is left to the caller to provide a syntactically
+            correct filter expression string.
         :return: CSV string or list.
         """
 
-        csv_results = self.britive.get(f'{self.base_url}/{report_id}/csv')
+        params = {}
+        if filter_expression:
+            params['filter'] = filter_expression
+        csv_results = self.britive.get(f'{self.base_url}/{report_id}/csv', params=params)
 
         # convert csv to json - issue is that JSON response has max of 1k records returned so have to use CSV
         # as the base and convert to dict if the client asked for dict

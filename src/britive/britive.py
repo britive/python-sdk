@@ -1,5 +1,6 @@
 import os
 import requests
+from requests.adapters import HTTPAdapter, Retry
 import json as native_json
 import pkg_resources
 from .users import Users
@@ -101,6 +102,8 @@ class Britive:
 
         self.base_url = f'https://{self.tenant}.britive-app.com/api'
         self.session = requests.Session()
+        retries = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+        self.session.mount('https://', HTTPAdapter(max_retries=retries))
 
         token_type = 'TOKEN' if len(self.__token) < 50 else 'Bearer'
 
