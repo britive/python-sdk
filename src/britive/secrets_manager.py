@@ -607,7 +607,7 @@ class StaticSecretTemplates:
             'passwordPolicyId': passwordPolicyId,
             'description': description,
             'rotationInterval': rotationInterval,
-            'parameters': parameters,
+            'parameters': [parameters],
         }
 
         return self.britive.post(f'{self.base_url}', json=params)

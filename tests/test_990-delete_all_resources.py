@@ -1,6 +1,7 @@
 # note that the order of deletes could matter here so we will delete resources
 # in the opposite order of creation.
 
+from distutils.command.clean import clean
 from .cache import *  # will also import some globals like `britive`
 from britive import exceptions
 
@@ -111,6 +112,42 @@ def test_user_delete(cached_user):
         assert len(users) == 0
     finally:
         cleanup('user')
+
+def test_vault_delete(cached_vault):
+    try:
+        response = britive.secrets_manager.vaults.delete(cached_vault['id'])
+        assert response is None
+    finally:
+        cleanup('vault')
+
+def test_folder_delete(cached_folder):
+    try:
+        response = britive.secrets_manager.folders.delete(cached_folder["path"])
+        assert response is None
+    finally:
+        cleanup('folder')
+
+def test_passwordPolicies_delete(cached_PasswordPolicies):
+    try:
+        response = britive.secrets_manager.password_policies.delete(cached_PasswordPolicies['id'])
+        assert response is None
+    finally:
+        cleanup('password-policies')
+
+def test_secret_delete(cached_secret):
+    try:
+        response = britive.secrets_manager.secrets.delete(cached_secret["path"])
+        assert response is None
+    finally:
+        cleanup('secret')
+
+def test_static_secret_templates_delete(cached_static_secret_template):
+    try:
+        response = britive.secrets_manager.static_secret_templates.delete(cached_static_secret_template['id'])
+        assert response is None
+    finally:
+        cleanup('static-secret-templates')
+
 
 
 

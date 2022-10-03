@@ -14,6 +14,7 @@ from britive import exceptions  # exceptions used in test files so including her
 britive = Britive()  # source details from environment variables
 
 
+
 characters = list(string.ascii_letters + string.digits + "!@#$%^&*()")
 
 
@@ -386,6 +387,37 @@ def cached_notification_user_tags(pytestconfig, cached_notification):
 @cached_resource(name='notification-available-applications')
 def cached_notification_applications(pytestconfig, cached_notification):
     return britive.notifications.available_applications(notification_id=cached_notification['notificationId'])
+
+@pytest.fixture(scope='session')
+@cached_resource(name='vault')
+def cached_vault(pytestconfig):
+    return britive.secrets_manager.vaults.list()
+
+@pytest.fixture(scope='session')
+@cached_resource(name='vault')
+def cached_folder(pytestconfig, cached_vault):
+    return britive.secrets_manager.folders.create(name="testfolder", vault_id=cached_vault(id))
+
+@pytest.fixture(scope='session')
+@cached_resource(name='password-policies')
+def cached_PasswordPolicies(pytestconfig):
+    return britive.secrets_manager.password_policies.create(name="testpwdpolicy")
+
+@pytest.fixture(scope='session')
+@cached_resource(name='secret')
+def cached_secret(pytestconfig, cached_vault):
+    return britive.secrets_manager.secrets.create(name="test secret", vault_id=cached_vault['id'])
+
+@pytest.fixture(scope='session')
+@cached_resource(name='static-secret-templates')
+def cached_static_secret_template(pytestconfig, cached_PasswordPolicies):
+    return britive.secrets_manager.static_secret_templates.create(name="test_name", passwordPolicyId=cached_PasswordPolicies['id'], parameters={'name': "test_param", 'description': "test_description", 'mask': False, 'required': False, 'type': "singleLine"})
+
+
+
+
+
+
 
 
 

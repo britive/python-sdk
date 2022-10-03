@@ -100,6 +100,7 @@ pytest tests/test_210-identity_providers.py -v
 pytest tests/test_220-my_access.py -v
 pytest tests/test_230-notifications.py -v
 pytest tests/test_240-my_secrets.py -v
+pytest tests/test_250-secrets_manager.py -v
 
 pytest tests/test_990-delete_all_resources.py -v
 ~~~
