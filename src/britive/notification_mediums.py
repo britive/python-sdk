@@ -12,7 +12,7 @@ class NotificationMediums:
         :return: List of all notification mediums
         """
 
-        return self.britive.get(self.base_url)
+        return self.britive.get(self.base_url)['result']
 
     def create(
         self,

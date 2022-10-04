@@ -390,8 +390,8 @@ def cached_notification_applications(pytestconfig, cached_notification):
 
 @pytest.fixture(scope='session')
 @cached_resource(name='vault')
-def cached_vault(pytestconfig):
-    return britive.secrets_manager.vaults.list()
+def cached_vault(pytestconfig, cached_tag):
+    return britive.secrets_manager.vaults.create(name="test vault27", tags=[cached_tag["userTagId"]])
 
 @pytest.fixture(scope='session')
 @cached_resource(name='vault')
@@ -404,9 +404,14 @@ def cached_PasswordPolicies(pytestconfig):
     return britive.secrets_manager.password_policies.create(name="testpwdpolicy")
 
 @pytest.fixture(scope='session')
+@cached_resource(name='pin-policies')
+def cached_PinPolicies(pytestconfig):
+    return britive.secrets_manager.password_policies.create_pin(name="testpinpolicy")
+
+@pytest.fixture(scope='session')
 @cached_resource(name='secret')
 def cached_secret(pytestconfig, cached_vault):
-    return britive.secrets_manager.secrets.create(name="test secret", vault_id=cached_vault['id'])
+    return britive.secrets_manager.secrets.create(name="test_secret", vault_id=cached_vault['id'])
 
 @pytest.fixture(scope='session')
 @cached_resource(name='static-secret-templates')

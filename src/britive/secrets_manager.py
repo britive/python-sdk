@@ -378,7 +378,7 @@ class Secrets:
         type: str = 'node',
         filter: str = None,
         recursivesecrets: bool = False,
-        getmetadata: bool = False) -> dict:
+        getmetadata: bool = True) -> dict:
         """
         Gets a secret from the vault.
 
