@@ -1,3 +1,4 @@
+from britive import policies
 from .cache import *  # will also import some globals like `britive`
 
 def test_create_vault(cached_vault):
@@ -60,6 +61,14 @@ def test_secret_get(cached_vault):
 def test_secret_update(cached_secret, cached_vault):
     update = britive.secrets_manager.secrets.update(cached_vault['id'], cached_secret['path'], {'Note' : "updated test note"})
     assert update is None
+
+def test_policies_list():
+    policies = britive.secrets_manager.policies.list()
+    assert isinstance(policies, list)
+    assert isinstance(policies[0], dict)
+
+def test_policies_create(cached_policy):
+    assert isinstance(cached_policy, dict)
 
 def test_static_secret_template_create(cached_static_secret_template):
     assert isinstance(cached_static_secret_template, dict)
