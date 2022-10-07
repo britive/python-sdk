@@ -3,6 +3,7 @@ import requests
 from requests.adapters import HTTPAdapter, Retry
 import json as native_json
 import pkg_resources
+import socket
 from .users import Users
 from .service_identity_tokens import ServiceIdentityTokens
 from .service_identities import ServiceIdentities
@@ -100,7 +101,10 @@ class Britive:
                 f'from environment variable {BRITIVE_TOKEN_ENV_NAME}'
             )
 
-        self.base_url = f'https://{self.tenant}.britive-app.com/api'
+        # clean up and apply logic to the passed in tenant (for backwards compatibility with no domain being required)
+        self._parse_tenant()
+
+        self.base_url = f'https://{self.tenant}/api'
         self.session = requests.Session()
         retries = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
         self.session.mount('https://', HTTPAdapter(max_retries=retries))
@@ -145,6 +149,20 @@ class Britive:
         self.notifications = Notifications(self)
         self.my_secrets = MySecrets(self)
         self.policies = Policies(self)
+
+    def _parse_tenant(self):
+        domain = self.tenant.replace('https://', '').replace('http://', '')   # remove scheme
+        domain = domain.split('/')[0]  # remove any paths as they will not be needed
+        try:
+            socket.gethostbyname_ex(domain)  # if success then a full domain was provided
+            self.tenant = domain
+        except socket.gaierror:  # assume just the tenant name was provided (originally the only supported method)
+            domain = f'{self.tenant}.britive-app.com'
+            try:
+                socket.gethostbyname_ex(domain)  # validate the hostname is real
+                self.tenant = domain  # and if so set the tenant accordingly
+            except socket.gaierror:
+                raise Exception(f'Invalid tenant provided: {self.tenant}')
 
     def features(self):
         features = {}
