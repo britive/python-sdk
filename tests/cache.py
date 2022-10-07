@@ -394,19 +394,19 @@ def cached_vault(pytestconfig, cached_tag):
     return britive.secrets_manager.vaults.create(name="test vault27", tags=[cached_tag["userTagId"]])
 
 @pytest.fixture(scope='session')
-@cached_resource(name='vault')
+@cached_resource(name='folder')
 def cached_folder(pytestconfig, cached_vault):
-    return britive.secrets_manager.folders.create(name="testfolder", vault_id=cached_vault(id))
+    return britive.secrets_manager.folders.create(name="testfolder", vault_id=cached_vault['id'])
 
 @pytest.fixture(scope='session')
 @cached_resource(name='password-policies')
 def cached_PasswordPolicies(pytestconfig):
-    return britive.secrets_manager.password_policies.create(name="testpwdpolicy")
+    return britive.secrets_manager.password_policies.create(name="pytestpwdpolicy")
 
 @pytest.fixture(scope='session')
 @cached_resource(name='pin-policies')
 def cached_PinPolicies(pytestconfig):
-    return britive.secrets_manager.password_policies.create_pin(name="testpinpolicy")
+    return britive.secrets_manager.password_policies.create_pin(name="pytestpinpolicy")
 
 @pytest.fixture(scope='session')
 @cached_resource(name='secret')
@@ -429,7 +429,7 @@ def cached_static_secret_template(pytestconfig, cached_PasswordPolicies):
 @pytest.fixture(scope='session')
 @cached_resource(name='policy')
 def cached_policy(pytestconfig, cached_user):
-    policy = britive.secrets_manager.policies.build("testpolicy", draft=True, active=False)  
+    policy = britive.secrets_manager.policies.build("pytestpolicy", draft=True, active=False)  
     return britive.secrets_manager.policies.create(policy=policy)
 
 

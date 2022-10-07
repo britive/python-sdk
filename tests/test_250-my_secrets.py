@@ -20,7 +20,7 @@ def test_list():
     assert isinstance(secrets[0], dict)
 
 
-def test_view_no_approval():
-    data = britive.my_secrets.view(path='/Test')
+def test_view_no_approval(cached_secret):
+    data = britive.my_secrets.view(path=cached_secret['path'])
     assert isinstance(data, dict)
 

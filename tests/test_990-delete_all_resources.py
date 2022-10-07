@@ -113,33 +113,13 @@ def test_user_delete(cached_user):
     finally:
         cleanup('user')
 
-def test_vault_delete(cached_vault):
-    try:
-        response = britive.secrets_manager.vaults.delete(cached_vault['id'])
-        assert response is None
-    finally:
-        cleanup('vault')
 
-def test_folder_delete(cached_folder):
+def test_folder_delete(cached_folder, cached_vault):
     try:
-        response = britive.secrets_manager.folders.delete(cached_folder["path"])
+        response = britive.secrets_manager.folders.delete(path=cached_folder['path'], vault_id=cached_vault['id'])
         assert response is None
     finally:
         cleanup('folder')
-
-def test_passwordPolicies_delete(cached_PasswordPolicies):
-    try:
-        response = britive.secrets_manager.password_policies.delete(cached_PasswordPolicies['id'])
-        assert response is None
-    finally:
-        cleanup('password-policies')
-
-def test_secret_delete(cached_secret):
-    try:
-        response = britive.secrets_manager.secrets.delete(cached_secret["path"])
-        assert response is None
-    finally:
-        cleanup('secret')
 
 def test_static_secret_templates_delete(cached_static_secret_template):
     try:
@@ -148,6 +128,40 @@ def test_static_secret_templates_delete(cached_static_secret_template):
     finally:
         cleanup('static-secret-templates')
 
+def test_passwordPolicies_delete(cached_PasswordPolicies):
+    try:
+        response = britive.secrets_manager.password_policies.delete(cached_PasswordPolicies['id'])
+        assert response is None
+    finally:
+        cleanup('password-policies')
+
+def test_pinPolicy_delete(cached_PinPolicies):
+    try:
+        response = britive.secrets_manager.password_policies.delete(cached_PinPolicies['id'])
+        assert response is None
+    finally:
+        cleanup('pin-policies')
+
+def test_secret_delete(cached_secret, cached_vault):
+    try:
+        response = britive.secrets_manager.secrets.delete(path=cached_secret['path'], vault_id=cached_vault['id'])
+        assert response is None
+    finally:
+        cleanup('secret')
+
+def test_policy_delete(cached_policy):
+    try:
+        response = britive.secrets_manager.policies.delete(cached_policy['id'])
+        assert response is None
+    finally:
+        cleanup('policy')
+
+def test_vault_delete(cached_vault):
+    try:
+        response = britive.secrets_manager.vaults.delete(cached_vault['id'])
+        assert response is None
+    finally:
+        cleanup('vault')
 
 
 
