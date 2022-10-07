@@ -15,7 +15,7 @@ def test_get_vault(cached_vault):
     assert vault['id'] == cached_vault['id']
 
 def test_update_vault(cached_vault):
-    britive.secrets_manager.vaults.update(cached_vault['id'], description="12345")
+    britive.secrets_manager.vaults.update(cached_vault['id'], description='12345')
     vault = britive.secrets_manager.vaults.get_vault_by_id(cached_vault['id'])
     assert vault['description'] == '12345'
 
@@ -40,7 +40,7 @@ def test_PasswordPolicies_list():
     assert isinstance(response[0], dict)
 
 def test_PasswordPolicies_update(cached_PasswordPolicies):
-    britive.secrets_manager.password_policies.update(cached_PasswordPolicies['id'], name="12345")
+    britive.secrets_manager.password_policies.update(cached_PasswordPolicies['id'], name='12345')
     assert britive.secrets_manager.password_policies.get(cached_PasswordPolicies['id'])['name'] == '12345'
 
 def test_generate_password(cached_PasswordPolicies):
@@ -48,18 +48,22 @@ def test_generate_password(cached_PasswordPolicies):
     assert isinstance(password, str)
 
 def test_validate_password(cached_PasswordPolicies):
-    response = britive.secrets_manager.password_policies.validate(cached_PasswordPolicies['id'], "testpassword")
+    response = britive.secrets_manager.password_policies.validate(cached_PasswordPolicies['id'], 'testpassword')
     assert response['isPasswordOrPinValid'] is False
 
 def test_secret_create(cached_secret):
     assert isinstance(cached_secret, dict)
 
 def test_secret_get(cached_vault): 
-    secret = britive.secrets_manager.secrets.get(vault_id=cached_vault['id'], path='/', type='secret')[0]   
+    secret = britive.secrets_manager.secrets.get(vault_id=cached_vault['id'], path='/', type='secret')[0]
     assert isinstance(secret, dict)
 
 def test_secret_update(cached_secret, cached_vault):
-    update = britive.secrets_manager.secrets.update(cached_vault['id'], cached_secret['path'], {'Note' : "updated test note"})
+    update = britive.secrets_manager.secrets.update(
+        cached_vault['id'],
+        cached_secret['path'],
+        {'Note' : 'updated test note'}
+    )
     assert update is None
 
 def test_policies_list():
@@ -85,8 +89,8 @@ def test_static_secret_template_get(cached_static_secret_template):
     assert cached_static_secret_template['id'] == static_secret_template['id']
 
 def test_static_secret_template_update(cached_static_secret_template):
-    britive.secrets_manager.static_secret_templates.update(cached_static_secret_template['id'], description = "test desc")
-    assert britive.secrets_manager.static_secret_templates.get(cached_static_secret_template['id'])['description'] == "test desc"
+    britive.secrets_manager.static_secret_templates.update(cached_static_secret_template['id'], description = 'test desc')
+    assert britive.secrets_manager.static_secret_templates.get(cached_static_secret_template['id'])['description'] == 'test desc'
 
 def test_resources_get():
     response = britive.secrets_manager.resources.get('/')
@@ -97,10 +101,3 @@ def test_rotate_keys(cached_vault):
     britive.secrets_manager.vaults.rotate_keys()
     current_time = britive.secrets_manager.vaults.get_vault_by_id(cached_vault['id'])['lastRotation']
     assert initial_time != current_time
-    
-
-
-
-
-
-
