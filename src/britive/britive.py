@@ -29,7 +29,7 @@ from .my_secrets import MySecrets
 from .policies import  Policies
 from .secrets_manager import SecretsManager
 from .notification_mediums import NotificationMediums
-#from .approvals import Approvals
+
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
 BRITIVE_TOKEN_ENV_NAME = 'BRITIVE_API_TOKEN'
@@ -138,7 +138,6 @@ class Britive:
         self.policies = Policies(self)
         self.secrets_manager = SecretsManager(self)
         self.notification_mediums = NotificationMediums(self)
-        #self.approvals = Approvals(self)
 
     def features(self):
         features = {}
