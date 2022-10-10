@@ -416,13 +416,16 @@ def cached_secret(pytestconfig, cached_vault):
 @pytest.fixture(scope='session')
 @cached_resource(name='static-secret-templates')
 def cached_static_secret_template(pytestconfig, cached_PasswordPolicies):
-    return britive.secrets_manager.static_secret_templates.create(name="test_name", passwordPolicyId=cached_PasswordPolicies['id'], parameters=
-    {
-        'name': "test_param",
-        'description': "test_description",
-        'mask': False,
-        'required': False,
-        'type': "singleLine"
+    return britive.secrets_manager.static_secret_templates.create(
+        name="test_name",
+        passwordPolicyId=cached_PasswordPolicies['id'],
+        parameters=
+        {
+            'name': "test_param",
+            'description': "test_description",
+            'mask': False,
+            'required': False,
+            'type': "singleLine"
         }
     )
 
@@ -431,6 +434,16 @@ def cached_static_secret_template(pytestconfig, cached_PasswordPolicies):
 def cached_policy(pytestconfig, cached_user):
     policy = britive.secrets_manager.policies.build("pytestpolicy", draft=True, active=False)  
     return britive.secrets_manager.policies.create(policy=policy)
+
+@pytest.fixture(scope='session')
+@cached_resource(name='notification-medium')
+def cached_notification_medium(pytestconfig):
+    return britive.notification_mediums.create(
+        type='teams',
+        name='pytest-notification-medium',
+        connectionParameters={"Webhook URL" : "https://www.google.com/"}
+    )
+
 
 
 

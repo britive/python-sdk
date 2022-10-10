@@ -41,21 +41,27 @@ def test_PasswordPolicies_list():
 
 def test_PasswordPolicies_update(cached_PasswordPolicies):
     britive.secrets_manager.password_policies.update(cached_PasswordPolicies['id'], name='12345')
-    assert britive.secrets_manager.password_policies.get(cached_PasswordPolicies['id'])['name'] == '12345'
+    assert britive.secrets_manager.password_policies.get(
+        cached_PasswordPolicies['id'])['name'] == '12345'
 
 def test_generate_password(cached_PasswordPolicies):
-    password = britive.secrets_manager.password_policies.generate_password(cached_PasswordPolicies['id'])
+    password = britive.secrets_manager.password_policies.generate_password(
+        cached_PasswordPolicies['id'])
     assert isinstance(password, str)
 
 def test_validate_password(cached_PasswordPolicies):
-    response = britive.secrets_manager.password_policies.validate(cached_PasswordPolicies['id'], 'testpassword')
+    response = britive.secrets_manager.password_policies.validate(
+        cached_PasswordPolicies['id'],
+        'testpassword')
     assert response['isPasswordOrPinValid'] is False
 
 def test_secret_create(cached_secret):
     assert isinstance(cached_secret, dict)
 
 def test_secret_get(cached_vault): 
-    secret = britive.secrets_manager.secrets.get(vault_id=cached_vault['id'], path='/', type='secret')[0]
+    secret = britive.secrets_manager.secrets.get(
+        vault_id=cached_vault['id'],
+        path='/', type='secret')[0]
     assert isinstance(secret, dict)
 
 def test_secret_update(cached_secret, cached_vault):
@@ -76,7 +82,7 @@ def test_policies_create(cached_policy):
 
 def test_static_secret_template_create(cached_static_secret_template):
     assert isinstance(cached_static_secret_template, dict)
- 
+
 def test_static_secret_template_list():
     response = britive.secrets_manager.static_secret_templates.list()
     assert isinstance(response, list)
@@ -84,13 +90,17 @@ def test_static_secret_template_list():
     assert isinstance(response[0], dict)
 
 def test_static_secret_template_get(cached_static_secret_template):
-    static_secret_template = britive.secrets_manager.static_secret_templates.get(cached_static_secret_template['id'])
+    static_secret_template = britive.secrets_manager.static_secret_templates.get(
+        cached_static_secret_template['id'])
     assert isinstance(static_secret_template, dict)
     assert cached_static_secret_template['id'] == static_secret_template['id']
 
 def test_static_secret_template_update(cached_static_secret_template):
-    britive.secrets_manager.static_secret_templates.update(cached_static_secret_template['id'], description = 'test desc')
-    assert britive.secrets_manager.static_secret_templates.get(cached_static_secret_template['id'])['description'] == 'test desc'
+    britive.secrets_manager.static_secret_templates.update(
+        cached_static_secret_template['id'],
+        description = 'test desc')
+    assert britive.secrets_manager.static_secret_templates.get(
+        cached_static_secret_template['id'])['description'] == 'test desc'
 
 def test_resources_get():
     response = britive.secrets_manager.resources.get('/')

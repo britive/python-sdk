@@ -2,6 +2,7 @@
 # in the opposite order of creation.
 
 from distutils.command.clean import clean
+from typing import final
 from .cache import *  # will also import some globals like `britive`
 from britive import exceptions
 
@@ -116,14 +117,16 @@ def test_user_delete(cached_user):
 
 def test_folder_delete(cached_folder, cached_vault):
     try:
-        response = britive.secrets_manager.folders.delete(path=cached_folder['path'], vault_id=cached_vault['id'])
+        response = britive.secrets_manager.folders.delete(
+            path=cached_folder['path'], vault_id=cached_vault['id'])
         assert response is None
     finally:
         cleanup('folder')
 
 def test_static_secret_templates_delete(cached_static_secret_template):
     try:
-        response = britive.secrets_manager.static_secret_templates.delete(cached_static_secret_template['id'])
+        response = britive.secrets_manager.static_secret_templates.delete(
+            cached_static_secret_template['id'])
         assert response is None
     finally:
         cleanup('static-secret-templates')
@@ -144,7 +147,10 @@ def test_pinPolicy_delete(cached_PinPolicies):
 
 def test_secret_delete(cached_secret, cached_vault):
     try:
-        response = britive.secrets_manager.secrets.delete(path=cached_secret['path'], vault_id=cached_vault['id'])
+        response = britive.secrets_manager.secrets.delete(
+            path=cached_secret['path'],
+            vault_id=cached_vault['id']
+            )
         assert response is None
     finally:
         cleanup('secret')
@@ -163,5 +169,10 @@ def test_vault_delete(cached_vault):
     finally:
         cleanup('vault')
 
-
-
+def test_notification_medium_delete(cached_notification_medium):
+    try:
+        response = britive.notification_mediums.delete(cached_notification_medium['id'])
+        assert response is None
+    finally:
+        cleanup('notification-medium')
+        
