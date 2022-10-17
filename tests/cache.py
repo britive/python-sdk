@@ -17,6 +17,7 @@ profile_v2_skip = 'requires profiles v1'
 profile_v1_skip = 'requires profiles v2'
 
 
+
 characters = list(string.ascii_letters + string.digits + "!@#$%^&*()")
 
 
@@ -411,6 +412,69 @@ def cached_notification_user_tags(pytestconfig, cached_notification):
 @cached_resource(name='notification-available-applications')
 def cached_notification_applications(pytestconfig, cached_notification):
     return britive.notifications.available_applications(notification_id=cached_notification['notificationId'])
+
+@pytest.fixture(scope='session')
+@cached_resource(name='vault')
+def cached_vault(pytestconfig, cached_tag):
+    return britive.secrets_manager.vaults.create(name="test vault27", tags=[cached_tag["userTagId"]])
+
+@pytest.fixture(scope='session')
+@cached_resource(name='folder')
+def cached_folder(pytestconfig, cached_vault):
+    return britive.secrets_manager.folders.create(name="testfolder", vault_id=cached_vault['id'])
+
+@pytest.fixture(scope='session')
+@cached_resource(name='password-policies')
+def cached_PasswordPolicies(pytestconfig):
+    return britive.secrets_manager.password_policies.create(name="pytestpwdpolicy")
+
+@pytest.fixture(scope='session')
+@cached_resource(name='pin-policies')
+def cached_PinPolicies(pytestconfig):
+    return britive.secrets_manager.password_policies.create_pin(name="pytestpinpolicy")
+
+@pytest.fixture(scope='session')
+@cached_resource(name='secret')
+def cached_secret(pytestconfig, cached_vault):
+    return britive.secrets_manager.secrets.create(name="test_secret", vault_id=cached_vault['id'])
+
+@pytest.fixture(scope='session')
+@cached_resource(name='static-secret-templates')
+def cached_static_secret_template(pytestconfig, cached_PasswordPolicies):
+    return britive.secrets_manager.static_secret_templates.create(
+        name="test_name",
+        passwordPolicyId=cached_PasswordPolicies['id'],
+        parameters=
+        {
+            'name': "test_param",
+            'description': "test_description",
+            'mask': False,
+            'required': False,
+            'type': "singleLine"
+        }
+    )
+
+@pytest.fixture(scope='session')
+@cached_resource(name='policy')
+def cached_policy(pytestconfig, cached_user):
+    policy = britive.secrets_manager.policies.build("pytestpolicy", draft=True, active=False)  
+    return britive.secrets_manager.policies.create(policy=policy)
+
+@pytest.fixture(scope='session')
+@cached_resource(name='notification-medium')
+def cached_notification_medium(pytestconfig):
+    return britive.notification_mediums.create(
+        type='teams',
+        name='pytest-notification-medium',
+        connectionParameters={"Webhook URL" : "https://www.google.com/"}
+    )
+
+
+
+
+
+
+
 
 
 
