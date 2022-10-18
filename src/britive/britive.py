@@ -30,6 +30,8 @@ from .my_access import MyAccess
 from .notifications import Notifications
 from .my_secrets import MySecrets
 from .policies import  Policies
+from .secrets_manager import SecretsManager
+from .notification_mediums import NotificationMediums
 
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
@@ -149,12 +151,15 @@ class Britive:
         self.notifications = Notifications(self)
         self.my_secrets = MySecrets(self)
         self.policies = Policies(self)
+        self.secrets_manager = SecretsManager(self)
+        self.notification_mediums = NotificationMediums(self)
 
     def _parse_tenant(self):
         domain = self.tenant.replace('https://', '').replace('http://', '')   # remove scheme
         domain = domain.split('/')[0]  # remove any paths as they will not be needed
         try:
-            socket.gethostbyname_ex(domain)  # if success then a full domain was provided
+            domain_without_port = domain.split(':')[0]
+            socket.gethostbyname_ex(domain_without_port)  # if success then a full domain was provided
             self.tenant = domain
         except socket.gaierror:  # assume just the tenant name was provided (originally the only supported method)
             domain = f'{self.tenant}.britive-app.com'
@@ -205,6 +210,15 @@ class Britive:
             filename: (f'{filename}.xml', file_content_as_str, content_type)
         }
         response = self.session.patch(url, files=files, headers={'Content-Type': None})
+        try:
+            return response.json()
+        except native_json.decoder.JSONDecodeError:  # if we cannot decode json then the response isn't json
+            return response.content.decode('utf-8')
+    
+    # note - this method is only used to upload a file when creating a secret
+    def post_upload(self, url, params=None, files=None):
+        """Internal use only."""
+        response = self.session.post(url, params=params, files=files, headers={'Content-Type': None})
         try:
             return response.json()
         except native_json.decoder.JSONDecodeError:  # if we cannot decode json then the response isn't json

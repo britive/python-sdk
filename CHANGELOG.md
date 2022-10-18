@@ -2,6 +2,30 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.11.0 [2022-10-18]
+#### What's New
+* Support for Secrets Manager APIs
+  * Vaults
+  * Password Policies
+  * Secrets
+  * Policies
+  * Static Secret Templates
+  * Resources
+  * Folders
+* Support for Notification Medium APIs
+
+#### Enhancements
+* Allow the use of a port number in a tenant URL
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.10.0 [2022-10-06]
 #### What's New
 * None
