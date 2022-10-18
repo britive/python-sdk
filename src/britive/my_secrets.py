@@ -5,9 +5,8 @@ from . import exceptions
 
 class MySecrets:
     """
-    This class is meant to be called by end users (as part of custom API integration work or the yet to be built
-    Python based Britive CLI tooling). It is an API layer on top of the actions that can be performed on the
-    "My Secrets" page of the Britive UI.
+    This class is meant to be called by end users (as part of custom API integration work or pybritive CLI).
+    It is an API layer on top of the actions that can be performed on the "My Secrets" page of the Britive UI.
 
     No "administrative" access is required by the methods in this class. Each method will only return resources/allow
     actions which are permitted to be performed by the user/service identity, as identified by an API token or
