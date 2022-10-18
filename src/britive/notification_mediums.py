@@ -16,30 +16,30 @@ class NotificationMediums:
 
     def create(
         self,
-        type: str,
+        notification_medium_type: str,
         name: str,
         description: str = 'Default notification medium description',
-        connectionParameters: dict = {},) -> dict:
+        connection_parameters: dict = {}
+    ) -> dict:
         """
         Create a new notification medium.
 
-        :param type: the type of the notification medium
+        :param notification_medium_type: the type of the notification medium
         :param name: the name of the notification medium
         :param description: the description of the notification medium
-        :param connectionParameters: the connection parameters of the notification medium
+        :param connection_parameters: the connection parameters of the notification medium
                 valid connection parameters:
                     URL : for slack, the URL
                     token : for slack, Auth Token for the Application BOT
                     Webhook URL : for teams, the URL of the teams webhook
-
         :return: Details of the newly created notification medium.
         """
 
         params = {
             'name': name,
             'description': description,
-            'type': type,
-            'connectionParameters': connectionParameters,
+            'type': notification_medium_type,
+            'connectionParameters': connection_parameters,
         }
         return self.britive.post(self.base_url, json=params)
 
@@ -48,13 +48,12 @@ class NotificationMediums:
         Provide details of the given notification medium, from a notification medium id.
 
         :param notification_medium_id: The ID  of the notification medium.
-
         :return: Details of the specified notification medium.
         """
 
         return self.britive.get(f'{self.base_url}/{notification_medium_id}')
 
-    def update(self, notification_medium_id: str, parameters : dict) -> dict:
+    def update(self, notification_medium_id: str, parameters: dict) -> dict:
         """
         Update a notification medium.
 
@@ -67,7 +66,6 @@ class NotificationMediums:
                     URL: for slack, the URL
                     token: for slack, Auth Token for the Application BOT
                     Webhook URL: for teams, the URL of the teams webhook
-
         :return: Details of the updated notification medium.
         """
 
@@ -80,7 +78,6 @@ class NotificationMediums:
         Deletes a notification medium.
 
         :param notification_medium_id: the ID of the notification medium
-
         :return: None
         """
 
@@ -91,7 +88,6 @@ class NotificationMediums:
         Provide a list of all channels for the given notification medium (only for slack).
 
         :param notification_medium_id: The ID of the notification medium.
-
         :return: List of all channels for the given notification medium.
         """
 

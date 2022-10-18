@@ -1,5 +1,6 @@
 from .cache import *  # will also import some globals like `britive`
 
+
 def test_list():
     secrets = britive.my_secrets.list()
     assert isinstance(secrets, list)

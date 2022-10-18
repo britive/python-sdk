@@ -123,6 +123,7 @@ def test_folder_delete(cached_folder, cached_vault):
     finally:
         cleanup('folder')
 
+
 def test_static_secret_templates_delete(cached_static_secret_template):
     try:
         response = britive.secrets_manager.static_secret_templates.delete(
@@ -131,6 +132,7 @@ def test_static_secret_templates_delete(cached_static_secret_template):
     finally:
         cleanup('static-secret-templates')
 
+
 def test_passwordPolicies_delete(cached_PasswordPolicies):
     try:
         response = britive.secrets_manager.password_policies.delete(cached_PasswordPolicies['id'])
@@ -138,12 +140,14 @@ def test_passwordPolicies_delete(cached_PasswordPolicies):
     finally:
         cleanup('password-policies')
 
+
 def test_pinPolicy_delete(cached_PinPolicies):
     try:
         response = britive.secrets_manager.password_policies.delete(cached_PinPolicies['id'])
         assert response is None
     finally:
         cleanup('pin-policies')
+
 
 def test_secret_delete(cached_secret, cached_vault):
     try:
@@ -155,6 +159,7 @@ def test_secret_delete(cached_secret, cached_vault):
     finally:
         cleanup('secret')
 
+
 def test_policy_delete(cached_policy):
     try:
         response = britive.secrets_manager.policies.delete(cached_policy['id'])
@@ -162,12 +167,14 @@ def test_policy_delete(cached_policy):
     finally:
         cleanup('policy')
 
+
 def test_vault_delete(cached_vault):
     try:
         response = britive.secrets_manager.vaults.delete(cached_vault['id'])
         assert response is None
     finally:
         cleanup('vault')
+
 
 def test_notification_medium_delete(cached_notification_medium):
     try:
