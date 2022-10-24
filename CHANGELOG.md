@@ -2,6 +2,22 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.11.1 [2022-10-24]
+#### What's New
+* None
+
+#### Enhancements
+* None
+
+#### Bug Fixes
+* Allow local machine DNS resolution (e.g. /etc/hosts) for tenant URL check
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.11.0 [2022-10-18]
 #### What's New
 * Support for Secrets Manager APIs
