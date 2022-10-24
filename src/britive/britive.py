@@ -104,7 +104,7 @@ class Britive:
             )
 
         # clean up and apply logic to the passed in tenant (for backwards compatibility with no domain being required)
-        self._parse_tenant()
+        self.tenant = self.parse_tenant(self.tenant)
 
         self.base_url = f'https://{self.tenant}/api'
         self.session = requests.Session()
@@ -154,20 +154,25 @@ class Britive:
         self.secrets_manager = SecretsManager(self)
         self.notification_mediums = NotificationMediums(self)
 
-    def _parse_tenant(self):
-        domain = self.tenant.replace('https://', '').replace('http://', '')   # remove scheme
+    @staticmethod
+    def parse_tenant(tenant: str) -> str:
+        domain = tenant.replace('https://', '').replace('http://', '')   # remove scheme
         domain = domain.split('/')[0]  # remove any paths as they will not be needed
         try:
-            domain_without_port = domain.split(':')[0]
-            socket.gethostbyname_ex(domain_without_port)  # if success then a full domain was provided
-            self.tenant = domain
+            domain_helper = domain.split(':')
+            port = 443
+            if len(domain_helper) > 1:
+                port = domain_helper[1]
+            domain_without_port = domain_helper[0]
+            socket.getaddrinfo(host=domain_without_port, port=port)  # if success then a full domain was provided
+            return domain
         except socket.gaierror:  # assume just the tenant name was provided (originally the only supported method)
-            domain = f'{self.tenant}.britive-app.com'
+            domain = f'{tenant}.britive-app.com'
             try:
-                socket.gethostbyname_ex(domain)  # validate the hostname is real
-                self.tenant = domain  # and if so set the tenant accordingly
+                socket.getaddrinfo(host=domain, port=443)  # validate the hostname is real
+                return domain  # and if so set the tenant accordingly
             except socket.gaierror:
-                raise Exception(f'Invalid tenant provided: {self.tenant}')
+                raise Exception(f'Invalid tenant provided: {tenant}. DNS resolution failed.')
 
     def features(self):
         features = {}
