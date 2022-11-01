@@ -338,9 +338,13 @@ class MyAccess:
 
         # inject credentials if asked
         if include_credentials:
-            credentials = self.credentials(transaction_id=transaction_id)
-            if transaction['status'] != 'checkedOut':  # we need to pull update details
-                transaction = self.get_checked_out_profile(transaction_id=transaction_id)
+            # if the transaction is not in status of checkedOut here it will be after the
+            # return of this call and we update the transaction object accordingly
+            credentials, transaction = self.credentials(
+                transaction_id=transaction_id,
+                transaction=transaction,
+                return_transaction_details=True
+            )
             transaction['credentials'] = credentials
 
         return transaction
@@ -394,7 +398,8 @@ class MyAccess:
             max_wait_time=max_wait_time
         )
 
-    def credentials(self, transaction_id: str) -> dict:
+    def credentials(self, transaction_id: str, transaction: dict = None,
+                    return_transaction_details: bool = False) -> any:
         """
         Return credentials of a checked out profile given the transaction ID.
 
@@ -402,21 +407,32 @@ class MyAccess:
         details.
 
         :param transaction_id: The ID of the transaction.
+        :param transaction: Optional - the details of the transaction. Primary use is for internal purposes.
+        :param return_transaction_details: Optional - whether to return the details of the transaction. Primary use is
+            for internal purposes.
         :return: Credentials associated with the checked out profile represented by the specified transaction.
         """
 
         # step 1: get the details of the transaction so we can make the appropriate API call
-        while True:
-            transaction = self.get_checked_out_profile(transaction_id=transaction_id)
-            if transaction['status'] == 'checkOutSubmitted':  # async checkout process
-                time.sleep(1)
-                continue
-            else:  # status == checkedOut
-                break
+        # we only need to get the details of the transaction if they are not already provided
+        # or the transaction is not in the state of checkedOut
+        if not transaction or transaction['status'] != 'checkedOut':
+            while True:
+                transaction = self.get_checked_out_profile(transaction_id=transaction_id)
+                if transaction['status'] == 'checkOutSubmitted':  # async checkout process
+                    time.sleep(1)
+                    continue
+                else:  # status == checkedOut
+                    break
 
         # step 2: make the proper API call
         url_part = 'url' if transaction['accessType'] == 'CONSOLE' else 'tokens'
-        return self.britive.get(f'{self.base_url}/{transaction_id}/{url_part}')
+        creds = self.britive.get(f'{self.base_url}/{transaction_id}/{url_part}')
+
+        if return_transaction_details:
+            return creds, transaction
+        else:
+            return creds
 
     def checkin(self, transaction_id: str) -> dict:
         """
