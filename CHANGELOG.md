@@ -2,6 +2,22 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.11.2 [2022-11-01]
+#### What's New
+* None
+
+#### Enhancements
+* Reduce number of API calls required to checkout a profile
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.11.1 [2022-10-24]
 #### What's New
 * None
