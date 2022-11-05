@@ -32,6 +32,7 @@ from .my_secrets import MySecrets
 from .policies import  Policies
 from .secrets_manager import SecretsManager
 from .notification_mediums import NotificationMediums
+from .approvals import Approvals
 
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
@@ -153,6 +154,7 @@ class Britive:
         self.policies = Policies(self)
         self.secrets_manager = SecretsManager(self)
         self.notification_mediums = NotificationMediums(self)
+        self.approvals = Approvals(self)
 
     @staticmethod
     def parse_tenant(tenant: str) -> str:
