@@ -10,9 +10,7 @@ def test_list():
     assert isinstance(response, list)
     assert len(response) > 0
     assert isinstance(response[0], dict)
-    
+
 def test_review(cached_approval):
     britive.approvals.review(True, cached_approval['requestId'])
-    #make sure the string 'ACCEPTED' is accurate
-    assert britive.approvals.get(cached_approval['requestId'])['status'] == 'ACCEPTED'
-
+    assert britive.approvals.get(cached_approval['requestId'])['status'] == 'APPROVED'
