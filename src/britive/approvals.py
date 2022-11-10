@@ -1,16 +1,16 @@
 class Approvals():
     def __init__(self, britive) -> None:
         self.britive = britive
-        self.base_url = f'{self.britive.base_url}/v1/approvals/'
+        self.base_url = f'{self.britive.base_url}/v1/approvals'
 
-    def review(self, decision : bool, request_id : str) -> dict:
+    def __review(self, decision : bool, request_id : str) -> dict:
         """for internal use"""
         params = {}
         if decision:
             params['approveRequest' ] = 'yes'
         else:
             params['approveRequest' ] = 'no'
-        return self.britive.patch(f'{self.base_url}{request_id}', params=params)
+        return self.britive.patch(f'{self.base_url}/{request_id}', params=params)
 
     def approve(self, request_id: str) -> dict:
         """
@@ -20,7 +20,7 @@ class Approvals():
         :return: None
         """
 
-        return self.review(True, request_id)
+        return self.__review(True, request_id)
 
     def reject(self, request_id: str) -> dict:
         """
@@ -30,7 +30,7 @@ class Approvals():
         :return: None
         """
 
-        return self.review(False, request_id)
+        return self.__review(False, request_id)
 
     def get(self, request_id: str) -> dict:
         """
@@ -40,19 +40,18 @@ class Approvals():
         :return: Details of specified request.
         """
 
-        return self.britive.get(f'{self.base_url}{request_id}')
+        return self.britive.get(f'{self.base_url}/{request_id}')
 
-    def list(self, filter : str = None, requestType : str = None):
+    def list(self, filter : str = None) -> list:
         """
         Return the list of requests.
 
-        :param filter: The filter that can filter the list requests
-        :param requestType: Specifies the type of request
+        :param filter: The filter that can filter the list requests. The supported operators are 'eq' and 'co'.
         :return: list of requests
         """
 
         params = {
-            'requestType' : requestType,
+            'requestType' : 'myApprovals',
             'filter' : filter
         }
         
