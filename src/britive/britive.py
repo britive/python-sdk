@@ -112,6 +112,8 @@ class Britive:
         self.session.mount('https://', HTTPAdapter(max_retries=retries))
 
         token_type = 'TOKEN' if len(self.__token) < 50 else 'Bearer'
+        if len(self.__token.split('::')) > 1:
+            token_type = 'WorkloadToken'
 
         try:
             version = pkg_resources.get_distribution('britive').version

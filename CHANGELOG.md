@@ -2,6 +2,22 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.12.0 [2022-11-XX]
+#### What's New
+* Support for workload identity federation
+
+#### Enhancements
+* None
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.11.2 [2022-11-01]
 #### What's New
 * None
