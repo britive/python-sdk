@@ -76,7 +76,7 @@ class Britive:
     """
 
     def __init__(self, tenant: str = None, token: str = None, query_features: bool = True,
-                 token_federation_provider: str = None):
+                 token_federation_provider: str = None, token_federation_provider_duration_seconds: int = 900):
         """
         Instantiate an authenticated interface that can be used to communicate with the Britive API.
 
@@ -90,13 +90,18 @@ class Britive:
             allowed to be used based on the features enabled, vs. attempting to make the API call and getting an error.
         :param token_federation_provider: The federation provider to use to source the token. Details of what can be
             provided can be found in the documentation for the Britive.source_federation_token_from method.
+        :param token_federation_provider_duration_seconds: Only applicable for the AWS provider. Specify the number of
+            seconds for which the generated token is valid. Defaults to 900 seconds (15 minutes).
         :raises: TenantMissingError, TokenMissingError
         """
 
         self.tenant = tenant or os.environ.get(BRITIVE_TENANT_ENV_NAME)
 
         if token_federation_provider:
-            self.__token = self.source_federation_token_from(provider=token_federation_provider)
+            self.__token = self.source_federation_token_from(
+                provider=token_federation_provider,
+                duration_seconds=token_federation_provider_duration_seconds
+            )
         else:
             self.__token = token or os.environ.get(BRITIVE_TOKEN_ENV_NAME)
 
@@ -166,7 +171,7 @@ class Britive:
         self.notification_mediums = NotificationMediums(self)
 
     @staticmethod
-    def source_federation_token_from(provider: str, tenant: str = None) -> str:
+    def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:
         """
         Returns a token from the specified federation provider.
 
@@ -199,6 +204,8 @@ class Britive:
         :param tenant: The name of the tenant. This field is optional but if not provided then the tenant will be
             sourced from environment variable BRITIVE_TENANT. Knowing the actual tenant is required for the AWS
             federation provider. This field can be ignored for non AWS federation providers.
+        :param duration_seconds: Only applicable for the AWS provider. Specify the number of seconds for which the
+            generated token is valid. Defaults to 900 seconds (15 minutes).
         :return: A federation token that can be used to authenticate to a Britive tenant.
         """
 
@@ -207,7 +214,11 @@ class Britive:
 
         if provider == 'aws':
             profile = helper_methods.safe_list_get(helper, 1, None)
-            return fp.AwsFederationProvider(profile=profile, tenant=tenant).get_token()
+            return fp.AwsFederationProvider(
+                profile=profile,
+                tenant=tenant,
+                duration=duration_seconds
+            ).get_token()
 
         if provider == 'github':
             audience = helper_methods.safe_list_get(helper, 1, None)
