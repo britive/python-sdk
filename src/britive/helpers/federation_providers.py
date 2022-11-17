@@ -39,9 +39,10 @@ class GithubFederationProvider(FederationProvider):
 
 
 class AwsFederationProvider(FederationProvider):
-    def __init__(self, profile: str, tenant: str):
+    def __init__(self, profile: str, tenant: str, duration: int = 900):
         from ..britive import Britive  # doing import here to avoid circular dependency
         self.profile = profile
+        self.duration = duration
         temp_tenant = tenant
         if not temp_tenant:
             self.tenant = os.getenv('BRITIVE_TENANT')
@@ -112,8 +113,8 @@ class AwsFederationProvider(FederationProvider):
                 'value': self.tenant,
                 'include_in_request': True
             },
-            'x-britive-verification-expires': {
-                'value': f'{(t + datetime.timedelta(seconds=10)).strftime("%Y%m%dT%H%M%SZ")}',
+            'x-britive-expires': {
+                'value': f'{(t + datetime.timedelta(seconds=self.duration)).strftime("%Y%m%dT%H%M%SZ")}',
                 'include_in_request': True
             }
         }
