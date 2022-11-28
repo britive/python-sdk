@@ -7,7 +7,6 @@ import os
 from .. import exceptions
 
 
-
 class FederationProvider:
     def __init__(self):
         pass
