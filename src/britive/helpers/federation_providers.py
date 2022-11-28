@@ -49,8 +49,7 @@ class AwsFederationProvider(FederationProvider):
         if not temp_tenant:
             print('Error: the aws federation provider requires the britive tenant as part of the signing algorithm')
             raise exceptions.TenantMissingError()
-        temp_tenant = Britive.parse_tenant(temp_tenant)
-        self.tenant = temp_tenant.split('.')[0]
+        self.tenant = Britive.parse_tenant(temp_tenant)
         super().__init__()
 
     @staticmethod

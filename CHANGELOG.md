@@ -2,6 +2,23 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.12.2 [2022-11-28]
+#### What's New
+* None
+
+#### Enhancements
+* None
+
+#### Bug Fixes
+> **_NOTE:_**  This is a pre-release feature. It is being published in anticipation of upcoming features being released to production. This functionality will not yet work in production environments.
+* Fix issue with AWS provider when injecting the tenant name into the AWS sigv4 signed request
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.12.1 [2022-11-17]
 #### What's New
 * None
