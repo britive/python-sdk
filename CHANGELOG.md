@@ -2,6 +2,24 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.12.3 [2022-12-12]
+#### What's New
+* None
+
+#### Enhancements
+* None
+
+#### Bug Fixes
+* Fix bug when catching JSON decode exceptions when decoding `requests` response - catching the more generic `ValueError` instead of a specific JSON decode error
+> **_NOTE:_**  This is a pre-release feature. It is being published in anticipation of upcoming features being released to production. This functionality will not yet work in production environments.
+* Remove port from tenant name in the AWS provider
+
+#### Dependencies
+* None
+
+#### Other
+* Allow disabling TLS/SSL verification for local development work by setting environment variable `export BRITIVE_NO_VERIFY_SSL=true`
+
 ## v2.12.2 [2022-11-28]
 #### What's New
 * None

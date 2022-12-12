@@ -125,6 +125,17 @@ class Britive:
         retries = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
         self.session.mount('https://', HTTPAdapter(max_retries=retries))
 
+        # allow the disabling of TLS/SSL verification for testing in development (mostly local development)
+        if os.getenv('BRITIVE_NO_VERIFY_SSL') and '.dev.' in self.tenant:
+            # turn off ssl verification
+            self.session.verify = False
+            # wipe these due to this bug: https://github.com/psf/requests/issues/3829
+            os.environ['CURL_CA_BUNDLE'] = ""
+            os.environ['REQUESTS_CA_BUNDLE'] = ""
+            # disable the warning message
+            import urllib3
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
         token_type = 'TOKEN' if len(self.__token) < 50 else 'Bearer'
         if len(self.__token.split('::')) > 1:
             token_type = 'WorkloadToken'
@@ -364,7 +375,7 @@ class Britive:
             # load the result as a dict
             try:
                 result = response.json()
-            except native_json.decoder.JSONDecodeError:  # if we cannot decode json then the response isn't json
+            except ValueError:  # includes simplejson.decoder.JSONDecodeError and native_json.decoder.JSONDecodeError
                 return response.content.decode('utf-8')
 
             # check on the pagination and iterate if required - we only need to check on this after the first
