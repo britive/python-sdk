@@ -2,6 +2,23 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.12.4 [2023-01-04]
+#### What's New
+* None
+
+#### Enhancements
+* None
+
+#### Bug Fixes
+> **_NOTE:_**  This is a pre-release feature. It is being published in anticipation of upcoming features being released to production. This functionality will not yet work in production environments.
+* Properly handle use case of long term (IAM User) vs. temporary credentials (AssumeRole/Federation) in the AWS Federation Provider
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.12.3 [2022-12-12]
 #### What's New
 * None
