@@ -103,10 +103,6 @@ class AwsFederationProvider(FederationProvider):
                 'value': t.strftime('%Y%m%dT%H%M%SZ'),
                 'include_in_request': True
             },
-            'x-amz-security-token': {
-                'value': session_token,
-                'include_in_request': True
-            },
             'x-britive-workload-aws-tenant': {
                 'value': self.tenant,
                 'include_in_request': True
@@ -116,6 +112,14 @@ class AwsFederationProvider(FederationProvider):
                 'include_in_request': True
             }
         }
+
+        # we only want to include the session token if we are dealing with temporary credentials
+        # otherwise the sigv4 signing method does not need this value (which would be None)
+        if session_token:
+            headers['x-amz-security-token'] = {
+                'value': session_token,
+                'include_in_request': True
+            }
 
         # ************* TASK 1: CREATE A CANONICAL REQUEST *************
         # http://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
