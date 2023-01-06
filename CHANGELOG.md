@@ -2,6 +2,26 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.13.0 [2023-01-06]
+#### What's New
+* Ability to pass a callback function to the following `my_access` methods which will report progress of the process.
+  * `checkout`
+  * `checkout_by_name`
+  * `request_approval`
+  * `request_approval_by_name`
+
+#### Enhancements
+* None
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.12.4 [2023-01-04]
 #### What's New
 * None
