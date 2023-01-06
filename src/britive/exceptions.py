@@ -75,6 +75,10 @@ class ApprovalWorkflowTimedOut(Exception):
     pass
 
 
+class ApprovalWorkflowRejected(Exception):
+    pass
+
+
 class AccessDenied(Exception):
     pass
 
