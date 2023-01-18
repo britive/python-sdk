@@ -2,6 +2,22 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.14.0 [2023-01-18]
+#### What's New
+* Added Bitbucket as an OIDC federation provider so that the needed logic for authenticating to Britive via Bitbucket pipelines is abstracted away from the caller.
+
+#### Enhancements
+* None
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.13.0 [2023-01-06]
 #### What's New
 * Ability to pass a callback function to the following `my_access` methods which will report progress of the process.
