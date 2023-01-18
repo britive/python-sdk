@@ -22,8 +22,13 @@ class GithubFederationProvider(FederationProvider):
 
     def get_token(self):
         import requests
-        url = os.environ['ACTIONS_ID_TOKEN_REQUEST_URL']
-        bearer_token = os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']
+        url = os.environ.get('ACTIONS_ID_TOKEN_REQUEST_URL')
+        bearer_token = os.environ.get('ACTIONS_ID_TOKEN_REQUEST_TOKEN')
+
+        if not url or not bearer_token:
+            msg = 'the codebase is not executing in a github environment and/or the action is ' \
+                  'is not set to use oidc permissions'
+            raise exceptions.NotExecutingInGithubEnvironment(msg)
 
         headers = {
             'User-Agent': 'actions/oidc-client',
@@ -196,3 +201,17 @@ class AwsFederationProvider(FederationProvider):
 
         token_encoded = base64.urlsafe_b64encode(json.dumps(token).encode('utf-8'))
         return f'AWS::{token_encoded.decode("utf-8")}'
+
+
+class BitbucketFederationProvider(FederationProvider):
+    def __init__(self):
+        super().__init__()
+
+    # https://support.atlassian.com/bitbucket-cloud/docs/integrate-pipelines-with-resource-servers-using-oidc/
+    def get_token(self):
+        id_token = os.environ.get('BITBUCKET_STEP_OIDC_TOKEN')
+        if not id_token:
+            msg = 'the codebase is not executing in a bitbucket environment and/or the `oidc` flag ' \
+                  'is not set on the pipeline step'
+            raise exceptions.NotExecutingInBitbucketEnvironment(msg)
+        return f'OIDC::{id_token}'
