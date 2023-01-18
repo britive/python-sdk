@@ -199,11 +199,12 @@ class Britive:
 
         * AWS IAM (with optional profile specified) - standard boto3 credential selection process will be used
         * Github Actions
+        * Bitbucket Pipelines
 
         Any other OIDC federation provider can be used and tokens can be provided to this class for authentication
         to a Britive tenant. Details of how to construct these tokens can be found at https://docs.britive.com.
 
-        :param provider: The name of the federation provider. Valid options are `aws` and `github`.
+        :param provider: The name of the federation provider. Valid options are `aws`, `github`, and `bitbucket`.
 
             For the AWS provider it is possible to provide a profile via value `aws-profile`. If no profile is provided
             then the boto3 `Session.get_credentials()` method will be used to obtain AWS credentials, which follows
@@ -234,6 +235,9 @@ class Britive:
         if provider == 'github':
             audience = helper_methods.safe_list_get(helper, 1, None)
             return fp.GithubFederationProvider(audience=audience).get_token()
+
+        if provider == 'bitbucket':
+            return fp.BitbucketFederationProvider().get_token()
 
         raise InvalidFederationProvider(f'federation provider {provider} not supported')
 
