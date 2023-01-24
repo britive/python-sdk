@@ -48,7 +48,9 @@ class Policies:
         :param access_validity_time: Optional number of minutes the access is valid after approval. Defaults to 120
             minutes.
         :param approver_users: Optional list of user names who are to be considered approvers.
-        :param approver_tags: Option list of tag names who are considered approvers.
+            If `approval_notification_medium` is set then either `approver_users` or `approver_tags` is required.
+        :param approver_tags: Optional list of tag names who are considered approvers.
+            If `approval_notification_medium` is set then either `approver_users` or `approver_tags` is required.
         :param access_type: The type of access this policy provides. Valid values are `Allow` and `Deny`. Defaults
             to `Allow`.
         :return: A dict which can be provided as a profile policy to `create` and `update`.
