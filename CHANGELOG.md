@@ -2,6 +2,22 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.14.1 [2023-01-24]
+#### What's New
+* None
+
+#### Enhancements
+* None
+
+#### Bug Fixes
+* In `profile.poilicies.build()` support the now available `validFor` approval parameter via method parameter `access_validity_time`.
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.14.0 [2023-01-18]
 #### What's New
 * Added Bitbucket as an OIDC federation provider so that the needed logic for authenticating to Britive via Bitbucket pipelines is abstracted away from the caller.
