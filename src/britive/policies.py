@@ -75,15 +75,25 @@ class Policies:
 
         # handle approval logic
         if approval_notification_medium:
-            condition['approval'] = {
+            if not approver_users and not approver_tags:
+                raise ValueError('when approval is required either approver_tags or approver_users or both '
+                                 'must be provided')
+            approval_condition = {
                 'notificationMedium': approval_notification_medium,
                 'timeToApprove': time_to_approve,
                 'validFor': access_validity_time,
                 'approvers': {
-                    'userIds': approver_users or [],
-                    'tags': approver_tags or []
+                    'userIds': approver_users,
+                    'tags': approver_tags
                 }
             }
+
+            if not approver_users:
+                approval_condition['approvers'].pop('userIds')
+            if not approver_tags:
+                approval_condition['approvers'].pop('tags')
+
+            condition['approval'] = approval_condition
 
         # put it all together
         policy = {
@@ -94,13 +104,22 @@ class Policies:
             'isReadOnly': read_only,
             'accessType': access_type,
             'members': {
-                'users': [{'name': u} for u in users] if users else [],
-                'tags': [{'name': t} for t in tags] if tags else [],
-                'serviceIdentities': [{'name': s} for s in service_identities] if service_identities else [],
-                'tokens': [{'name': t} for t in tokens] if tokens else []
+                'users': [{'name': u} for u in users] if users else None,
+                'tags': [{'name': t} for t in tags] if tags else None,
+                'serviceIdentities': [{'name': s} for s in service_identities] if service_identities else None,
+                'tokens': [{'name': t} for t in tokens] if tokens else None
             },
             'condition': json.dumps(condition, default=str)
         }
+
+        if not users:
+            policy['members'].pop('users')
+        if not tags:
+            policy['members'].pop('tags')
+        if not service_identities:
+            policy['members'].pop('serviceIdentities')
+        if not tokens:
+            policy['members'].pop('tokens')
 
         if permissions:
             policy['permissions'] = [{'name': p} for p in permissions]

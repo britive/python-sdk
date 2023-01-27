@@ -2,6 +2,22 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.14.2 [2023-01-27]
+#### What's New
+* None
+
+#### Enhancements
+* None
+
+#### Bug Fixes
+* In `poilicies.build()` properly handle when lists are empty
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.14.1 [2023-01-24]
 #### What's New
 * None
