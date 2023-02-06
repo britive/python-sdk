@@ -169,6 +169,34 @@ class Profiles:
 
         return self.britive.post(f'{self.britive.base_url}/paps/{profile_id}/scopes', json=scopes)
 
+    def add_single_environment_scope(self, profile_id: str, environment_id: str) -> list:
+        """
+        Add a single environment to the scopes associated with the specified profile.
+
+        This API call is useful when there are a large number of environments (500+) as the
+        `set_scopes()` call may time out.
+
+        :param profile_id: The ID of the profile.
+        :param environment_id: The ID of the environment which will be added to the profile scopes.
+        :return: List of scopes and associated details.
+        """
+
+        return self.britive.patch(f'{self.britive.base_url}/paps/{profile_id}/scopes/{environment_id}')
+
+    def remove_single_environment_scope(self, profile_id: str, environment_id: str) -> list:
+        """
+        Remove a single environment from the scopes associated with the specified profile.
+
+        This API call is useful when there are a large number of environments (500+) as the
+        `set_scopes()` call may time out.
+
+        :param profile_id: The ID of the profile.
+        :param environment_id: The ID of the environment which will be removed from the profile scopes.
+        :return: List of scopes and associated details.
+        """
+
+        return self.britive.delete(f'{self.britive.base_url}/paps/{profile_id}/scopes/{environment_id}')
+
     def enable(self, application_id: str, profile_id: str) -> dict:
         """
         Enables a profile.
