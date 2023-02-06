@@ -49,6 +49,22 @@ def test_set_scopes(cached_profile, cached_environment):
     assert scopes[0]['value'] == cached_environment['id']
 
 
+def test_remove_single_environment_scope(cached_profile, cached_environment):
+    response = britive.profiles.remove_single_environment_scope(
+        profile_id=cached_profile['papId'],
+        environment_id=cached_environment['id']
+    )
+    assert response is None
+
+
+def test_add_single_environment_scope(cached_profile, cached_environment):
+    response = britive.profiles.add_single_environment_scope(
+        profile_id=cached_profile['papId'],
+        environment_id=cached_environment['id']
+    )
+    assert response is None
+
+
 def test_disable(cached_profile):
     profile = britive.profiles.disable(
         application_id=cached_profile['appContainerId'],
