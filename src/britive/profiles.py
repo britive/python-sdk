@@ -152,6 +152,16 @@ class Profiles:
 
         return self.britive.get(f'{self.britive.base_url}/paps/{profile_id}/resources', params=params)
 
+    def get_scopes(self, profile_id: str) -> list:
+        """
+        Get the scopes associated with the specified profile.
+
+        :param profile_id: The ID of the profile for which scopes will be updated.
+        :return: List of scopes and associated details.
+        """
+
+        return self.britive.get(f'{self.britive.base_url}/paps/{profile_id}/scopes')
+
     def set_scopes(self, profile_id: str, scopes: list) -> list:
         """
         Update the scopes associated with the specified profile.
