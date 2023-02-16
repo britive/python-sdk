@@ -2,6 +2,22 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.15.1 [2023-02-16]
+#### What's New
+* None
+
+#### Enhancements
+* None
+
+#### Bug Fixes
+* Added missing API call `profiles.get_scopes()`
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.15.0 [2023-02-06]
 #### What's New
 * Added two new APIs for managing single environment scope changes for a profile
