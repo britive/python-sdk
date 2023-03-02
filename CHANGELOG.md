@@ -2,6 +2,22 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.16.0 [2023-03-02]
+#### What's New
+* Natively support Azure Managed Identity OIDC authentication for workload federation.
+
+#### Enhancements
+* None
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.15.1 [2023-02-16]
 #### What's New
 * None
