@@ -195,16 +195,19 @@ class Britive:
         sourced outside of this SDK and provided as input via the standard token presentation
         options.
 
-        Two federation providers are currently supported by this method.
+        Five federation providers are currently supported by this method.
 
-        * AWS IAM (with optional profile specified) - standard boto3 credential selection process will be used
-        * Github Actions
-        * Bitbucket Pipelines
+        * AWS IAM/STS, with optional profile specified - (aws)
+        * Github Actions (github)
+        * Bitbucket Pipelines (bitbucket)
+        * Azure System Assigned Managed Identities (azuresmi)
+        * Azure User Assigned Managed Identities (azureumi)
 
         Any other OIDC federation provider can be used and tokens can be provided to this class for authentication
         to a Britive tenant. Details of how to construct these tokens can be found at https://docs.britive.com.
 
-        :param provider: The name of the federation provider. Valid options are `aws`, `github`, and `bitbucket`.
+        :param provider: The name of the federation provider. Valid options are `aws`, `github`, `bitbucket`,
+            `azuresmi`, and `azureumi`.
 
             For the AWS provider it is possible to provide a profile via value `aws-profile`. If no profile is provided
             then the boto3 `Session.get_credentials()` method will be used to obtain AWS credentials, which follows
@@ -213,6 +216,16 @@ class Britive:
 
             For the Github provider it is possible to provide an OIDC audience value via `github-<audience>`. If no
             audience is provided the default Github audience value will be used.
+
+            For Azure User Assigned Managed Identities (azureumi) a client id is required. It must be
+            provided in the form `azureumi-<client-id>`. From the Azure documentation...a user-assigned identity's
+            client ID or, when using Pod Identity, the client ID of an Azure AD app registration. This argument
+            is supported in all hosting environments.
+
+            For both Azure Managed Identity options it is possible to provide an OIDC audience value via
+            `azuresmi-<audience>` and `azureumi-<client-id>|<audience>`. If no audience is provided the default audience
+             of `https://management.azure.com/` will be used.
+
         :param tenant: The name of the tenant. This field is optional but if not provided then the tenant will be
             sourced from environment variable BRITIVE_TENANT. Knowing the actual tenant is required for the AWS
             federation provider. This field can be ignored for non AWS federation providers.
@@ -238,6 +251,22 @@ class Britive:
 
         if provider == 'bitbucket':
             return fp.BitbucketFederationProvider().get_token()
+
+        if provider == 'azuresmi':
+            audience = helper_methods.safe_list_get(helper, 1, None)
+            return fp.AzureSystemAssignedManagedIdentityFederationProvider(audience=audience).get_token()
+
+        if provider == 'azureumi':
+            additional_attributes_str = helper_methods.safe_list_get(helper, 1, None)
+            if not additional_attributes_str:
+                raise ValueError('client id is required via azurumi-<client-id>')
+            additional_attributes = additional_attributes_str.split('|')
+            client_id = additional_attributes[0]
+            audience = helper_methods.safe_list_get(additional_attributes, 1, None)
+            return fp.AzureUserAssignedManagedIdentityFederationProvider(
+                client_id=client_id,
+                audience=audience
+            ).get_token()
 
         raise InvalidFederationProvider(f'federation provider {provider} not supported')
 

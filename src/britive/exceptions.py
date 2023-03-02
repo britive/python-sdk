@@ -123,6 +123,10 @@ class NotExecutingInBitbucketEnvironment(Exception):
     pass
 
 
+class NotExecutingInAzureEnvironment(Exception):
+    pass
+
+
 # from https://docs.britive.com/docs/restapi-status-codes
 allowed_exceptions = {
     400: InvalidRequest,
