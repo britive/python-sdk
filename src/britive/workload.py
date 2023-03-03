@@ -4,7 +4,7 @@ class Workload:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/workload'
         self.identity_providers = self.IdentityProviders(self)
-        self.users = self.User(self)
+        self.service_identities = self.ServiceIdentities(self)
 
     class IdentityProviders:
         def __init__(self, workload):
@@ -108,7 +108,9 @@ class Workload:
             if description:
                 params['description'] = description
             if allowed_audiences:
-                params['allowedAudiences'] = attributes_map
+                params['allowedAudiences'] = allowed_audiences
+            if attributes_map:
+                params['attributesMap'] = attributes_map
 
             return self.create(**params)
 
@@ -173,7 +175,7 @@ class Workload:
                 'userAttr': custom_identity_attribute_id
             }
 
-    class Users:
+    class ServiceIdentities:
         def __init__(self, workload):
             self.britive = workload.britive
             self.base_url: str = workload.base_url + '/users/{id}/identity-provider'  # will .format(id=...) later
@@ -182,10 +184,73 @@ class Workload:
             """
             Returns details about the workload identity provider associated with the specified service identity.
 
-            :param service_identity_id: The ID of the service identity
+            :param service_identity_id: The ID of the service identity.
             :returns: Details about the workload identity provider associated with the specified service identity.
             """
 
             return self.britive.get(self.base_url.format(id=service_identity_id))
 
-        def associate
+        def assign(self, service_identity_id: str, idp_id: str, token_duration: int = 300,
+                   federated_attributes_ids: dict = None, federated_attributes_names: dict = None) -> dict:
+            """
+            Associates an OIDC provider with the specified Service Identity.
+
+            :param service_identity_id: The ID of the service identity.
+            :param idp_id: The ID of the OIDC Identity Provider.
+            :param token_duration: Duration in seconds (from now) before a token provided by the client expires.
+                This will be evaluated alongside the OIDC JWT expiration field and the earlier of the two values
+                will govern when the token expires. This field is optional and defaults to 300 seconds.
+            :param federated_attributes_ids: An attribute map where keys are the custom attribute ids and values are
+                strings or list of strings (for multivalued attributes) which map back to the mapped token claims.
+                This will be merged with `federated_attributes_names` and if there are duplicates this will win.
+            :param federated_attributes_names: An attribute map where keys are the custom attribute names and values are
+                strings or list of strings (for multivalued attributes) which map back to the mapped token claims.
+                The names will be auto-converted to ids and merged with `federated_attributes_ids`. If there are
+                duplicates `federated_attributes_ids` will win.
+            :returns: Details of the newly assigned workload identity provider.
+            """
+
+            params = {
+                'idpId': idp_id,
+                'tokenDuration': token_duration
+            }
+
+            response = self.britive.post(self.base_url.format(id=service_identity_id), json=params)
+
+            if federated_attributes_ids or federated_attributes_names:
+                try:
+                    self.britive.service_identities.set_custom_identity_attributes(
+                        service_identity_id=service_identity_id,
+                        custom_attributes_ids=federated_attributes_ids,
+                        custom_attributes_names=federated_attributes_names
+                    )
+                except Exception as e:
+                    # need to remove the assignment as something went wrong with the attributes mapping
+                    self.unassign_idp(service_identity_id=service_identity_id)
+                    # and re-raise the error
+                    raise e
+
+            return response
+
+        def unassign(self, service_identity_id: str) -> None:
+            """
+            Removes/deletes the service identity's assigned identity provider, along with any custom attribute mappings.
+
+            This will revert the service identity back to use static API tokens for authentication.
+
+            :param service_identity_id: The ID of the Service Identity.
+            :returns: None.
+            """
+            existing_attributes = self.britive.service_identities.get_custom_identity_attributes(
+                service_identity_id=service_identity_id,
+                as_dict=True
+            )
+            self.britive.service_identities.remove_custom_identity_attributes(
+                service_identity_id=service_identity_id,
+                custom_attributes_ids=existing_attributes
+            )
+            return self.britive.delete(self.base_url.format(id=service_identity_id))
+
+
+
+
