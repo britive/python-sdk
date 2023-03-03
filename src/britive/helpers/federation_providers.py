@@ -15,6 +15,61 @@ class FederationProvider:
         raise NotImplemented()
 
 
+class AzureSystemAssignedManagedIdentityFederationProvider(FederationProvider):
+    def __init__(self, audience: str = None):
+        self.audience = audience if audience else 'https://management.azure.com/'
+        super().__init__()
+
+    def get_token(self):
+        # azure-identity is not a hard requirement of this SDK but is required for the
+        # azure provider so checking to ensure it exists
+        try:
+            from azure.identity._exceptions import CredentialUnavailableError
+        except ImportError:
+            raise Exception('azure-identity required - please install azure-identity package to use the azure managed '
+                            'identity federation provider')
+
+        try:
+            from azure.identity import ManagedIdentityCredential
+            token = ManagedIdentityCredential().get_token(self.audience).token
+            return f'OIDC::{token}'
+        except ImportError:
+            raise Exception('azure-identity required - please install azure-identity package to use the azure managed '
+                            'identity federation provider')
+        except CredentialUnavailableError:
+            msg = 'the codebase is not executing in a azure environment or some other issue is causing the ' \
+                  'managed identity credentials to be unavailable'
+            raise exceptions.NotExecutingInAzureEnvironment(msg)
+
+
+class AzureUserAssignedManagedIdentityFederationProvider(FederationProvider):
+    def __init__(self, client_id: str, audience: str = None):
+        self.audience = audience if audience else 'https://management.azure.com/'
+        self.client_id = client_id
+        super().__init__()
+
+    def get_token(self):
+        # azure-identity is not a hard requirement of this SDK but is required for the
+        # azure provider so checking to ensure it exists
+        try:
+            from azure.identity._exceptions import CredentialUnavailableError
+        except ImportError:
+            raise Exception('azure-identity required - please install azure-identity package to use the azure managed '
+                            'identity federation provider')
+
+        try:
+            from azure.identity import ManagedIdentityCredential
+            token = ManagedIdentityCredential(client_id=self.client_id).get_token(self.audience).token
+            return f'OIDC::{token}'
+        except ImportError:
+            raise Exception('azure-identity required - please install azure-identity package to use the azure managed '
+                            'identity federation provider')
+        except CredentialUnavailableError:
+            msg = 'the codebase is not executing in a azure environment or some other issue is causing the ' \
+                  'managed identity credentials to be unavailable'
+            raise exceptions.NotExecutingInAzureEnvironment(msg)
+
+
 class GithubFederationProvider(FederationProvider):
     def __init__(self, audience: str = None):
         self.audience = audience
@@ -75,16 +130,15 @@ class AwsFederationProvider(FederationProvider):
             import boto3
             import botocore.exceptions as botoexceptions
         except ImportError:
-            print('boto3 required - please install boto3 package to use the aws federation provider')
-            exit()
+            raise Exception('boto3 required - please install boto3 package to use the aws federation provider')
 
         # and do all the complex logic for sigv4 signing the sts get-caller-identity endpoint
         session = None
         try:
             session = boto3.Session(profile_name=self.profile)
         except botoexceptions.ProfileNotFound as e:
-            print(f'Error: {str(e)}')
-            exit()
+            raise Exception(f'Error: {str(e)}')
+
         creds = session.get_credentials()
         access_key_id = creds.access_key
         secret_access_key = creds.secret_key
