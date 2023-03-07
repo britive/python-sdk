@@ -102,8 +102,8 @@ def test_service_identity_assign_and_unassign(cached_service_identity, cached_id
     )
     assert isinstance(response, dict)
 
-    attrs = britive.service_identities.get_custom_identity_attributes(
-        service_identity_id=cached_service_identity['userId'],
+    attrs = britive.service_identities.custom_attributes.get(
+        principal_id=cached_service_identity['userId'],
         as_dict=True
     )
 
@@ -117,8 +117,8 @@ def test_service_identity_assign_and_unassign(cached_service_identity, cached_id
 
     assert response is None
 
-    attrs = britive.service_identities.get_custom_identity_attributes(
-        service_identity_id=cached_service_identity['userId'],
+    attrs = britive.service_identities.custom_attributes.get(
+        principal_id=cached_service_identity['userId'],
         as_dict=False
     )
 
@@ -134,8 +134,8 @@ def test_service_identity_assign_and_unassign(cached_service_identity, cached_id
     )
     assert isinstance(response, dict)
 
-    attrs = britive.service_identities.get_custom_identity_attributes(
-        service_identity_id=cached_service_identity['userId'],
+    attrs = britive.service_identities.custom_attributes.get(
+        principal_id=cached_service_identity['userId'],
         as_dict=True
     )
 
@@ -149,8 +149,8 @@ def test_service_identity_assign_and_unassign(cached_service_identity, cached_id
 
     assert response is None
 
-    attrs = britive.service_identities.get_custom_identity_attributes(
-        service_identity_id=cached_service_identity['userId'],
+    attrs = britive.service_identities.custom_attributes.get(
+        principal_id=cached_service_identity['userId'],
         as_dict=False
     )
 

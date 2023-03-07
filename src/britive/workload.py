@@ -348,8 +348,8 @@ class Workload:
             response = self.britive.post(self.base_url.format(id=service_identity_id), json=params)
 
             try:
-                self.britive.service_identities.set_custom_identity_attributes(
-                    service_identity_id=service_identity_id,
+                self.britive.service_identities.custom_attributes.add(
+                    principal_id=service_identity_id,
                     custom_attributes=federated_attributes,
                 )
             except Exception as e:
@@ -369,12 +369,12 @@ class Workload:
             :param service_identity_id: The ID of the Service Identity.
             :returns: None.
             """
-            existing_attributes = self.britive.service_identities.get_custom_identity_attributes(
-                service_identity_id=service_identity_id,
+            existing_attributes = self.britive.service_identities.custom_attributes.get(
+                principal_id=service_identity_id,
                 as_dict=True
             )
-            self.britive.service_identities.remove_custom_identity_attributes(
-                service_identity_id=service_identity_id,
+            self.britive.service_identities.custom_attributes.remove(
+                principal_id=service_identity_id,
                 custom_attributes=existing_attributes
             )
             return self.britive.delete(self.base_url.format(id=service_identity_id))
