@@ -204,99 +204,84 @@ class ServiceIdentities:
         if as_dict:
             attrs = {}
             for attribute in response:
-                if attribute in attrs.keys():  # need to handle the multi-value attributes
+                current_attr_id = attribute['attributeId']
+                if current_attr_id in attrs.keys():  # need to handle the multi-value attributes
                     is_list = isinstance(attrs[attribute['attributeId']], list)
 
                     if not is_list:  # make it a list
-                        attrs[attribute['attributeId']] = [attrs[attribute['attributeId']]]
-                    attrs[attribute['attributeId']].appen(attribute['attributeValue'])
+                        attrs[current_attr_id] = [attrs[current_attr_id]]
+                    attrs[current_attr_id].append(attribute['attributeValue'])
                 else:
-                    attrs[attribute['attributeId']] = attribute['attributeValue']
+                    attrs[current_attr_id] = attribute['attributeValue']
             return attrs
         else:
             return response
 
-    def set_custom_identity_attributes(self, service_identity_id: str, custom_attributes_ids: dict = None,
-                                       custom_attributes_names: dict = None) -> None:
+    def set_custom_identity_attributes(self, service_identity_id: str, custom_attributes: dict) -> None:
         """
         Sets custom attributes for the provided Service Identity.
 
         :param service_identity_id: The IDs of the Service Identity.
-        :param custom_attributes_ids: An attribute map where keys are the custom attribute ids and values are
-            custom attribute values as strings or list of strings for multivalued attributes. This will be merged
-            with `custom_attributes_names` and if there are duplicates this will win.
-        :param custom_attributes_names: An attribute map where keys are the custom attribute names and values are
-            custom attribute values as strings or list of strings for multivalued attributes. The names will be
-            auto-converted to ids and merged with `custom_attributes_ids`. If there are duplicates
-            `custom_attributes_ids` will win.
+        :param custom_attributes: An attribute map where keys are the custom attribute ids or names and values are
+            custom attribute values as strings or list of strings for multivalued attributes.
         """
         return self._modify_custom_identity_attributes(
             service_identity_id=service_identity_id,
             operation='add',
-            custom_attributes_ids=custom_attributes_ids,
-            custom_attributes_names=custom_attributes_names
+            custom_attributes=custom_attributes,
         )
 
-    def remove_custom_identity_attributes(self, service_identity_id: str, custom_attributes_ids: dict = None,
-                                          custom_attributes_names: dict = None) -> None:
+    def remove_custom_identity_attributes(self, service_identity_id: str, custom_attributes: dict) -> None:
         """
         Removes custom attributes for the provided Service Identity.
 
         :param service_identity_id: The IDs of the Service Identity.
-        :param custom_attributes_ids: An attribute map where keys are the custom attribute ids and values are
-            custom attribute values as strings or list of strings for multivalued attributes. This will be merged
-            with `custom_attributes_names` and if there are duplicates this will win.
-        :param custom_attributes_names: An attribute map where keys are the custom attribute names and values are
-            custom attribute values as strings or list of strings for multivalued attributes. The names will be
-            auto-converted to ids and merged with `custom_attributes_ids`. If there are duplicates
-            `custom_attributes_ids` will win.
+        :param custom_attributes: An attribute map where keys are the custom attribute ids or names and values are
+            custom attribute values as strings or list of strings for multivalued attributes.
         """
         return self._modify_custom_identity_attributes(
             service_identity_id=service_identity_id,
             operation='remove',
-            custom_attributes_ids=custom_attributes_ids,
-            custom_attributes_names=custom_attributes_names
+            custom_attributes=custom_attributes
         )
 
-    def _modify_custom_identity_attributes(self, service_identity_id: str, operation: str,
-                                           custom_attributes_ids: dict = None,
-                                           custom_attributes_names: dict = None) -> None:
-        if not custom_attributes_ids:
-            custom_attributes_ids = {}
+    def _build_custom_attributes_list(self, operation: str, custom_attributes: dict):
+        # first get list of existing custom identity attributes and build some helpers
+        existing_attrs = [attr for attr in self.britive.identity_attributes.list() if not attr['builtIn']]
+        existing_attr_ids = [attr['id'] for attr in existing_attrs]
+        attrs_by_name = {attr['name']: attr['id'] for attr in existing_attrs}
 
-        if operation not in ['add', 'remove']:
-            raise ValueError('operation must either be add or remove')
+        # for each custom_attribute key/value provided ensure we convert to ID and build the list
+        attrs_list = []
+        for id_or_name, value in custom_attributes.items():
+            # obtain the custom attribute id
+            custom_attribute_id = id_or_name
+            if custom_attribute_id not in existing_attr_ids:
+                custom_attribute_id = attrs_by_name.get(custom_attribute_id, None)
+            if not custom_attribute_id:
+                raise ValueError(f'custom identity attribute name {id_or_name} not found.')
 
-        # pull ids given names and merge into the ids dict if the ids dict doesn't already have the key
-        if custom_attributes_names:
-            existing_attributes = self.britive.identity_attributes.list()
-            for name, value in custom_attributes_names.items():
-                attribute_id = None
-                for attr in existing_attributes:
-                    if attr['name'] == name:
-                        attribute_id = attr['id']
-                        break
-                if not attribute_id:
-                    raise ValueError(f'custom identity attribute name value of {name} not found.')
-                if attribute_id not in custom_attributes_ids.keys():
-                    custom_attributes_ids[attribute_id] = value
-
-        if len(custom_attributes_ids.keys()) == 0:
-            raise ValueError('either custom_attributes_ids or custom_attributes_ids or both must be provided.')
-
-        # now form the required payload
-        attribute_list = []
-        for attr_id, value in custom_attributes_ids.items():
+            # and create the list dict entry for each value
             value = value if isinstance(value, list) else [value]  # handle multivalued attributes
             for v in value:
-                attribute_list.append(
+                attrs_list.append(
                     {
                         'op': operation,
                         'customUserAttribute': {
                             'attributeValue': v,
-                            'attributeId': attr_id
+                            'attributeId': custom_attribute_id
                         }
                     }
                 )
+        return attrs_list
 
-        return self.britive.patch(f'{self.base_url}/{service_identity_id}/custom-attributes', json=attribute_list)
+    def _modify_custom_identity_attributes(self, service_identity_id: str, operation: str,
+                                           custom_attributes: dict) -> None:
+
+        if operation not in ['add', 'remove']:
+            raise ValueError('operation must either be add or remove')
+
+        return self.britive.patch(
+            f'{self.base_url}/{service_identity_id}/custom-attributes',
+            json=self._build_custom_attributes_list(operation=operation, custom_attributes=custom_attributes)
+        )

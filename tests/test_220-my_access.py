@@ -15,12 +15,14 @@ def test_list_profiles():
     assert isinstance(profiles[0], dict)
 
 
+@pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_checkout(cached_checked_out_profile):
     assert isinstance(cached_checked_out_profile, dict)
     assert cached_checked_out_profile['accessType'] == 'PROGRAMMATIC'
     assert 'credentials' in cached_checked_out_profile.keys()
 
 
+@pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_checkout_again(cached_profile, cached_environment):
     response = britive.my_access.checkout(
             profile_id=cached_profile['papId'],
@@ -33,17 +35,20 @@ def test_checkout_again(cached_profile, cached_environment):
     assert 'credentials' in response.keys()
 
 
+@pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_list_checked_out_profiles():
     profiles = britive.my_access.list_checked_out_profiles()
     assert isinstance(profiles, list)
     assert len(profiles) >= 1  # since we just checked one out!
 
 
+@pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_get_checked_out_profile(cached_checked_out_profile):
     profile = britive.my_access.get_checked_out_profile(transaction_id=cached_checked_out_profile['transactionId'])
     assert isinstance(profile, dict)
 
 
+@pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_checkin(cached_checked_out_profile):
     response = britive.my_access.checkin(transaction_id=cached_checked_out_profile['transactionId'])
     assert isinstance(response, dict)
@@ -51,12 +56,14 @@ def test_checkin(cached_checked_out_profile):
     cleanup('checked-out-profile')
 
 
+@pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_checkout_by_name(cached_checked_out_profile_by_name):
     assert isinstance(cached_checked_out_profile_by_name, dict)
     assert cached_checked_out_profile_by_name['accessType'] == 'PROGRAMMATIC'
     assert 'credentials' in cached_checked_out_profile_by_name.keys()
 
 
+@pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_checkin_by_name(cached_profile, cached_environment, cached_application):
     account_id = os.environ['BRITIVE_TEST_ENV_ACCOUNT_ID']
     response = britive.my_access.checkin_by_name(

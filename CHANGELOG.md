@@ -2,6 +2,22 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.17.0 [2023-03-08]
+#### What's New
+* Workload API coverage (create workload federation identity providers and map to service identities)
+
+#### Enhancements
+* Add custom attribute coverage to users and service identities
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* For dev/test removed the pin on `pytest` which was causing issues with newer versions of python
+
+#### Other
+* None
+
 ## v2.16.0 [2023-03-02]
 #### What's New
 * Natively support Azure Managed Identity OIDC authentication for workload federation.
