@@ -517,10 +517,42 @@ def cached_workload_identity_provider_oidc(pytestconfig, cached_identity_attribu
     return response
 
 
+@pytest.fixture(scope='session')
+@cached_resource(name='policy-system-level')
+def cached_system_level_policy(pytestconfig, cached_tag):
+    r = str(random.randint(0, 1000000))
+    policy = britive.system.policies.build(
+        name=f'python-sdk-{r}',
+        tags=[cached_tag['name']],
+        roles=['UserViewRole']
+    )
+    response = britive.system.policies.create(policy=policy)
+    return response
 
 
+@pytest.fixture(scope='session')
+@cached_resource(name='role-system-level')
+def cached_system_level_role(pytestconfig):
+    r = str(random.randint(0, 1000000))
+    role = britive.system.roles.build(
+        name=f'python-sdk-{r}',
+        permissions=['NMAdminPermission']
+    )
+    response = britive.system.roles.create(role=role)
+    return response
 
 
+@pytest.fixture(scope='session')
+@cached_resource(name='permission-system-level')
+def cached_system_level_permission(pytestconfig):
+    r = str(random.randint(0, 1000000))
+    permission = britive.system.permissions.build(
+        name=f'python-sdk-{r}',
+        consumer='apps',
+        actions=['apps.app.view']
+    )
+    response = britive.system.permissions.create(permission=permission)
+    return response
 
 
 

@@ -136,7 +136,6 @@ allowed_exceptions = {
     400: InvalidRequest,
     401: UnauthorizedRequest,
     403: ForbiddenRequest,
-    404: NotFound,
     405: MethodNotAllowed,
     500: InternalServerError,
     503: ServiceUnavailable

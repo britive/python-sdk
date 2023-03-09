@@ -88,7 +88,7 @@ def test_service_identity_get_when_nothing_associated(cached_service_identity):
     response = britive.workload.service_identities.get(
         service_identity_id=cached_service_identity['userId']
     )
-    assert bool(response) is False
+    assert response['status'] == 404
 
 
 def test_service_identity_assign_and_unassign(cached_service_identity, cached_identity_attribute,

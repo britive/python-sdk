@@ -123,6 +123,11 @@ pytest tests/test_230-notifications.py -v
 pytest tests/test_240-secrets_manager.py -v
 pytest tests/test_250-my_secrets.py -v
 pytest tests/test_260-notification_mediums.py -v
+pytest tests/test_270-system_policies.py -v
+pytest tests/test_280_system_actions.py -v
+pytest tests/test_290_system_consumers.py -v
+pytest tests/test_300-system_roles.py -v
+pytest tests/test_310-system_permissions.py -v
 
 pytest tests/test_990-delete_all_resources.py -v
 ~~~

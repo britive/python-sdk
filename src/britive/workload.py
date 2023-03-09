@@ -319,10 +319,7 @@ class Workload:
                 Returns None if there is no workload identity provider associated with the specified service identity.
             """
 
-            try:
-                return self.britive.get(self.base_url.format(id=service_identity_id))
-            except exceptions.NotFound:
-                return None
+            return self.britive.get(self.base_url.format(id=service_identity_id))
 
         def assign(self, service_identity_id: str, idp_id: str, federated_attributes: dict,
                    token_duration: int = 300) -> dict:
