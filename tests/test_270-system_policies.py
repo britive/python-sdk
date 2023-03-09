@@ -123,3 +123,17 @@ def test_delete(cached_system_level_policy):
     finally:
         cleanup('policy-system-level')
 
+
+def test_evaluate():
+    response = britive.system.policies.evaluate(
+        statements=[
+            {
+                'action': 'authz.permission.update',
+                'resource': '*',
+                'consumer': 'authz'
+            }
+        ]
+    )
+    assert isinstance(response, dict)
+    assert len(response.keys()) == 1
+    assert 'PolicyEvalRequest' in list(response.keys())[0]

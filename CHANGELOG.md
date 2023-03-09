@@ -21,6 +21,16 @@ All changes to the package starting with v2.8.1 will be logged here.
 #### Other
 * None
 
+### DEPRECATION NOTICE
+
+#### `policies.py`
+
+This python file only holds one method `build`. The remainder of the system policy logic has been created
+in `system.policies` so as not to cause confusion with secrets manager and profile policies.
+
+In the next major release, `policies.py` will be retired. As of release `2.17.0` the `polices.build` method
+simply calls `system.policies.build`. 
+
 ## v2.16.0 [2023-03-02]
 #### What's New
 * Natively support Azure Managed Identity OIDC authentication for workload federation.

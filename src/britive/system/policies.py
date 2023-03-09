@@ -100,6 +100,40 @@ class SystemPolicies:
         self._validate_identifier_type(identifier_type)
         return self.britive.patch(f'{self.base_url}/{policy_identifier}', json={'isActive': True})
 
+    def evaluate(self, statements: list) -> dict:
+        """
+        Evaluate the calling identities access for the given set of statements.
+
+        :param: statements: List of statements in the following format. Use `build_evaluate_statement` to help
+            construct the statement list.
+            [
+                {
+                    'action': '<action>',
+                    'resource': '<resource>',
+                    'consumer': '<consumer>'
+                },
+            ]
+        :returns: Dictionary containing each statement mapped to Allow or Deny.
+        """
+
+        return self.britive.post(f'{self.britive.base_url}/v1/policy-admin/batchevaluate', json=statements)
+
+    @staticmethod
+    def build_evaluate_statement(consumer: str, action: str, resource: str = '*') -> dict:
+        """
+        Builds a statement which can be evaluated with `evaluate`.
+
+        :param consumer: The consumer for the statement.
+        :param action: The action for the statement.
+        :param resource: Optional resource for the statement. Defaults to `*`.
+        :returns: The statement.
+        """
+        return {
+            'action': action,
+            'resource': resource,
+            'consumer': consumer
+        }
+
     @staticmethod
     def build(name: str, description: str = '', draft: bool = False, active: bool = True,
               read_only: bool = False, users: list = None, tags: list = None, tokens: list = None,
