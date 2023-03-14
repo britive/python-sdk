@@ -15,9 +15,8 @@ profiles_v1 = britive.feature_flags['profile-v1']
 profiles_v2 = not profiles_v1
 profile_v2_skip = 'requires profiles v1'
 profile_v1_skip = 'requires profiles v2'
-
-
-
+scan_skip = True if os.getenv('BRITIVE_TEST_IGNORE_SCAN') else False
+scan_skip_message = 'ignore scan requested'
 characters = list(string.ascii_letters + string.digits + "!@#$%^&*()")
 
 
@@ -39,7 +38,7 @@ def generate_random_password(length=30):
 
 
 def cleanup(resource):
-    file = f'./.cache/v/resources/{resource}'  # ./ instead of ../ since this is being run from the root directory
+    file = f'./.pytest_cache/v/resources/{resource}'  # ./ instead of ../ since this is being run from  root directory
     if os.path.isfile(file):
         os.remove(file)
 
@@ -186,9 +185,10 @@ def cached_group(pytestconfig, cached_application, cached_environment):
 
 @pytest.fixture(scope='session')
 @cached_resource(name='identity-attribute')
-def cached_identity_attribute(pytestconfig, cached_application, cached_environment):
+def cached_identity_attribute(pytestconfig):
+    r = str(random.randint(0, 1000000))
     return britive.identity_attributes.create(
-            name='test',
+            name=f'python-sdk-test-{r}',
             description='test',
             data_type='String',
             multi_valued=False
@@ -484,13 +484,75 @@ def cached_notification_medium(pytestconfig):
     )
 
 
+@pytest.fixture(scope='session')
+@cached_resource(name='workload-identity-provider-aws')
+def cached_workload_identity_provider_aws(pytestconfig, cached_identity_attribute):
+    r = str(random.randint(0, 1000000))
+    try:
+        response = britive.workload.identity_providers.create_aws(
+            name=f'python-sdk-aws-{r}',
+            attributes_map={
+                'UserId': cached_identity_attribute['id']
+            }
+        )
+        return response
+    except exceptions.InternalServerError:
+        for idp in britive.workload.identity_providers.list():
+            if idp['idpType'] == 'AWS':
+                return idp
+        raise Exception('AWS provider could not be created and non-found')
 
 
+@pytest.fixture(scope='session')
+@cached_resource(name='workload-identity-provider-oidc')
+def cached_workload_identity_provider_oidc(pytestconfig, cached_identity_attribute):
+    r = str(random.randint(0, 1000000))
+    response = britive.workload.identity_providers.create_oidc(
+        name=f'python-sdk-oidc-{r}',
+        attributes_map={
+            'sub': cached_identity_attribute['name']
+        },
+        issuer_url='https://id.fakedomain.com'
+    )
+    return response
 
 
+@pytest.fixture(scope='session')
+@cached_resource(name='policy-system-level')
+def cached_system_level_policy(pytestconfig, cached_tag):
+    r = str(random.randint(0, 1000000))
+    policy = britive.system.policies.build(
+        name=f'python-sdk-{r}',
+        tags=[cached_tag['name']],
+        roles=['UserViewRole']
+    )
+    response = britive.system.policies.create(policy=policy)
+    return response
 
 
+@pytest.fixture(scope='session')
+@cached_resource(name='role-system-level')
+def cached_system_level_role(pytestconfig):
+    r = str(random.randint(0, 1000000))
+    role = britive.system.roles.build(
+        name=f'python-sdk-{r}',
+        permissions=['NMAdminPermission']
+    )
+    response = britive.system.roles.create(role=role)
+    return response
 
+
+@pytest.fixture(scope='session')
+@cached_resource(name='permission-system-level')
+def cached_system_level_permission(pytestconfig):
+    r = str(random.randint(0, 1000000))
+    permission = britive.system.permissions.build(
+        name=f'python-sdk-{r}',
+        consumer='apps',
+        actions=['apps.app.view']
+    )
+    response = britive.system.permissions.create(permission=permission)
+    return response
 
 
 

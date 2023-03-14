@@ -31,10 +31,11 @@ from .identity_providers import IdentityProviders
 from .my_access import MyAccess
 from .notifications import Notifications
 from .my_secrets import MySecrets
-from .policies import  Policies
+from .policies import Policies
 from .secrets_manager import SecretsManager
 from .notification_mediums import NotificationMediums
-
+from .workload import Workload
+from .system.system import System
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
 BRITIVE_TOKEN_ENV_NAME = 'BRITIVE_API_TOKEN'
@@ -180,6 +181,8 @@ class Britive:
         self.policies = Policies(self)
         self.secrets_manager = SecretsManager(self)
         self.notification_mediums = NotificationMediums(self)
+        self.workload = Workload(self)
+        self.system = System(self)
 
     @staticmethod
     def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:

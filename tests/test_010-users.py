@@ -102,6 +102,61 @@ def test_reset_mfa(cached_user):
         britive.users.reset_mfa(cached_user['userId'])
 
 
+def test_set_custom_identity_attributes(cached_user, cached_identity_attribute):
+    response = britive.service_identities.custom_attributes.add(
+        principal_id=cached_user['userId'],
+        custom_attributes={
+            cached_identity_attribute['id']: [
+                f'test-attr-value-{random.randint(0, 1000000)}'
+            ]
+        }
+    )
+    assert response is None
+
+
+def test_get_custom_identity_attributes_list(cached_user, cached_identity_attribute):
+    response = britive.service_identities.custom_attributes.get(
+        principal_id=cached_user['userId'],
+        as_dict=False
+    )
+    assert isinstance(response, list)
+    assert len(response) == 1
+    assert isinstance(response[0], dict)
+    assert response[0]['attributeId'] == cached_identity_attribute['id']
+
+
+def test_get_custom_identity_attributes_dict(cached_user, cached_identity_attribute):
+    response = britive.service_identities.custom_attributes.get(
+        principal_id=cached_user['userId'],
+        as_dict=True
+    )
+    assert isinstance(response, dict)
+    assert cached_identity_attribute['id'] in response.keys()
+    assert response[cached_identity_attribute['id']].startswith('test-attr-value')
+
+
+def test_remove_custom_identity_attributes(cached_user, cached_identity_attribute):
+    value = britive.service_identities.custom_attributes.get(
+        principal_id=cached_user['userId'],
+        as_dict=True
+    )[cached_identity_attribute['id']]
+    response = britive.service_identities.custom_attributes.remove(
+        principal_id=cached_user['userId'],
+        custom_attributes={
+            cached_identity_attribute['name']: [
+                value
+            ]
+        }
+    )
+    assert response is None
+
+    attributes = britive.service_identities.custom_attributes.get(
+        principal_id=cached_user['userId'],
+        as_dict=False
+    )
+
+    assert len(attributes) == 0
+
 
 
 

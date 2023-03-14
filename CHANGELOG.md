@@ -2,6 +2,35 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.17.0 [2023-03-14]
+#### What's New
+* Workload API coverage (create workload federation identity providers and map to service identities) `workload`
+* System Policies coverage `system.policies`
+* System Roles coverage `system.roles`
+* System Permissions coverage `system.permissions`
+
+#### Enhancements
+* Add custom attribute coverage to users and service identities
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* For dev/test removed the pin on `pytest` which was causing issues with newer versions of python
+
+#### Other
+* None
+
+### DEPRECATION NOTICE
+
+#### `policies.py`
+
+This python file only holds one method `build`. The remainder of the system policy logic has been created
+in `system.policies` so as not to cause confusion with secrets manager and profile policies.
+
+In the next major release, `policies.py` will be retired. As of release `2.17.0` the `polices.build` method
+simply calls `system.policies.build`. 
+
 ## v2.16.0 [2023-03-02]
 #### What's New
 * Natively support Azure Managed Identity OIDC authentication for workload federation.

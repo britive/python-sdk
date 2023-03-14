@@ -1,4 +1,4 @@
-# Python Britive API Wrapper
+# Python Britive SDK
 
 This repo will hold the python code that wraps the Britive API so downstream python applications/scripts
 can consume a native Python library.
@@ -54,7 +54,7 @@ To run just execute `tox` on the command line or if you want to clean the enviro
 rebuild the entire virtualenv. There are some issues with pytest caching that have been found so cleaning the virtualenv
 helps clear that up.
 
-`pytest` is being used to test the API wrapper. Run the following commands in order to test the full library.
+`pytest` is being used to test the SDK. Run the following commands in order to test the full library.
 
 These below tests/commands should only be run during local development when iterating quickly (more like unit testing). 
 `tox` should be used when possible to test the full end-to-end process (more like integration testing).
@@ -84,9 +84,19 @@ export BRITIVE_TENANT=...
 export BRITIVE_TEST_ENV_ACCOUNT_ID=<12 digit AWS account id>
 ~~~
 
+If you want to skip running a scan (and waiting a long time for the results) you can set
+
+~~~
+export BRITIVE_TEST_IGNORE_SCAN=true
+~~~
+
+And then all the API calls that are reliant on a scan to occur will be ignored. This may be useful when you just
+want to an internal end-to-end process vs. integrating with a cloud service provider.
+
 Then run these in order or as required.
 
 ~~~
+pytest tests/test_005-identity_attributes.py -v
 pytest tests/test_010-users.py -v
 pytest tests/test_020-tags.py -v
 pytest tests/test_030-service_identities.py -v
@@ -98,7 +108,6 @@ pytest tests/test_080-scans.py -v  # warning - this one will take a while since 
 pytest tests/test_090-accounts.py -v # note - a scan must first be completed
 pytest tests/test_100-permissions.py -v # note - a scan must first be completed
 pytest tests/test_110-groups.py -v # note - a scan must first be completed
-pytest tests/test_120-identity_attributes.py -v
 pytest tests/test_130-profiles.py -v
 pytest tests/test_140-task_services.py -v
 pytest tests/test_150-tasks.py -v
@@ -108,11 +117,17 @@ pytest tests/test_180-api_tokens.py -v
 pytest tests/test_190-audit_logs.py -v
 pytest tests/test_200-reports.py -v
 pytest tests/test_210-identity_providers.py -v
+pytest tests/test_215-workload.py -v
 pytest tests/test_220-my_access.py -v
 pytest tests/test_230-notifications.py -v
 pytest tests/test_240-secrets_manager.py -v
 pytest tests/test_250-my_secrets.py -v
 pytest tests/test_260-notification_mediums.py -v
+pytest tests/test_270-system_policies.py -v
+pytest tests/test_280_system_actions.py -v
+pytest tests/test_290_system_consumers.py -v
+pytest tests/test_300-system_roles.py -v
+pytest tests/test_310-system_permissions.py -v
 
 pytest tests/test_990-delete_all_resources.py -v
 ~~~
