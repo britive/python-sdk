@@ -2,7 +2,7 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
-## v2.17.0 [2023-03-09]
+## v2.17.0 [2023-03-14]
 #### What's New
 * Workload API coverage (create workload federation identity providers and map to service identities) `workload`
 * System Policies coverage `system.policies`
