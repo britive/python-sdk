@@ -46,3 +46,4 @@ class IdentityAttributes:
         """
 
         return self.britive.delete(f'{self.base_url}/{attribute_id}')
+

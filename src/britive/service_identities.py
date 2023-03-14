@@ -1,3 +1,7 @@
+from .helpers.custom_attributes import CustomAttributes
+from .exceptions import NotFound
+
+
 valid_statues = ['active', 'inactive']
 
 
@@ -5,6 +9,7 @@ class ServiceIdentities:
     def __init__(self, britive):
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/users'
+        self.custom_attributes = CustomAttributes(self)
 
     def list(self, filter_expression: str = None) -> list:
         """
@@ -106,7 +111,6 @@ class ServiceIdentities:
         response = self.britive.post(self.base_url, json=kwargs)
         return response
 
-    # TODO - check this once a bug fix has been deployed
     def update(self, service_identity_id: str, **kwargs) -> dict:
         """
         Update the specified attributes of the provided service identity.

@@ -27,6 +27,10 @@ class ForbiddenRequest(Exception):
     pass
 
 
+class NotFound(Exception):
+    pass
+
+
 class MethodNotAllowed(Exception):
     pass
 

@@ -2,6 +2,7 @@ from .exceptions import \
     UserDoesNotHaveMFAEnabled, \
     UserNotAllowedToChangePassword, \
     UserNotAssociatedWithDefaultIdentityProvider
+from .helpers.custom_attributes import CustomAttributes
 
 
 valid_statues = ['active', 'inactive']
@@ -11,6 +12,7 @@ class Users:
     def __init__(self, britive):
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/users'
+        self.custom_attributes = CustomAttributes(self)
 
     def list(self, filter_expression: str = None) -> list:
         """

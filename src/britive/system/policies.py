@@ -1,0 +1,258 @@
+import json
+
+
+class SystemPolicies:
+    def __init__(self, britive):
+        self.britive = britive
+        self.base_url = f'{self.britive.base_url}/v1/policy-admin/policies'
+
+    @staticmethod
+    def _validate_identifier_type(identifier_type):
+        if identifier_type not in ['id', 'name']:
+            raise ValueError(f'identifier_type of {identifier_type} is invalid. Only `name` and `id` are allowed.')
+
+    def list(self) -> list:
+        """
+        List system level policies (not including policies for secrets manager or profiles).
+
+        :returns: List of policies.
+        """
+
+        return self.britive.get(self.base_url)
+
+    def get(self, policy_identifier: str, identifier_type: str = 'name', verbose: bool = False) -> dict:
+        """
+        Get details of the specified system policy.
+
+        :param policy_identifier: The ID or name of the policy.
+        :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
+            identifiers will be returned. Either all identifiers must be names or all identifiers must be IDs.
+        :param verbose: Whether to return a more compact response (the default) or a more verbose response.
+        :returns: Details of the specified policy.
+        """
+
+        self._validate_identifier_type(identifier_type)
+        params = {
+            'compactResponse': not verbose
+        }
+        return self.britive.get(f'{self.base_url}/{policy_identifier}', params=params)
+
+    def create(self, policy: dict) -> dict:
+        """
+        Create a system level policy.
+
+        :param policy: The policy to create. Use `policies.build` to assist in constructing a proper policy document.
+        :returns: Details of the newly created policy.
+        """
+
+        return self.britive.post(self.base_url, json=policy)
+    
+    def update(self, policy_identifier: str, policy: dict, identifier_type: str = 'name') -> None:
+        """
+        Update a system level policy.
+
+        :param policy_identifier: The ID or name of the policy to update.
+        :param policy: The policy to update. Use `policies.build` to assist in constructing a proper policy document.
+        :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
+            identifiers will be returned. Either all identifiers must be names or all identifiers must be IDs.
+        :returns: None.
+        """
+
+        self._validate_identifier_type(identifier_type)
+        return self.britive.patch(f'{self.base_url}/{policy_identifier}', json=policy)
+
+    def delete(self, policy_identifier: str, identifier_type: str = 'name') -> None:
+        """
+        Delete a system level policy.
+
+        :param policy_identifier: The ID or name of the policy to delete.
+        :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
+            identifiers will be returned. Either all identifiers must be names or all identifiers must be IDs.
+        :returns: None.
+        """
+
+        self._validate_identifier_type(identifier_type)
+        return self.britive.delete(f'{self.base_url}/{policy_identifier}')
+
+    def disable(self, policy_identifier: str, identifier_type: str = 'name') -> None:
+        """
+        Disable a system level policy.
+
+        :param policy_identifier: The ID of the policy to disable.
+        :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
+            identifiers will be returned. Either all identifiers must be names or all identifiers must be IDs.
+        :returns: None.
+        """
+
+        self._validate_identifier_type(identifier_type)
+        return self.britive.patch(f'{self.base_url}/{policy_identifier}', json={'isActive': False})
+
+    def enable(self, policy_identifier: str, identifier_type: str = 'name') -> None:
+        """
+        Enable a system level policy.
+
+        :param policy_identifier: The ID of the policy to enable.
+        :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
+            identifiers will be returned. Either all identifiers must be names or all identifiers must be IDs.
+        :returns: None.
+        """
+
+        self._validate_identifier_type(identifier_type)
+        return self.britive.patch(f'{self.base_url}/{policy_identifier}', json={'isActive': True})
+
+    def evaluate(self, statements: list) -> dict:
+        """
+        Evaluate the calling identities access for the given set of statements.
+
+        :param: statements: List of statements in the following format. Use `build_evaluate_statement` to help
+            construct the statement list.
+            [
+                {
+                    'action': '<action>',
+                    'resource': '<resource>',
+                    'consumer': '<consumer>'
+                },
+            ]
+        :returns: Dictionary containing each statement mapped to Allow or Deny.
+        """
+
+        return self.britive.post(f'{self.britive.base_url}/v1/policy-admin/batchevaluate', json=statements)
+
+    @staticmethod
+    def build_evaluate_statement(consumer: str, action: str, resource: str = '*') -> dict:
+        """
+        Builds a statement which can be evaluated with `evaluate`.
+
+        :param consumer: The consumer for the statement.
+        :param action: The action for the statement.
+        :param resource: Optional resource for the statement. Defaults to `*`.
+        :returns: The statement.
+        """
+        return {
+            'action': action,
+            'resource': resource,
+            'consumer': consumer
+        }
+
+    @staticmethod
+    def build(name: str, description: str = '', draft: bool = False, active: bool = True,
+              read_only: bool = False, users: list = None, tags: list = None, tokens: list = None,
+              service_identities: list = None, permissions: list = None, roles: list = None, ips: list = None,
+              from_time: str = None, to_time: str = None, approval_notification_medium: str = None,
+              time_to_approve: int = 5, access_validity_time: int = 120, approver_users: list = None,
+              approver_tags: list = None, access_type: str = 'Allow', identifier_type: str = 'name') -> dict:
+        """
+        Build a policy document given the provided inputs.
+
+        :param name: The name of the policy.
+        :param description: An optional description of the policy.
+        :param draft: Indicates if the policy is a draft. Defaults to `False`.
+        :param active: Indicates if the policy is active. Defaults to `True`.
+        :param read_only: Indicates if the policy is a read only. Defaults to `False`.
+        :param users: Optional list of user names or ids to which this policy applies.
+        :param tags: Optional list of tag names or ids to which this policy applies.
+        :param tokens: Optional list of token names or ids to which this policy applies.
+        :param service_identities: Optional list of service identity names or ids to which this policy applies.
+        :param permissions: Optional list of permission names or ids this policy grants. Provide either this parameter
+            or `roles`.
+        :param roles: Optional list of role names or ids to which this policy applies. Provider either this parameter
+            or `permissions`.
+        :param ips: Optional list of IP addresses for which this policy applies. Provide in CIDR notation
+            or dotted decimal format for individual (/32) IP addresses.
+        :param from_time: The start date/time of when the policy is in effect. If a date is provided
+            (`YYYY-MM-DD HH:MM:SS`) this will represent the start date/time of 1 contiguous time range. If just a
+            time is provided (`HH:MM:SS`) this will represent the daily recurring start time. If this parameter is
+            provided then `to_time` must also be provided.
+        :param to_time: The end date/time of when the policy is in effect. If a date is provided
+            (`YYYY-MM-DD HH:MM:SS`) this will represent the end date/time of 1 contiguous time range. If just a
+            time is provided (`HH:MM:SS`) this will represent the daily recurring end time. If this parameter is
+            provided then `from_time` must also be provided.
+        :param approval_notification_medium: Optional notification medium name to which approval requests will be
+            delivered. Specifying this parameter indicates the desire to enable approvals for this policy.
+        :param time_to_approve: Optional number of minutes to wait for an approval before denying the action. Defaults
+            to 5 minutes.
+        :param access_validity_time: Optional number of minutes the access is valid after approval. Defaults to 120
+            minutes.
+        :param approver_users: Optional list of user names or ids who are to be considered approvers.
+            If `approval_notification_medium` is set then either `approver_users` or `approver_tags` is required.
+        :param approver_tags: Optional list of tag names who are considered approvers.
+            If `approval_notification_medium` is set then either `approver_users` or `approver_tags` is required.
+        :param access_type: The type of access this policy provides. Valid values are `Allow` and `Deny`. Defaults
+            to `Allow`.
+        :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
+            identifiers are being provided to the other parameters. Either all identifiers must be names or all
+            identifiers must be IDs.
+        :return: A dict which can be provided as a policy to `create` and `update`.
+        """
+
+        condition = {}
+
+        # handle ip address logic
+        if ips:
+            condition['ipAddress'] = ','.join(ips)
+
+        # handle from_time and to_time logic
+        if from_time and not to_time:
+            raise ValueError('if from_time is provided then to_time must also be provided.')
+        if to_time and not from_time:
+            raise ValueError('if to_time is provided then from_time must also be provided.')
+        if from_time and to_time:
+            condition['timeOfAccess'] = {
+                'from': from_time,
+                'to': to_time
+            }
+
+        # handle approval logic
+        if approval_notification_medium:
+            if not approver_users and not approver_tags:
+                raise ValueError('when approval is required either approver_tags or approver_users or both '
+                                 'must be provided')
+            approval_condition = {
+                'notificationMedium': approval_notification_medium,
+                'timeToApprove': time_to_approve,
+                'validFor': access_validity_time,
+                'approvers': {
+                    'userIds': approver_users,
+                    'tags': approver_tags
+                }
+            }
+
+            if not approver_users:
+                approval_condition['approvers'].pop('userIds')
+            if not approver_tags:
+                approval_condition['approvers'].pop('tags')
+
+            condition['approval'] = approval_condition
+
+        # put it all together
+        policy = {
+            'name': name,
+            'description': description,
+            'isActive': active,
+            'isDraft': draft,
+            'isReadOnly': read_only,
+            'accessType': access_type,
+            'members': {
+                'users': [{identifier_type: u} for u in users] if users else None,
+                'tags': [{identifier_type: t} for t in tags] if tags else None,
+                'serviceIdentities': [{identifier_type: s} for s in service_identities] if service_identities else None,
+                'tokens': [{identifier_type: t} for t in tokens] if tokens else None
+            },
+            'condition': json.dumps(condition, default=str)
+        }
+
+        if not users:
+            policy['members'].pop('users')
+        if not tags:
+            policy['members'].pop('tags')
+        if not service_identities:
+            policy['members'].pop('serviceIdentities')
+        if not tokens:
+            policy['members'].pop('tokens')
+
+        if permissions:
+            policy['permissions'] = [{identifier_type: p} for p in permissions]
+        if roles:
+            policy['roles'] = [{identifier_type: r} for r in roles]
+
+        return policy

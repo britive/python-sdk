@@ -115,6 +115,15 @@ def test_user_delete(cached_user):
         cleanup('user')
 
 
+# 005-identity_attributes
+def test_identity_attribute_delete(cached_identity_attribute):
+    try:
+        response = britive.identity_attributes.delete(attribute_id=cached_identity_attribute['id'])
+        assert response is None
+    finally:
+        cleanup('identity-attribute')
+
+
 def test_folder_delete(cached_folder, cached_vault):
     try:
         response = britive.secrets_manager.folders.delete(
