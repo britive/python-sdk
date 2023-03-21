@@ -91,6 +91,57 @@ def test_update(cached_tag):
     britive.tags.update(cached_tag['userTagId'], name=cached_tag['name'])
 
 
+def test_membership_rules_list(cached_tag):
+    response = britive.tags.membership_rules.list(tag_id=cached_tag['userTagId'])
+    assert len(response) == 0
+
+
+def test_membership_rules_create(cached_tag, cached_user):
+    rules = [
+        britive.tags.membership_rules.build(attribute_id_or_name='Email', operator='is', value=cached_user['email'])
+    ]
+
+    response = britive.tags.membership_rules.create(tag_id=cached_tag['userTagId'], rules=rules)
+    assert len(response) == 1
+
+    response = britive.tags.membership_rules.list(tag_id=cached_tag['userTagId'])
+    assert len(response) == 1
+
+
+def test_membership_rules_update(cached_tag, cached_user):
+    rules = [
+        britive.tags.membership_rules.build(
+            attribute_id_or_name='Email',
+            operator='is',
+            value=cached_user['email']
+        ),
+        britive.tags.membership_rules.build(
+            attribute_id_or_name='Username',
+            operator='is',
+            value=cached_user['username']
+        )
+    ]
+
+    response = britive.tags.membership_rules.update(tag_id=cached_tag['userTagId'], rules=rules)
+    assert response is None
+
+    response = britive.tags.membership_rules.list(tag_id=cached_tag['userTagId'])
+    assert len(response) == 2
+
+
+def test_membership_rules_matched_users(cached_tag, cached_user):
+    response = britive.tags.membership_rules.matched_users(tag_id=cached_tag['userTagId'])
+    assert len(response) == 1
+    assert response[0]['email'] == cached_user['email']
+
+
+def test_membership_rules_delete(cached_tag):
+    response = britive.tags.membership_rules.delete(tag_id=cached_tag['userTagId'])
+    assert response is None
+
+    response = britive.tags.membership_rules.list(tag_id=cached_tag['userTagId'])
+    assert len(response) == 0
+
 
 
 

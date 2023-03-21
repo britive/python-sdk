@@ -2,12 +2,12 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
-## v2.17.1 [2023-03-22]
+## v2.18.0 [2023-03-22]
 #### What's New
-* None
+* Support for tag membership rules.
 
 #### Enhancements
-* All the creation of external tags (tags associated with an identity provider) using a non-SCIM authentication token
+* Allow the creation of external tags (tags associated with an identity provider) using a non-SCIM identity.
 
 #### Bug Fixes
 * None
