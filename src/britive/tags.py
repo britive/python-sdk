@@ -4,12 +4,13 @@ class Tags:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/user-tags'
 
-    def create(self, name: str, description: str = None) -> dict:
+    def create(self, name: str, description: str = None, idp: str = None) -> dict:
         """
-        Create a new tag
+        Create a new tag.
 
         :param name: The tag name.
         :param description: The tag description.
+        :param idp: The ID of the identity provider. To be used when creating an external tag.
         :return: Details of the newly created tag.
         """
 
@@ -17,6 +18,10 @@ class Tags:
             'name': name,
             'description': description
         }
+
+        if idp:
+            data['userTagIdentityProviders'] = [{'identityProvider': {'id': idp}}]
+            data['external'] = True
 
         return self.britive.post(self.base_url, json=data)
 
@@ -158,6 +163,8 @@ class Tags:
     def delete(self, tag_id: str) -> None:
         """
         Delete a tag.
+
+        You can delete an external tag ONLY if it has yet to be synced via SCIM.
 
         :param tag_id: The ID of the tag.
         :return: None

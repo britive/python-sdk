@@ -2,6 +2,23 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.17.1 [2023-03-22]
+#### What's New
+* None
+
+#### Enhancements
+* All the creation of external tags (tags associated with an identity provider) using a non-SCIM authentication token
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
+
 ## v2.17.0 [2023-03-14]
 #### What's New
 * Workload API coverage (create workload federation identity providers and map to service identities) `workload`
