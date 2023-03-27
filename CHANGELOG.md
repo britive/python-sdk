@@ -2,7 +2,7 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
-## v2.18.0 [2023-03-22]
+## v2.18.0 [2023-03-28]
 #### What's New
 * Support for tag membership rules.
 
