@@ -1,15 +1,112 @@
 
-class Tags:
+class TagMembershipRules:
     def __init__(self, britive):
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/user-tags'
 
-    def create(self, name: str, description: str = None) -> dict:
+    def build(self, attribute_id_or_name: str, operator: str, value: str) -> dict:
         """
-        Create a new tag
+        Builds a membership rule.
+
+        :param attribute_id_or_name: The attribute id or name for the rule. Names will be converted to ids by the SDK.
+        :param operator: Valid values are `contains` and `is`.
+        :param value: The value to match in the rule.
+        :returns: Dictionary which can be used to build a list of rules.
+        """
+
+        if operator.lower() not in ['contains', 'is']:
+            raise ValueError('invalid operator provided.')
+
+        # first get list of existing identity attributes and build some helpers
+        existing_attrs = [attr for attr in self.britive.identity_attributes.list()]
+        existing_attr_ids = [attr['id'] for attr in existing_attrs]
+        attrs_by_name = {attr['name']: attr['id'] for attr in existing_attrs}
+
+        attribute_id = attribute_id_or_name
+        if attribute_id not in existing_attr_ids:
+            attribute_id = attrs_by_name.get(attribute_id_or_name, None)
+        if not attribute_id:
+            raise ValueError(f'identity attribute name {attribute_id_or_name} not found.')
+
+        return {
+            'attributeId': attribute_id,
+            'operator': operator.lower(),
+            'value': value
+        }
+
+    def list(self, tag_id: str) -> list:
+        """
+        List existing membership rules for the given tag.
+
+        :param tag_id: The tag id.
+        :returns: List of membership rules for the given tag.
+        """
+
+        return self.britive.get(f'{self.base_url}/{tag_id}/attribute-criteria')
+
+    def create(self, tag_id: str, rules: list) -> list:
+        """
+        Create new membership rules for the given tag.
+
+        :param tag_id: The tag id.
+        :param rules: The list of rules to include in the request. Use `build` to help construct the list.
+        :returns: List of newly created membership rules for the given tag.
+        """
+
+        return self.britive.post(f'{self.base_url}/{tag_id}/attribute-criteria', json=rules)
+
+    def update(self, tag_id: str, rules: list) -> None:
+        """
+        Update membership rules for the given tag.
+
+        All membership rules must be provided. What is provided in the request will fully replace the existing
+        list of membership rules associated with the given tag.
+
+        :param tag_id: The tag id.
+        :param rules: The list of rules to include in the request. Use `build` to help construct the list.
+        :returns: None.
+        """
+
+        return self.britive.patch(f'{self.base_url}/{tag_id}/attribute-criteria', json=rules)
+
+    def delete(self, tag_id: str) -> None:
+        """
+        Delete all membership rules for the given tag.
+
+        :param tag_id: The tag id.
+        :returns: None.
+        """
+
+        return self.britive.patch(f'{self.base_url}/{tag_id}/attribute-criteria', json=[])
+
+    def matched_users(self, tag_id: str) -> list:
+        """
+        Lists users which match the membership rules associated with the given tag.
+
+        :param tag_id: The tag id.
+        :returns: List of matching users.
+        """
+
+        params = {
+            'page': 0,
+            'size': 100
+        }
+        return self.britive.get(f'{self.base_url}/{tag_id}/matched-users', params=params)
+
+
+class Tags:
+    def __init__(self, britive):
+        self.britive = britive
+        self.base_url = f'{self.britive.base_url}/user-tags'
+        self.membership_rules = TagMembershipRules(self.britive)
+
+    def create(self, name: str, description: str = None, idp: str = None) -> dict:
+        """
+        Create a new tag.
 
         :param name: The tag name.
         :param description: The tag description.
+        :param idp: The ID of the identity provider. To be used when creating an external tag.
         :return: Details of the newly created tag.
         """
 
@@ -17,6 +114,10 @@ class Tags:
             'name': name,
             'description': description
         }
+
+        if idp:
+            data['userTagIdentityProviders'] = [{'identityProvider': {'id': idp}}]
+            data['external'] = True
 
         return self.britive.post(self.base_url, json=data)
 
@@ -158,6 +259,8 @@ class Tags:
     def delete(self, tag_id: str) -> None:
         """
         Delete a tag.
+
+        You can delete an external tag ONLY if it has yet to be synced via SCIM.
 
         :param tag_id: The ID of the tag.
         :return: None
