@@ -441,13 +441,6 @@ def cached_PinPolicies(pytestconfig):
 
 
 @pytest.fixture(scope='session')
-@cached_resource(name='secret')
-def cached_secret(pytestconfig, cached_vault):
-    r = str(random.randint(0, 1000000))
-    return britive.secrets_manager.secrets.create(name=f"test_secret-{r}", vault_id=cached_vault['id'])
-
-
-@pytest.fixture(scope='session')
 @cached_resource(name='static-secret-templates')
 def cached_static_secret_template(pytestconfig, cached_PasswordPolicies):
     r = str(random.randint(0, 1000000))
@@ -456,12 +449,23 @@ def cached_static_secret_template(pytestconfig, cached_PasswordPolicies):
         password_policy_id=cached_PasswordPolicies['id'],
         parameters=
         {
-            'name': "test_param",
+            'name': "Note",
             'description': "test_description",
             'mask': False,
             'required': False,
             'type': "singleLine"
         }
+    )
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='secret')
+def cached_secret(pytestconfig, cached_vault, cached_static_secret_template):
+    r = str(random.randint(0, 1000000))
+    return britive.secrets_manager.secrets.create(
+        name=f"test_secret-{r}",
+        vault_id=cached_vault['id'],
+        static_secret_template_id=cached_static_secret_template['id']
     )
 
 

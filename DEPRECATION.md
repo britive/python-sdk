@@ -11,3 +11,18 @@ in `system.policies` so as not to cause confusion with secrets manager and profi
 
 In the next major release, `policies.py` will be retired. As of release `2.17.0` the `polices.build` method
 simply calls `system.policies.build`. 
+
+
+#### Policy Condition Attributes `from_time` and `to_time`
+
+The following policy `build` method parameters `from_time` and `to_time` are deprecated as of release `2.19.0`. The 
+parameters are still being accepted and will be converted to the go forward policy condition format.
+
+* `system.polices.build`
+* `policies.build`
+* `profiles.policies.build`
+* `secrets_manager.policies.build`
+
+New time based condition fields `date_schedule` and `days_schedule` provided enhanced functionality. Until the next
+major release `from_time` and `to_time` parameters will be mapped into the new condition fields to ensure backwards
+compatibility.

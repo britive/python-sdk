@@ -1,4 +1,5 @@
 import json
+from .system.policies import SystemPolicies
 
 
 class SecretsManager:
@@ -245,9 +246,7 @@ class PasswordPolicies:
         """
 
         params = {'action': 'generatePasswordOrPin'}
-        return self.britive.get(f'{self.base_url}/{password_policy_id}', params=params)[
-            'passwordOrPin'
-        ]
+        return self.britive.get(f'{self.base_url}/{password_policy_id}', params=params)['passwordOrPin']
 
     def validate(self, password_policy_id: str, password: str) -> dict:
         """
