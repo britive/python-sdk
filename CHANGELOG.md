@@ -5,12 +5,14 @@ All changes to the package starting with v2.8.1 will be logged here.
 ## v2.19.0 [2023-05-XX]
 #### What's New
 * Added `workload.scim_user` for managed workload identity federation for SCIM users.
+* Added `my_access.approve_request`, `my_access.reject_request`, and `my_access.list_approvals`.
 
 #### Enhancements
 * Modified the way in which workload identity providers are associated with service identities.
+* Added `date_schedule` and `days_schedule` to the various policy `build` methods.
 
 #### Bug Fixes
-* None
+* Addressed race condition in `my_access.checkout` if multiple processes (running as the same user) attempt to check out the same profile at the same time
 
 #### Dependencies
 * None
