@@ -102,8 +102,7 @@ class MyAccess:
                          max_wait_time: int = 600, block_until_disposition: bool = False,
                          progress_func: Callable = None) -> any:
         """
-        Requests approval to checkout a profile at a later time, by supplying the names of entities vs. the IDs of
-        those entities.
+        Requests approval to checkout a profile at a later time.
 
         Console vs. Programmatic access is not applicable here. The request for approval will allow the caller
         to checkout either type of access once the request has been approved.

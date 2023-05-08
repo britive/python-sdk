@@ -21,6 +21,9 @@ def test_profile_delete(cached_profile):
         assert cached_profile['papId'] not in [p['papId'] for p in profiles]
     finally:
         cleanup('profile')
+        cleanup('profile-approval-policy')
+        cleanup('dynamic-session-attribute')
+        cleanup('static-session-attribute')
 
 
 # 070-environments

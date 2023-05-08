@@ -153,7 +153,7 @@ class PasswordPolicies:
         has_lower_case_chars: bool = True,
         has_numbers: bool = True,
         has_special_chars: bool = True,
-        allowed_special_chars: str = '@#$%\\(\',)'
+        allowed_special_chars: str = '~`!@#$%^&*()-_+=[]{}|/;:"?/\\.><,\''
     ) -> dict:
         """
         Creates a new password policy.
@@ -162,10 +162,10 @@ class PasswordPolicies:
         :param description: description of the password policy
         :param password_type: type of password to use for the policy
         :param min_password_length: minimum length of the password
-        :param has_upper_case_chars: whether or not to require uppercase characters
-        :param has_lower_case_chars: whether or not to require lowercase characters
-        :param has_numbers: whether or not to require numbers
-        :param has_special_chars: whether or not to require special characters
+        :param has_upper_case_chars: whether to require uppercase characters
+        :param has_lower_case_chars: whether to require lowercase characters
+        :param has_numbers: whether to require numbers
+        :param has_special_chars: whether to require special characters
         :param allowed_special_chars: a string of special characters to allow in the password
         :return: Details of the newly created password policy.
         """
@@ -176,19 +176,14 @@ class PasswordPolicies:
             'passwordType': password_type,
             'minPasswordLength': min_password_length,
             'hasUpperCaseChars': has_upper_case_chars,
-            'hasLowercaseChars': has_lower_case_chars,
+            'hasLowerCaseChars': has_lower_case_chars,
             'hasNumbers': has_numbers,
             'hasSpecialChars': has_special_chars,
             'allowedSpecialChars': allowed_special_chars,
         }
         return self.britive.post(self.base_url, json=params)
 
-    def create_pin(
-        self, 
-        name: str, 
-        description: str = 'Default description', 
-        pin_length: int = 4
-    ) -> dict:
+    def create_pin(self,  name: str,  description: str = 'Default description',  pin_length: int = 4) -> dict:
         """
         Creates a new pin password policy.
 
@@ -216,16 +211,18 @@ class PasswordPolicies:
             description: description of the password policy
             passwordType: type of password to use for the policy
             minPasswordLength: minimum length of the password
-            hasUpperCaseChars: whether or not to require uppercase characters
-            hasLowercaseChars: whether or not to require lowercase characters
-            hasNumbers: whether or not to require numbers
-            hasSpecialChars: whether or not to require special characters
+            hasUpperCaseChars: whether to require uppercase characters
+            hasLowercaseChars: whether to require lowercase characters
+            hasNumbers: whether to require numbers
+            hasSpecialChars: whether to require special characters
             allowedSpecialChars: a string of special characters to allow in the password
             pinLength: the length of the pin to use for the policy (only for pins)
         :return: None
         """
 
-        return self.britive.patch(f'{self.base_url}/{password_policy_id}', json=kwargs)
+        current = self.get(password_policy_id=password_policy_id)
+
+        return self.britive.patch(f'{self.base_url}/{password_policy_id}', json={**current, **kwargs})
 
     def delete(self, password_policy_id: str) -> None:
         """
@@ -242,7 +239,7 @@ class PasswordPolicies:
         Generates a password for the given password policy.
 
         :param password_policy_id: the ID of the password policy
-        :return: the generated the generated password
+        :return: the generated password
         """
 
         params = {'action': 'generatePasswordOrPin'}
@@ -254,13 +251,18 @@ class PasswordPolicies:
 
         :param password_policy_id: the ID of the password policy
         :param password: the password to validate
-        :return: whether or not the password is valid
+        :return: whether the password is valid
         """
 
-        params = {'id': password_policy_id, 'passwordOrPin': password}
-        return self.britive.post(
-            f'{self.base_url}?action=validatePasswordOrPin', json=params
-        )
+        data = {
+            'id': password_policy_id,
+            'passwordOrPin': password,
+        }
+
+        params = {
+            'action': 'validatePasswordOrPin'
+        }
+        return self.britive.post(self.base_url, json=data, params=params)
 
 
 class Folders:
@@ -650,8 +652,10 @@ class StaticSecretTemplates:
         :return: None
         """
 
+        current = self.get(secret_template_id=static_secret_template_id)
+
         return self.britive.patch(
-            f'{self.base_url}/{static_secret_template_id}', json=kwargs
+            f'{self.base_url}/{static_secret_template_id}', json={**current, **kwargs}
         )
 
 

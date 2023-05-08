@@ -60,6 +60,7 @@ def test_PasswordPolicies_update(cached_PasswordPolicies):
 
 
 def test_generate_password(cached_PasswordPolicies):
+    time.sleep(5)  # sleep for 5 seconds as I think the password policy update takes a bit to settle down
     password = britive.secrets_manager.password_policies.generate_password(
         cached_PasswordPolicies['id'])
     assert isinstance(password, str)
