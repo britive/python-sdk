@@ -21,5 +21,3 @@ def test_service_identity_tokens_get(cached_service_identity):
     assert 'token' in token.keys()
 
 
-
-

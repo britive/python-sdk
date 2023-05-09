@@ -118,7 +118,7 @@ def test_set_metadata(cached_identity_provider):
     )
     assert isinstance(response, dict)
     assert 'certificateDn' in response.keys()
-    assert response['certificateDn'] == f'CN={britive.tenant.replace(".britive-app.com", "")}'
+    assert response['certificateDn'] == f'CN={britive.tenant.split(".")[0]}'
 
 
 def test_delete(cached_identity_provider):

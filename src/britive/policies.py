@@ -10,9 +10,10 @@ class Policies:
     def build(name: str, description: str = '', draft: bool = False, active: bool = True,
               read_only: bool = False, users: list = None, tags: list = None, tokens: list = None,
               service_identities: list = None, permissions: list = None, roles: list = None, ips: list = None,
-              from_time: str = None, to_time: str = None, approval_notification_medium: str = None,
-              time_to_approve: int = 5, access_validity_time: int = 120, approver_users: list = None,
-              approver_tags: list = None, access_type: str = 'Allow', identifier_type: str = 'name') -> dict:
+              from_time: str = None, to_time: str = None, date_schedule: dict = None, days_schedule: dict = None,
+              approval_notification_medium: str = None, time_to_approve: int = 5, access_validity_time: int = 120,
+              approver_users: list = None, approver_tags: list = None, access_type: str = 'Allow',
+              identifier_type: str = 'name') -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -34,11 +35,30 @@ class Policies:
         :param from_time: The start date/time of when the policy is in effect. If a date is provided
             (`YYYY-MM-DD HH:MM:SS`) this will represent the start date/time of 1 contiguous time range. If just a
             time is provided (`HH:MM:SS`) this will represent the daily recurring start time. If this parameter is
-            provided then `to_time` must also be provided.
+            provided then `to_time` must also be provided. This parameter is deprecated as of v2.19.0. The presence of
+            `date_schedule` and/or `days_schedule` will override this field.
         :param to_time: The end date/time of when the policy is in effect. If a date is provided
             (`YYYY-MM-DD HH:MM:SS`) this will represent the end date/time of 1 contiguous time range. If just a
             time is provided (`HH:MM:SS`) this will represent the daily recurring end time. If this parameter is
-            provided then `from_time` must also be provided.
+            provided then `from_time` must also be provided. This parameter is deprecated as of v2.19.0. The presence of
+            `date_schedule` and/or `days_schedule` will override this field.
+        :param date_schedule: A dict in the format
+            {
+                'fromDate': '2022-10-29 10:30:00',
+                'toDate': '2022-11-05 18:30:00',
+                'timezone': 'UTC'
+            }
+            Timezone formats can be found in the TZ Identifier column of the following page.
+            https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+        :param days_schedule: A dict in the format
+            {
+                'fromTime': '10:30:00',
+                'toTime': '18:30:00',
+                'timezone': 'UTC',
+                'days': ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY']
+            }
+            Timezone formats can be found in the TZ Identifier column of the following page.
+            https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
         :param approval_notification_medium: Optional notification medium name to which approval requests will be
             delivered. Specifying this parameter indicates the desire to enable approvals for this policy.
         :param time_to_approve: Optional number of minutes to wait for an approval before denying the action. Defaults
@@ -72,6 +92,8 @@ class Policies:
             ips=ips,
             from_time=from_time,
             to_time=to_time,
+            date_schedule=date_schedule,
+            days_schedule=days_schedule,
             approval_notification_medium=approval_notification_medium,
             time_to_approve=time_to_approve,
             access_validity_time=access_validity_time,

@@ -135,12 +135,21 @@ class SystemPolicies:
         }
 
     @staticmethod
+    def _time_of_access_type_from_deprecated_fields(from_time: str, to_time: str):
+        if len(from_time) == 8 and len(to_time) == 8:
+            return 'days'
+        if len(from_time) == 19 and len(to_time) == 19:
+            return 'date'
+        raise ValueError('from_time and to_time must both be valid times or datetimes. Cannot mix.')
+
+    @staticmethod
     def build(name: str, description: str = '', draft: bool = False, active: bool = True,
               read_only: bool = False, users: list = None, tags: list = None, tokens: list = None,
               service_identities: list = None, permissions: list = None, roles: list = None, ips: list = None,
-              from_time: str = None, to_time: str = None, approval_notification_medium: str = None,
-              time_to_approve: int = 5, access_validity_time: int = 120, approver_users: list = None,
-              approver_tags: list = None, access_type: str = 'Allow', identifier_type: str = 'name') -> dict:
+              from_time: str = None, to_time: str = None, date_schedule: dict = None, days_schedule: dict = None,
+              approval_notification_medium: str = None, time_to_approve: int = 5, access_validity_time: int = 120,
+              approver_users: list = None, approver_tags: list = None, access_type: str = 'Allow',
+              identifier_type: str = 'name') -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -162,11 +171,30 @@ class SystemPolicies:
         :param from_time: The start date/time of when the policy is in effect. If a date is provided
             (`YYYY-MM-DD HH:MM:SS`) this will represent the start date/time of 1 contiguous time range. If just a
             time is provided (`HH:MM:SS`) this will represent the daily recurring start time. If this parameter is
-            provided then `to_time` must also be provided.
+            provided then `to_time` must also be provided. This parameter is deprecated as of v2.19.0. The presence of
+            `date_schedule` and/or `days_schedule` will override this field.
         :param to_time: The end date/time of when the policy is in effect. If a date is provided
             (`YYYY-MM-DD HH:MM:SS`) this will represent the end date/time of 1 contiguous time range. If just a
             time is provided (`HH:MM:SS`) this will represent the daily recurring end time. If this parameter is
-            provided then `from_time` must also be provided.
+            provided then `from_time` must also be provided. This parameter is deprecated as of v2.19.0. The presence of
+            `date_schedule` and/or `days_schedule` will override this field.
+        :param date_schedule: A dict in the format
+            {
+                'fromDate': '2022-10-29 10:30:00',
+                'toDate': '2022-11-05 18:30:00',
+                'timezone': 'UTC'
+            }
+            Timezone formats can be found in the TZ Identifier column of the following page.
+            https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+        :param days_schedule: A dict in the format
+            {
+                'fromTime': '10:30:00',
+                'toTime': '18:30:00',
+                'timezone': 'UTC',
+                'days': ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY']
+            }
+            Timezone formats can be found in the TZ Identifier column of the following page.
+            https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
         :param approval_notification_medium: Optional notification medium name to which approval requests will be
             delivered. Specifying this parameter indicates the desire to enable approvals for this policy.
         :param time_to_approve: Optional number of minutes to wait for an approval before denying the action. Defaults
@@ -192,14 +220,41 @@ class SystemPolicies:
             condition['ipAddress'] = ','.join(ips)
 
         # handle from_time and to_time logic
+        # this logic is deprecated (and updated) in v2.19.0 and will be retired in v3.x.x
         if from_time and not to_time:
             raise ValueError('if from_time is provided then to_time must also be provided.')
         if to_time and not from_time:
             raise ValueError('if to_time is provided then from_time must also be provided.')
         if from_time and to_time:
+            # we need to determine if we are dealing with dates or times
+            # as that will inform if we set days_schedule or date_schedule
+            time_of_access_type = SystemPolicies._time_of_access_type_from_deprecated_fields(from_time, to_time)
+            if time_of_access_type == 'days' and not days_schedule:  # dealing with times of day
+                days_schedule = {
+                    'fromTime': from_time,
+                    'toTime': to_time,
+                    'timezone': 'UTC',
+                    'days': [
+                        'MONDAY',
+                        'TUESDAY',
+                        'WEDNESDAY',
+                        'THURSDAY',
+                        'FRIDAY',
+                        'SATURDAY',
+                        'SUNDAY'
+                    ]
+                }
+            if time_of_access_type == 'date' and not date_schedule:  # dealing with date range
+                date_schedule = {
+                    'fromDate': from_time,
+                    'toDate': to_time,
+                    'timezone': 'UTC'
+                }
+
+        if date_schedule or days_schedule:
             condition['timeOfAccess'] = {
-                'from': from_time,
-                'to': to_time
+                'dateSchedule': date_schedule,
+                'daysSchedule': days_schedule
             }
 
         # handle approval logic
@@ -211,6 +266,7 @@ class SystemPolicies:
                 'notificationMedium': approval_notification_medium,
                 'timeToApprove': time_to_approve,
                 'validFor': access_validity_time,
+                'isValidForInDays': False,  # the SDK will only support minutes
                 'approvers': {
                     'userIds': approver_users,
                     'tags': approver_tags
@@ -237,8 +293,7 @@ class SystemPolicies:
                 'tags': [{identifier_type: t} for t in tags] if tags else None,
                 'serviceIdentities': [{identifier_type: s} for s in service_identities] if service_identities else None,
                 'tokens': [{identifier_type: t} for t in tokens] if tokens else None
-            },
-            'condition': json.dumps(condition, default=str)
+            }
         }
 
         if not users:
@@ -254,5 +309,7 @@ class SystemPolicies:
             policy['permissions'] = [{identifier_type: p} for p in permissions]
         if roles:
             policy['roles'] = [{identifier_type: r} for r in roles]
+        if condition:
+            policy['condition'] = json.dumps(condition, default=str)
 
         return policy
