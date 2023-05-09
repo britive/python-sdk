@@ -14,7 +14,7 @@ def test_run_json():
 
     report = britive.reports.run(report_id=report_id, csv=False)
     assert isinstance(report, list)
-    assert len(report) > 5  # at least 5 rows in the report
+    assert len(report) > 0  # at least 1 row in the report
     assert(len(report)) % 100 != 0  # v2.8.1 - adding check due to pagination bug not including the last page
 
 

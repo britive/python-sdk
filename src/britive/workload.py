@@ -8,6 +8,7 @@ class Workload:
         self.base_url = f'{self.britive.base_url}/workload'
         self.identity_providers = self.IdentityProviders(self)
         self.service_identities = self.ServiceIdentities(self)
+        self.scim_user = self.ScimUser(self)
 
     class IdentityProviders:
         def __init__(self, workload):
@@ -337,25 +338,35 @@ class Workload:
             :returns: Details of the newly assigned workload identity provider.
             """
 
+            mapping_attributes = []
+            converted_federated_attributes = {}
+            converted_attributes = self.britive.service_identities.custom_attributes._build_list(
+                operation='add',
+                custom_attributes=federated_attributes
+            )
+
+            for attr in converted_attributes:
+                custom_attr = attr['customUserAttribute']
+                attr_id = custom_attr['attributeId']
+                if attr_id not in converted_federated_attributes.keys():
+                    converted_federated_attributes[attr_id] = []
+                converted_federated_attributes[attr_id].append(custom_attr['attributeValue'])
+
+            for custom_attribute_id, values in converted_federated_attributes.items():
+                mapping_attributes.append(
+                    {
+                        'attrId': custom_attribute_id,
+                        'values': values
+                    }
+                )
+
             params = {
                 'idpId': idp_id,
-                'tokenDuration': token_duration
+                'tokenDuration': token_duration,
+                'mappingAttributes': mapping_attributes
             }
 
-            response = self.britive.post(self.base_url.format(id=service_identity_id), json=params)
-
-            try:
-                self.britive.service_identities.custom_attributes.add(
-                    principal_id=service_identity_id,
-                    custom_attributes=federated_attributes,
-                )
-            except Exception as e:
-                # need to remove the assignment as something went wrong with the attributes mapping
-                self.unassign(service_identity_id=service_identity_id)
-                # and re-raise the error
-                raise e
-
-            return response
+            return self.britive.post(self.base_url.format(id=service_identity_id), json=params)
 
         def unassign(self, service_identity_id: str) -> None:
             """
@@ -366,16 +377,52 @@ class Workload:
             :param service_identity_id: The ID of the Service Identity.
             :returns: None.
             """
-            existing_attributes = self.britive.service_identities.custom_attributes.get(
-                principal_id=service_identity_id,
-                as_dict=True
-            )
-            self.britive.service_identities.custom_attributes.remove(
-                principal_id=service_identity_id,
-                custom_attributes=existing_attributes
-            )
             return self.britive.delete(self.base_url.format(id=service_identity_id))
 
+    class ScimUser:
+        def __init__(self, workload):
+            self.britive = workload.britive
+            self.base_url: str = workload.base_url + '/scim-user/identity-provider'
 
+        def get(self, idp_name: str) -> dict:
+            """
+            Gets details of the workload federation enabled service identity associated with the identity provider.
 
+            The identity provider name provided must be a SAML identity provider.
 
+            :param idp_name: The name of the SAML Identity Provider.
+            :returns: Details of the newly assigned service identity to the identity provider.
+            """
+
+            return self.britive.get(f'{self.base_url}/{idp_name}')
+
+        def assign(self, service_identity_id: str, idp_name: str) -> dict:
+            """
+            Associates a workload federation enabled service identity with an identity provider SCIM service.
+
+            The service identity must already be configured for workload federation.
+            The identity provider name provided must be a SAML identity provider.
+
+            :param service_identity_id: The ID of the service identity.
+            :param idp_name: The name of the SAML Identity Provider.
+            :returns: Details of the newly assigned service identity to the identity provider.
+            """
+
+            params = {
+                'idpName': idp_name,
+                'userId': service_identity_id
+            }
+
+            return self.britive.post(self.base_url, json=params)
+
+        def unassign(self, idp_name: str) -> dict:
+            """
+            Removes a workload federation enabled service identity from an identity provider SCIM service.
+
+            The identity provider name provided must be a SAML identity provider.
+
+            :param idp_name: The name of the SAML Identity Provider.
+            :returns: Details of the newly assigned service identity to the identity provider.
+            """
+
+            return self.britive.delete(f'{self.base_url}/{idp_name}')

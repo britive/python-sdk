@@ -5,22 +5,22 @@ from .cache import *  # will also import some globals like `britive`
 
 def test_create(cached_profile):
     assert isinstance(cached_profile, dict)
-    assert cached_profile['name'] == 'test'
+    assert cached_profile['name'].startswith('test')
     assert len(cached_profile['scope']) == 0
 
 
 def test_list(cached_profile):
     profiles = britive.profiles.list(application_id=cached_profile['appContainerId'])
     assert isinstance(profiles, list)
-    assert len(profiles) == 1
+    assert len(profiles) > 0
     assert isinstance(profiles[0], dict)
-    assert profiles[0]['name'] == 'test'
+    assert profiles[0]['name'].startswith('test')
 
 
 def test_get(cached_profile):
     profile = britive.profiles.get(application_id=cached_profile['appContainerId'], profile_id=cached_profile['papId'])
     assert isinstance(profile, dict)
-    assert profile['name'] == 'test'
+    assert profile['name'].startswith('test')
 
 
 def test_update(cached_profile):
@@ -214,6 +214,12 @@ def test_tags_remove(cached_profile, cached_tag):
 def test_policies_create(cached_profile_policy):
     assert isinstance(cached_profile_policy, dict)
     assert cached_profile_policy['members']['tags']
+
+
+@pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
+def test_policies_create_with_approval(cached_profile_approval_policy):
+    assert isinstance(cached_profile_approval_policy, dict)
+    assert cached_profile_approval_policy['members']['serviceIdentities']
 
 
 @pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)

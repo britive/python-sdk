@@ -198,9 +198,10 @@ def cached_identity_attribute(pytestconfig):
 @pytest.fixture(scope='session')
 @cached_resource(name='profile')
 def cached_profile(pytestconfig, cached_application):
+    r = str(random.randint(0, 1000000))
     return britive.profiles.create(
             application_id=cached_application['appContainerId'],
-            name='test'
+            name=f'test-{r}'
         )
 
 
@@ -211,6 +212,22 @@ def cached_profile_policy(pytestconfig, cached_profile, cached_tag):
         name=cached_profile['papId'],
         description=cached_tag['name'],
         tags=[cached_tag['name']]
+    )
+    return britive.profiles.policies.create(
+        profile_id=cached_profile['papId'],
+        policy=policy
+    )
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='profile-approval-policy')
+def cached_profile_approval_policy(pytestconfig, cached_profile, cached_service_identity):
+    policy = britive.profiles.policies.build(
+        name=f"{cached_profile['papId']}-2",
+        description='',
+        service_identities=[cached_service_identity['username']],
+        approval_notification_medium='Email',
+        approver_users=[britive.my_access.whoami()['username']]
     )
     return britive.profiles.policies.create(
         profile_id=cached_profile['papId'],
@@ -291,7 +308,7 @@ def cached_security_policy(pytestconfig, cached_service_identity_token):
 
 @pytest.fixture(scope='session')
 @cached_resource(name='api-token')
-def cached_api_token(pytestconfig, cached_service_identity_token):
+def cached_api_token(pytestconfig):
     r = str(random.randint(0, 1000000))
     return britive.api_tokens.create(
             name=f'test-{r}',
@@ -441,13 +458,6 @@ def cached_PinPolicies(pytestconfig):
 
 
 @pytest.fixture(scope='session')
-@cached_resource(name='secret')
-def cached_secret(pytestconfig, cached_vault):
-    r = str(random.randint(0, 1000000))
-    return britive.secrets_manager.secrets.create(name=f"test_secret-{r}", vault_id=cached_vault['id'])
-
-
-@pytest.fixture(scope='session')
 @cached_resource(name='static-secret-templates')
 def cached_static_secret_template(pytestconfig, cached_PasswordPolicies):
     r = str(random.randint(0, 1000000))
@@ -456,7 +466,7 @@ def cached_static_secret_template(pytestconfig, cached_PasswordPolicies):
         password_policy_id=cached_PasswordPolicies['id'],
         parameters=
         {
-            'name': "test_param",
+            'name': "Note",
             'description': "test_description",
             'mask': False,
             'required': False,
@@ -466,11 +476,22 @@ def cached_static_secret_template(pytestconfig, cached_PasswordPolicies):
 
 
 @pytest.fixture(scope='session')
+@cached_resource(name='secret')
+def cached_secret(pytestconfig, cached_vault, cached_static_secret_template):
+    r = str(random.randint(0, 1000000))
+    return britive.secrets_manager.secrets.create(
+        name=f"test_secret-{r}",
+        vault_id=cached_vault['id'],
+        static_secret_template_id=cached_static_secret_template['id']
+    )
+
+
+@pytest.fixture(scope='session')
 @cached_resource(name='policy')
 def cached_policy(pytestconfig, cached_user):
     r = str(random.randint(0, 1000000))
     policy = britive.secrets_manager.policies.build(f"pytestpolicy-{r}", draft=True, active=False)
-    return britive.secrets_manager.policies.create(policy=policy)
+    return britive.secrets_manager.policies.create(policy=policy, path='/')
 
 
 @pytest.fixture(scope='session')
