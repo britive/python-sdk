@@ -1,6 +1,6 @@
 from . import exceptions
 import datetime
-import json
+from typing import Union
 
 
 creation_defaults = {
@@ -638,9 +638,9 @@ class ProfilePolicies:
     def build(self, name: str, description: str = '', draft: bool = False, active: bool = True,
               read_only: bool = False, users: list = None, tags: list = None, service_identities: list = None,
               ips: list = None, from_time: str = None, to_time: str = None, date_schedule: dict = None,
-              days_schedule: dict = None, approval_notification_medium: str = None, time_to_approve: int = 5,
-              access_validity_time: int = 120, approver_users: list = None, approver_tags: list = None,
-              access_type: str = 'Allow', identifier_type: str = 'name') -> dict:
+              days_schedule: dict = None, approval_notification_medium: Union[str, list] = None,
+              time_to_approve: int = 5, access_validity_time: int = 120, approver_users: list = None,
+              approver_tags: list = None, access_type: str = 'Allow', identifier_type: str = 'name') -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -682,7 +682,8 @@ class ProfilePolicies:
             Timezone formats can be found in the TZ Identifier column of the following page.
             https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
         :param approval_notification_medium: Optional notification medium name to which approval requests will be
-            delivered. Specifying this parameter indicates the desire to enable approvals for this policy.
+            delivered. Can also specify a list of notification medium names. Specifying this parameter indicates the
+            desire to enable approvals for this policy.
         :param time_to_approve: Optional number of minutes to wait for an approval before denying the action. Defaults
             to 5 minutes.
         :param access_validity_time: Optional number of minutes the access is valid after approval. Defaults to 120

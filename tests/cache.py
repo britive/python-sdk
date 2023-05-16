@@ -234,7 +234,6 @@ def cached_profile_approval_policy(pytestconfig, cached_profile, cached_service_
         policy=policy
     )
 
-
 @pytest.fixture(scope='session')
 @cached_resource(name='static-session-attribute')
 def cached_static_session_attribute(pytestconfig, cached_profile):

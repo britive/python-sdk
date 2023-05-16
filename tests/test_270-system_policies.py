@@ -17,6 +17,32 @@ def test_create(cached_system_level_policy):
     assert cached_system_level_policy['name'].startswith('python-sdk')
 
 
+def test_create_single_nm():
+    policy = britive.system.policies.build(
+        name=f'python-sdk',
+        tags=[cached_tag['name']],
+        roles=['UserViewRole'],
+        approval_notification_medium='Email',
+        approver_tags=[cached_tag['name']]
+    )
+    assert 'id' in policy.keys()
+    assert 'name' in policy.keys()
+    assert policy['name'].startswith('python-sdk')
+
+
+def test_create_multiple_nm():
+    policy = britive.system.policies.build(
+        name=f'python-sdk',
+        tags=[cached_tag['name']],
+        roles=['UserViewRole'],
+        approval_notification_medium=['Email'],
+        approver_tags=[cached_tag['name']]
+    )
+    assert 'id' in policy.keys()
+    assert 'name' in policy.keys()
+    assert policy['name'].startswith('python-sdk')
+
+
 def test_get_id(cached_system_level_policy):
     response = britive.system.policies.get(policy_identifier=cached_system_level_policy['id'], identifier_type='id')
     assert 'id' in response.keys()

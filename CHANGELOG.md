@@ -2,6 +2,23 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.20.0 [2023-05-XX]
+#### What's New
+* None
+
+#### Enhancements
+* Support multiple notification mediums for an approval policy condition.
+
+#### Bug Fixes
+* None
+* 
+#### Dependencies
+* None
+
+#### Other
+* None
+
+
 ## v2.19.0 [2023-05-09]
 #### What's New
 * Added `workload.scim_user` for managed workload identity federation for SCIM users.

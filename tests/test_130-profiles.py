@@ -217,9 +217,21 @@ def test_policies_create(cached_profile_policy):
 
 
 @pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
-def test_policies_create_with_approval(cached_profile_approval_policy):
+def test_policies_create_with_approval_single_notification_medium(cached_profile_approval_policy):
     assert isinstance(cached_profile_approval_policy, dict)
     assert cached_profile_approval_policy['members']['serviceIdentities']
+
+
+@pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
+def test_policies_create_with_approval_multiple_notification_medium():
+    policy = britive.profiles.policies.build(
+        name=f"{cached_profile['papId']}-2",
+        description='',
+        service_identities=[cached_service_identity['username']],
+        approval_notification_medium=['Email'],
+        approver_users=[britive.my_access.whoami()['username']]
+    )
+    assert isinstance(policy, dict)
 
 
 @pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
