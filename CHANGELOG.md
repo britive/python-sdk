@@ -2,7 +2,7 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
-## v2.20.0 [2023-05-XX]
+## v2.20.0 [2023-06-XX]
 #### What's New
 * None
 
