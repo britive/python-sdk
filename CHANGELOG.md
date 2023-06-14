@@ -2,9 +2,9 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
-## v2.20.0 [2023-06-XX]
+## v2.20.0 [2023-06-14]
 #### What's New
-* None
+* Support for profile permission constraints.
 
 #### Enhancements
 * Support multiple notification mediums for an approval policy condition.
@@ -13,7 +13,7 @@ All changes to the package starting with v2.8.1 will be logged here.
 * None
 * 
 #### Dependencies
-* None
+* Resolve dependabot alert for `requests` - https://github.com/britive/python-sdk/security/dependabot/1
 
 #### Other
 * None

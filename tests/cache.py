@@ -17,6 +17,8 @@ profile_v2_skip = 'requires profiles v1'
 profile_v1_skip = 'requires profiles v2'
 scan_skip = True if os.getenv('BRITIVE_TEST_IGNORE_SCAN') else False
 scan_skip_message = 'ignore scan requested'
+constraints = False if os.getenv('BRITIVE_GCP_TEST_APP_ID') and os.getenv('BRITIVE_TENANT') == 'engv2-ea' else True
+constraints_skip = 'not using engv2-ea and/or BRITIVE_GCP_TEST_APP_ID not set'
 characters = list(string.ascii_letters + string.digits + "!@#$%^&*()")
 
 
@@ -575,4 +577,50 @@ def cached_system_level_permission(pytestconfig):
     return response
 
 
+@pytest.fixture(scope='session')
+@cached_resource(name='gcp-profile-bq')
+def cached_gcp_profile_big_query(pytestconfig):
+    r = str(random.randint(0, 1000000))
+    response = britive.profiles.create(
+        application_id=os.getenv('BRITIVE_GCP_TEST_APP_ID'),
+        name=f'test-bq-constraints-{r}',
+        scope=[
+            {
+                'type': 'EnvironmentGroup',
+                'value': '881409387174'
+            }
+        ]
+    )
 
+    britive.profiles.permissions.add(
+        profile_id=response['papId'],
+        permission_name='BigQuery Admin',
+        permission_type='role'
+    )
+
+    return response
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='gcp-profile-storage')
+def cached_gcp_profile_storage(pytestconfig):
+    r = str(random.randint(0, 1000000))
+
+    response = britive.profiles.create(
+        application_id=os.getenv('BRITIVE_GCP_TEST_APP_ID'),
+        name=f'test-storage-constraints-{r}',
+        scope=[
+            {
+                'type': 'EnvironmentGroup',
+                'value': '881409387174'
+            }
+        ]
+    )
+
+    britive.profiles.permissions.add(
+        profile_id=response['papId'],
+        permission_name='Storage Admin',
+        permission_type='role'
+    )
+
+    return response

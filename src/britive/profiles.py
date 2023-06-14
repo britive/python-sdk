@@ -371,7 +371,7 @@ class ProfilePermissionConstraints:
         Lint the provided condition expression.
 
         :param profile_id: The ID of the profile.
-        :param permission_name: The name of the permission for which to list supported constraints.
+        :param permission_name: The name of the permission for which to lint the condition expression.
         :param expression: The condition expression to lint.
         :param permission_type: The type of permission. Defaults to `role`.
         :returns: Results of the lint operation.
@@ -400,7 +400,7 @@ class ProfilePermissionConstraints:
         :param constraint_type: The type of constraint.
         :param constraint: The constraint to add. If `constraint_type == 'condition'` then this parameter should be a
             dict with fields `title`, `description`, and `expression`. Otherwise, this parameter should be a dict with
-            field `name`.
+            field `name` or string value.
         :param permission_type: The type of permission. Defaults to `role`.
         :returns: None.
         """
@@ -423,7 +423,7 @@ class ProfilePermissionConstraints:
         :param permission_name: The name of the permission for which the constraint should be removed.
         :param constraint_type: The type of constraint.
         :param constraint: The constraint to remove. If `constraint_type == 'condition'` then omit this parameter or
-            set it to `None`. Otherwise, this parameter should be a dict with field `name`.
+            set it to `None`. Otherwise, this parameter should be a dict with field `name` or string value.
         :param permission_type: The type of permission. Defaults to `role`.
         :returns: None.
         """
@@ -433,14 +433,10 @@ class ProfilePermissionConstraints:
         params = {
             'operation': 'remove'
         }
+        if constraint is None:
+            constraint = {}
 
-        data = None
-        if constraint_type != 'condition':
-            data = {
-                'name': constraint
-            }
-
-        return self.britive.put(url, params=params, json=data)
+        return self.britive.put(url, params=params, json=constraint)
 
 
 class ProfileIdentities:
