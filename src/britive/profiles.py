@@ -1,6 +1,6 @@
 from . import exceptions
 import datetime
-import json
+from typing import Union
 
 
 creation_defaults = {
@@ -245,6 +245,7 @@ class ProfilePermissions:
     def __init__(self, britive):
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/paps'
+        self.constraints = ProfilePermissionConstraints(britive)
 
     def add(self, profile_id: str, permission_type: str, permission_name: str) -> dict:
         """
@@ -328,6 +329,114 @@ class ProfilePermissions:
         }
 
         return self.britive.post(f'{self.base_url}/{profile_id}/permissions', json=data)
+
+
+class ProfilePermissionConstraints:
+    def __init__(self, britive):
+        self.britive = britive
+        self.base_url = f'{self.britive.base_url}/paps'
+
+    def list_supported_types(self, profile_id: str, permission_name: str, permission_type: str = 'role') -> list:
+        """
+        Lists the supported constraint types.
+
+        :param profile_id: The ID of the profile.
+        :param permission_name: The name of the permission for which to list supported constraints.
+        :param permission_type: The type of permission. Defaults to `role`.
+        :returns: List of supported constraint types.
+        """
+
+        url = f'{self.base_url}/{profile_id}/permissions/{permission_name}/' \
+              f'{permission_type}/supported-constraint-types'
+        return self.britive.get(url)
+
+    def get(self, profile_id: str, permission_name: str, constraint_type: str, permission_type: str = 'role') -> list:
+        """
+        Gets the list of constraints.
+
+        :param profile_id: The ID of the profile.
+        :param permission_name: The name of the permission for which to list supported constraints.
+        :param constraint_type: The type of constraint.
+        :param permission_type: The type of permission. Defaults to `role`.
+        :returns: List of constraints for the given constraint type.
+        """
+
+        url = f'{self.base_url}/{profile_id}/permissions/{permission_name}/' \
+              f'{permission_type}/constraints/{constraint_type}'
+        return self.britive.get(url).get('result')
+
+    def lint_condition(self, profile_id: str, permission_name: str, expression: str,
+                       permission_type: str = 'role') -> dict:
+        """
+        Lint the provided condition expression.
+
+        :param profile_id: The ID of the profile.
+        :param permission_name: The name of the permission for which to lint the condition expression.
+        :param expression: The condition expression to lint.
+        :param permission_type: The type of permission. Defaults to `role`.
+        :returns: Results of the lint operation.
+        """
+
+        url = f'{self.base_url}/{profile_id}/permissions/{permission_name}/' \
+              f'{permission_type}/constraints/condition'
+
+        params = {
+            'operation': 'validate'
+        }
+
+        data = {
+            'expression': expression
+        }
+
+        return self.britive.put(url, params=params, json=data)
+
+    def add(self, profile_id: str, permission_name: str, constraint_type: str, constraint: dict,
+            permission_type: str = 'role') -> None:
+        """
+        Adds the given constraint.
+
+        :param profile_id: The ID of the profile.
+        :param permission_name: The name of the permission for which the constraint should be added.
+        :param constraint_type: The type of constraint.
+        :param constraint: The constraint to add. If `constraint_type == 'condition'` then this parameter should be a
+            dict with fields `title`, `description`, and `expression`. Otherwise, this parameter should be a dict with
+            field `name` or string value.
+        :param permission_type: The type of permission. Defaults to `role`.
+        :returns: None.
+        """
+
+        url = f'{self.base_url}/{profile_id}/permissions/{permission_name}/' \
+              f'{permission_type}/constraints/{constraint_type}'
+
+        params = {
+            'operation': 'add'
+        }
+
+        return self.britive.put(url, params=params, json=constraint)
+
+    def remove(self, profile_id: str, permission_name: str, constraint_type: str, constraint: dict = None,
+               permission_type: str = 'role') -> None:
+        """
+        Removes the given constraint.
+
+        :param profile_id: The ID of the profile.
+        :param permission_name: The name of the permission for which the constraint should be removed.
+        :param constraint_type: The type of constraint.
+        :param constraint: The constraint to remove. If `constraint_type == 'condition'` then omit this parameter or
+            set it to `None`. Otherwise, this parameter should be a dict with field `name` or string value.
+        :param permission_type: The type of permission. Defaults to `role`.
+        :returns: None.
+        """
+
+        url = f'{self.base_url}/{profile_id}/permissions/{permission_name}/' \
+              f'{permission_type}/constraints/{constraint_type}'
+        params = {
+            'operation': 'remove'
+        }
+        if constraint is None:
+            constraint = {}
+
+        return self.britive.put(url, params=params, json=constraint)
 
 
 class ProfileIdentities:
@@ -638,9 +747,9 @@ class ProfilePolicies:
     def build(self, name: str, description: str = '', draft: bool = False, active: bool = True,
               read_only: bool = False, users: list = None, tags: list = None, service_identities: list = None,
               ips: list = None, from_time: str = None, to_time: str = None, date_schedule: dict = None,
-              days_schedule: dict = None, approval_notification_medium: str = None, time_to_approve: int = 5,
-              access_validity_time: int = 120, approver_users: list = None, approver_tags: list = None,
-              access_type: str = 'Allow', identifier_type: str = 'name') -> dict:
+              days_schedule: dict = None, approval_notification_medium: Union[str, list] = None,
+              time_to_approve: int = 5, access_validity_time: int = 120, approver_users: list = None,
+              approver_tags: list = None, access_type: str = 'Allow', identifier_type: str = 'name') -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -682,7 +791,8 @@ class ProfilePolicies:
             Timezone formats can be found in the TZ Identifier column of the following page.
             https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
         :param approval_notification_medium: Optional notification medium name to which approval requests will be
-            delivered. Specifying this parameter indicates the desire to enable approvals for this policy.
+            delivered. Can also specify a list of notification medium names. Specifying this parameter indicates the
+            desire to enable approvals for this policy.
         :param time_to_approve: Optional number of minutes to wait for an approval before denying the action. Defaults
             to 5 minutes.
         :param access_validity_time: Optional number of minutes the access is valid after approval. Defaults to 120

@@ -217,9 +217,21 @@ def test_policies_create(cached_profile_policy):
 
 
 @pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
-def test_policies_create_with_approval(cached_profile_approval_policy):
+def test_policies_create_with_approval_single_notification_medium(cached_profile_approval_policy):
     assert isinstance(cached_profile_approval_policy, dict)
     assert cached_profile_approval_policy['members']['serviceIdentities']
+
+
+@pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
+def test_policies_create_with_approval_multiple_notification_medium(cached_profile, cached_service_identity):
+    policy = britive.profiles.policies.build(
+        name=f"{cached_profile['papId']}-2",
+        description='',
+        service_identities=[cached_service_identity['username']],
+        approval_notification_medium=['Email'],
+        approver_users=[britive.my_access.whoami()['username']]
+    )
+    assert isinstance(policy, dict)
 
 
 @pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
@@ -264,4 +276,166 @@ def test_policies_delete(cached_profile, cached_profile_policy):
     finally:
         cleanup('profile-policy')
 
-# TODO - test ProfilePermissions on some other non AWS application.
+
+@pytest.mark.skipif(constraints, reason=constraints_skip)
+def test_constraints_list_supported_types(cached_gcp_profile_big_query, cached_gcp_profile_storage):
+    response = britive.profiles.permissions.constraints.list_supported_types(
+        profile_id=cached_gcp_profile_big_query['papId'],
+        permission_name='BigQuery Admin',
+        permission_type='role'
+    )
+    assert 'bigquery.datasets' in response
+    assert 'bigquery.tables' in response
+
+    response = britive.profiles.permissions.constraints.list_supported_types(
+        profile_id=cached_gcp_profile_storage['papId'],
+        permission_name='Storage Admin',
+        permission_type='role'
+    )
+
+    assert len(response) == 1
+    assert 'condition' in response
+
+
+@pytest.mark.skipif(constraints, reason=constraints_skip)
+def test_constraints_get_before_add(cached_gcp_profile_big_query, cached_gcp_profile_storage):
+    response = britive.profiles.permissions.constraints.get(
+        profile_id=cached_gcp_profile_big_query['papId'],
+        permission_name='BigQuery Admin',
+        permission_type='role',
+        constraint_type='bigquery.datasets'
+    )
+
+    assert response is None
+
+    response = britive.profiles.permissions.constraints.get(
+        profile_id=cached_gcp_profile_big_query['papId'],
+        permission_name='BigQuery Admin',
+        permission_type='role',
+        constraint_type='bigquery.tables'
+    )
+
+    assert response is None
+
+    response = britive.profiles.permissions.constraints.get(
+        profile_id=cached_gcp_profile_storage['papId'],
+        permission_name='Storage Admin',
+        permission_type='role',
+        constraint_type='condition'
+    )
+
+    assert response is None
+
+
+@pytest.mark.skipif(constraints, reason=constraints_skip)
+def test_constraints_lint_condition(cached_gcp_profile_storage):
+    expression = "(resource.type != 'storage.googleapis.com/Bucket' && " \
+                 "resource.type != 'storage.googleapis.com/Object') || " \
+                 "resource.name.startsWith('projects/_/buckets/my-first-project-demo-bucket-1')"
+    response = britive.profiles.permissions.constraints.lint_condition(
+        profile_id=cached_gcp_profile_storage['papId'],
+        permission_name='Storage Admin',
+        permission_type='role',
+        expression=expression
+    )
+
+    assert response['success']
+    assert response['message'] == '{}'
+
+
+@pytest.mark.skipif(constraints, reason=constraints_skip)
+def test_constraints_add_big_query(cached_gcp_profile_big_query):
+    response = britive.profiles.permissions.constraints.add(
+        profile_id=cached_gcp_profile_big_query['papId'],
+        permission_name='BigQuery Admin',
+        permission_type='role',
+        constraint_type='bigquery.datasets',
+        constraint='my-first-project-310615.myfirstdataset'
+    )
+
+    assert response is None
+
+    try:
+        britive.profiles.permissions.constraints.add(
+            profile_id=cached_gcp_profile_big_query['papId'],
+            permission_name='BigQuery Admin',
+            permission_type='role',
+            constraint_type='bigquery.datasets',
+            constraint='my-first-project-310615.myfirstdataset'
+        )
+    except Exception as e:
+        assert 'Constraint is already available in the added list' in str(e)
+
+
+@pytest.mark.skipif(constraints, reason=constraints_skip)
+def test_constraints_add_storage(cached_gcp_profile_storage):
+    expression = "(resource.type != 'storage.googleapis.com/Bucket' && " \
+                 "resource.type != 'storage.googleapis.com/Object') || " \
+                 "resource.name.startsWith('projects/_/buckets/my-first-project-demo-bucket-1')"
+
+    constraint = {
+        'title': 'test',
+        'description': 'test',
+        'expression': expression
+    }
+
+    response = britive.profiles.permissions.constraints.add(
+        profile_id=cached_gcp_profile_storage['papId'],
+        permission_name='Storage Admin',
+        permission_type='role',
+        constraint_type='condition',
+        constraint=constraint
+    )
+
+    assert response is None
+
+    try:
+        britive.profiles.permissions.constraints.add(
+            profile_id=cached_gcp_profile_storage['papId'],
+            permission_name='Storage Admin',
+            permission_type='role',
+            constraint_type='condition',
+            constraint=constraint
+        )
+    except Exception as e:
+        assert 'Constraint is already available in the added list' in str(e)
+
+
+@pytest.mark.skipif(constraints, reason=constraints_skip)
+def test_constraints_remove_big_query(cached_gcp_profile_big_query):
+    try:
+        response = britive.profiles.permissions.constraints.remove(
+            profile_id=cached_gcp_profile_big_query['papId'],
+            permission_name='BigQuery Admin',
+            permission_type='role',
+            constraint_type='bigquery.datasets',
+            constraint='my-first-project-310615.myfirstdataset'
+        )
+
+        assert response is None
+    finally:
+        britive.profiles.delete(
+            application_id=os.getenv('BRITIVE_GCP_TEST_APP_ID'),
+            profile_id=cached_gcp_profile_big_query['papId']
+        )
+        cleanup('gcp-profile-bq')
+
+
+@pytest.mark.skipif(constraints, reason=constraints_skip)
+def test_constraints_remove_storage(cached_gcp_profile_storage):
+    try:
+        response = britive.profiles.permissions.constraints.remove(
+            profile_id=cached_gcp_profile_storage['papId'],
+            permission_name='Storage Admin',
+            permission_type='role',
+            constraint_type='condition',
+            constraint=None
+        )
+
+        assert response is None
+    finally:
+        britive.profiles.delete(
+            application_id=os.getenv('BRITIVE_GCP_TEST_APP_ID'),
+            profile_id=cached_gcp_profile_storage['papId']
+        )
+        cleanup('gcp-profile-storage')

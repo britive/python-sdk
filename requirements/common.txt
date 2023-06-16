@@ -1,2 +1,2 @@
 # can likely change this to earlier versions - will deal with that later
-requests ~= 2.27.1
+requests>=2.31.0
