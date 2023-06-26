@@ -2,6 +2,22 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.20.1 [2023-06-26]
+#### What's New
+* None
+
+#### Enhancements
+* None
+
+#### Bug Fixes
+* Properly handle situation when a user requests approval to checkout a profile but there is already an approved request for that same profile.
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.20.0 [2023-06-14]
 #### What's New
 * Support for profile permission constraints.
@@ -11,7 +27,7 @@ All changes to the package starting with v2.8.1 will be logged here.
 
 #### Bug Fixes
 * None
-* 
+
 #### Dependencies
 * Resolve dependabot alert for `requests` - https://github.com/britive/python-sdk/security/dependabot/1
 
