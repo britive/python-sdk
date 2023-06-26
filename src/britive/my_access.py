@@ -131,6 +131,10 @@ class MyAccess:
             f'{self.base_url}/{profile_id}/environments/{environment_id}/approvalRequest',
             json=data
         )
+
+        if request is None:
+            raise exceptions.ProfileCheckoutAlreadyApproved()
+
         request_id = request['requestId']
 
         if block_until_disposition:
