@@ -17,6 +17,24 @@ def test_create(cached_system_level_policy):
     assert cached_system_level_policy['name'].startswith('python-sdk')
 
 
+def test_create_default(cached_system_level_policy_condition_as_default_json_str):
+    assert isinstance(cached_system_level_policy_condition_as_default_json_str, dict)
+    assert 'id' in cached_system_level_policy_condition_as_default_json_str.keys()
+    assert 'name' in cached_system_level_policy_condition_as_default_json_str.keys()
+    assert cached_system_level_policy_condition_as_default_json_str['name'].startswith('python-sdk-')
+    assert 'condition' in cached_system_level_policy_condition_as_default_json_str.keys()
+    assert isinstance(cached_system_level_policy_condition_as_default_json_str['condition'], str)
+
+
+def test_create_condition_dictionary(cached_system_level_policy_condition_as_dictionary):
+    assert isinstance(cached_system_level_policy_condition_as_dictionary, dict)
+    assert 'id' in cached_system_level_policy_condition_as_dictionary.keys()
+    assert 'name' in cached_system_level_policy_condition_as_dictionary.keys()
+    assert cached_system_level_policy_condition_as_dictionary['name'].startswith('python-sdk-')
+    assert 'condition' in cached_system_level_policy_condition_as_dictionary.keys()
+    assert isinstance(cached_system_level_policy_condition_as_dictionary['condition'], dict)
+
+
 def test_create_single_nm(cached_tag):
     policy = britive.system.policies.build(
         name='python-sdk',
@@ -50,6 +68,61 @@ def test_get_id(cached_system_level_policy):
     assert 'id' in response.keys()
     assert 'name' in response.keys()
     assert response['name'].startswith('python-sdk')
+
+
+def test_get_policy_condition_as_default(cached_system_level_policy_condition_as_default_json_str):
+    response = britive.system.policies.get(policy_identifier=cached_system_level_policy_condition_as_default_json_str['id']
+                                           , identifier_type='id'
+                                           , condition_block_format='asis')
+    assert 'condition' in response.keys()
+    assert 'name' in response.keys()
+    assert isinstance(response['condition'], str)
+
+
+def test_get_policy_condition_as_json(cached_system_level_policy_condition_as_default_json_str):
+    response = britive.system.policies.get(policy_identifier=cached_system_level_policy_condition_as_default_json_str['id']
+                                           , identifier_type='id'
+                                           , condition_block_format='json')
+    assert 'condition' in response.keys()
+    assert 'name' in response.keys()
+    assert isinstance(response['condition'], str)
+
+
+def test_get_policy_condition_as_dict(cached_system_level_policy_condition_as_default_json_str):
+    response = britive.system.policies.get(policy_identifier=cached_system_level_policy_condition_as_default_json_str['id']
+                                           , identifier_type='id'
+                                           , condition_block_format='dict')
+    assert 'condition' in response.keys()
+    assert 'name' in response.keys()
+    assert isinstance(response['condition'], dict)
+
+
+def test_get_policy_condition_as_default2(cached_system_level_policy_condition_as_dictionary):
+    response = britive.system.policies.get(policy_identifier=cached_system_level_policy_condition_as_dictionary['id']
+                                           , identifier_type='id'
+                                           , condition_block_format='asis')
+    assert 'condition' in response.keys()
+    assert 'name' in response.keys()
+    assert isinstance(response['condition'], dict)
+
+
+def test_get_policy_condition_as_json2(cached_system_level_policy_condition_as_dictionary):
+    response = britive.system.policies.get(policy_identifier=cached_system_level_policy_condition_as_dictionary['id']
+                                           , identifier_type='id'
+                                           , condition_block_format='json')
+    print(response)
+    assert 'condition' in response.keys()
+    assert 'name' in response.keys()
+    assert isinstance(response['condition'], str)
+
+
+def test_get_policy_condition_as_dict2(cached_system_level_policy_condition_as_dictionary):
+    response = britive.system.policies.get(policy_identifier=cached_system_level_policy_condition_as_dictionary['id']
+                                           , identifier_type='id'
+                                           , condition_block_format='dict')
+    assert 'condition' in response.keys()
+    assert 'name' in response.keys()
+    assert isinstance(response['condition'], dict)
 
 
 def test_get_name(cached_system_level_policy):

@@ -21,7 +21,8 @@ class SystemPolicies:
 
         return self.britive.get(self.base_url)
 
-    def get(self, policy_identifier: str, identifier_type: str = 'name', verbose: bool = False) -> dict:
+    def get(self, policy_identifier: str, identifier_type: str = 'name', verbose: bool = False,
+            condition_block_format: str = 'asis') -> dict:
         """
         Get details of the specified system policy.
 
@@ -29,6 +30,10 @@ class SystemPolicies:
         :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
             identifiers will be returned. Either all identifiers must be names or all identifiers must be IDs.
         :param verbose: Whether to return a more compact response (the default) or a more verbose response.
+        :param condition_block_format: Valid values are 'asis', 'dict' or 'json'. Defaults to 'json', which is the only option prior to this change.
+            'asis' returns the condition as it is saved in the system i.e, json string.
+            'dict' option will return the condition block as a python dictionary.
+            'json' option will return the condition block as a json string (this was the only option prior to this change).
         :returns: Details of the specified policy.
         """
 
@@ -36,7 +41,39 @@ class SystemPolicies:
         params = {
             'compactResponse': not verbose
         }
-        return self.britive.get(f'{self.base_url}/{policy_identifier}', params=params)
+
+        policy = self.britive.get(f'{self.base_url}/{policy_identifier}', params=params)
+
+        if 'condition' in policy.keys():
+            if condition_block_format == 'asis':
+                return policy
+            elif condition_block_format == 'dict':
+                if isinstance(policy.get('condition'), dict):
+                    return policy
+                elif isinstance(policy.get('condition'), str):
+                    policy.update({'condition': json.loads(policy.get('condition'))})
+                    return policy
+                else:
+                    policy
+            elif condition_block_format == 'json':
+                if isinstance(policy.get('condition'), str):
+                    try:
+                        json.loads(policy.get('condition'))
+                        return policy
+                    except ValueError as e:
+                        return policy
+                    except:
+                        return policy
+                elif isinstance(policy.get('condition'), dict):
+                    policy.update({"condition": json.dumps(policy.get('condition'))})
+                    return policy
+                else:
+                    return policy
+            else:
+                return policy
+        else:
+            return policy
+
 
     def create(self, policy: dict) -> dict:
         """
@@ -150,7 +187,7 @@ class SystemPolicies:
               from_time: str = None, to_time: str = None, date_schedule: dict = None, days_schedule: dict = None,
               approval_notification_medium: Union[str, list] = None, time_to_approve: int = 5,
               access_validity_time: int = 120, approver_users: list = None, approver_tags: list = None,
-              access_type: str = 'Allow', identifier_type: str = 'name') -> dict:
+              access_type: str = 'Allow', identifier_type: str = 'name', condition_as_json: bool = True) -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -212,6 +249,7 @@ class SystemPolicies:
         :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
             identifiers are being provided to the other parameters. Either all identifiers must be names or all
             identifiers must be IDs.
+        :param condition_as_json: condition block can be returned as a string or json. Defaults to String (json string).
         :return: A dict which can be provided as a policy to `create` and `update`.
         """
 
@@ -312,6 +350,9 @@ class SystemPolicies:
         if roles:
             policy['roles'] = [{identifier_type: r} for r in roles]
         if condition:
-            policy['condition'] = json.dumps(condition, default=str)
+            if condition_as_json:
+                policy['condition'] = json.dumps(condition, default=str)
+            else:
+                policy['condition'] = condition
 
         return policy

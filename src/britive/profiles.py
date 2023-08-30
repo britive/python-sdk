@@ -1,6 +1,7 @@
 from . import exceptions
 import datetime
 from typing import Union
+import json
 
 
 creation_defaults = {
@@ -778,7 +779,8 @@ class ProfilePolicies:
               ips: list = None, from_time: str = None, to_time: str = None, date_schedule: dict = None,
               days_schedule: dict = None, approval_notification_medium: Union[str, list] = None,
               time_to_approve: int = 5, access_validity_time: int = 120, approver_users: list = None,
-              approver_tags: list = None, access_type: str = 'Allow', identifier_type: str = 'name') -> dict:
+              approver_tags: list = None, access_type: str = 'Allow', identifier_type: str = 'name',
+              condition_as_json: bool = True) -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -835,6 +837,7 @@ class ProfilePolicies:
         :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
             identifiers are being provided to the other parameters. Either all identifiers must be names or all
             identifiers must be IDs.
+        :param condition_as_json: condition block can be returned as string or json. default is string.
         :return: A dict which can be provided as a profile policy to `create` and `update`.
         """
 
@@ -858,7 +861,8 @@ class ProfilePolicies:
             approver_users=approver_users,
             approver_tags=approver_tags,
             access_type=access_type,
-            identifier_type=identifier_type
+            identifier_type=identifier_type,
+            condition_as_json=condition_as_json
         )
 
         # clean up the generic policy response and customize for profiles
@@ -881,7 +885,7 @@ class ProfilePolicies:
 
         return self.britive.get(f'{self.base_url}/{profile_id}/policies')
 
-    def get(self, profile_id: str, policy_id: str) -> dict:
+    def get(self, profile_id: str, policy_id: str, condition_block_format: str = 'asis') -> dict:
         """
         Retrieve details about a specific policy which is associated with the provided profile.
 
@@ -890,10 +894,39 @@ class ProfilePolicies:
 
         :param profile_id: The ID of the profile.
         :param policy_id: The ID of the policy.
+        :param condition_block_format: Valid values are 'asis', 'dict' or 'json'. Defaults to 'json', which is the only option prior to this change.
+            'asis' returns the condition as it is saved in the system i.e, json string.
+            'dict' option will return the condition block as a python dictionary.
+            'json' option will return the condition block as a json string (this was the only option prior to this change).
         "return: Details of the policy.
         """
 
-        return self.britive.get(f'{self.base_url}/{profile_id}/policies/{policy_id}')
+        policy = self.britive.get(f'{self.base_url}/{profile_id}/policies/{policy_id}')
+
+        if 'condition' in policy.keys():
+            if condition_block_format == 'asis':
+                return policy
+            elif condition_block_format == 'dict':
+                if isinstance(policy.get('condition'), dict):
+                    return policy
+                elif isinstance(policy.get('condition'), str):
+                    policy.update({'condition': json.loads(policy.get('condition'))})
+                    return policy
+                else:
+                    policy
+            elif condition_block_format == 'json':
+                if isinstance(policy.get('condition'), str):
+                    try:
+                        json.loads(policy.get('condition'))
+                        return policy
+                    except ValueError as e:
+                        return policy
+                elif isinstance(policy.get('condition'), dict):
+                    policy.update({"condition": json.dumps(policy.get('condition'))})
+                    return policy
+        else:
+            return policy
+
 
     def create(self, profile_id: str, policy: dict) -> dict:
         """

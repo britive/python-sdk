@@ -228,6 +228,38 @@ def cached_profile_policy(pytestconfig, cached_profile, cached_tag):
 
 
 @pytest.fixture(scope='session')
+@cached_resource(name='profile-policy-str')
+def cached_profile_policy_condition_as_json_str(pytestconfig, cached_profile, cached_tag):
+    policy = britive.profiles.policies.build(
+        name=cached_profile['papId'],
+        description=cached_tag['name'],
+        tags=[cached_tag['name']],
+        ips = ['12.12.12.12', '13.13.13.13'],
+        condition_as_json=True
+    )
+    return britive.profiles.policies.create(
+        profile_id=cached_profile['papId'],
+        policy=policy
+    )
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='profile-policy-dict')
+def cached_profile_policy_condition_as_dict(pytestconfig, cached_profile, cached_tag):
+    policy = britive.profiles.policies.build(
+        name=cached_profile['papId'],
+        description=cached_tag['name'],
+        tags=[cached_tag['name']],
+        ips = ['12.12.12.12', '13.13.13.13'],
+        condition_as_json=False
+    )
+    return britive.profiles.policies.create(
+        profile_id=cached_profile['papId'],
+        policy=policy
+    )
+
+
+@pytest.fixture(scope='session')
 @cached_resource(name='profile-approval-policy')
 def cached_profile_approval_policy(pytestconfig, cached_profile, cached_service_identity):
     policy = britive.profiles.policies.build(
@@ -557,6 +589,32 @@ def cached_system_level_policy(pytestconfig, cached_tag):
     response = britive.system.policies.create(policy=policy)
     return response
 
+@pytest.fixture(scope='session')
+@cached_resource(name='policy-system-level-condition-default-as-json-str')
+def cached_system_level_policy_condition_as_default_json_str(pytestconfig, cached_tag):
+    r = str(random.randint(0, 1000000))
+    policy = britive.system.policies.build(
+        name=f'python-sdk-condition-default{r}',
+        tags=[cached_tag['name']],
+        roles=['UserViewRole'],
+        ips=['11.11.11.11', '12.12.12.12']
+    )
+    response = britive.system.policies.create(policy=policy)
+    return response
+
+@pytest.fixture(scope='session')
+@cached_resource(name='policy-system-level-condition-as-dict')
+def cached_system_level_policy_condition_as_dictionary(pytestconfig, cached_tag):
+    r = str(random.randint(0, 1000000))
+    policy = britive.system.policies.build(
+        name=f'python-sdk-condition-as-dict{r}',
+        tags=[cached_tag['name']],
+        roles=['UserViewRole'],
+        ips=['11.11.11.11', '12.12.12.12'],
+        condition_as_json=False
+    )
+    response = britive.system.policies.create(policy=policy)
+    return response
 
 @pytest.fixture(scope='session')
 @cached_resource(name='role-system-level')
