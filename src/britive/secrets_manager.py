@@ -465,7 +465,7 @@ class Policies:
               date_schedule: dict = None, days_schedule: dict = None,
               approval_notification_medium: Union[str, list] = None, time_to_approve: int = 5,
               access_validity_time: int = 120, approver_users: list = None, approver_tags: list = None,
-              access_type: str = 'Allow', identifier_type: str = 'name') -> dict:
+              access_type: str = 'Allow', identifier_type: str = 'name', condition_as_json: bool = True) -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -525,6 +525,7 @@ class Policies:
         :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
             identifiers are being provided to the other parameters. Either all identifiers must be names or all
             identifiers must be IDs.
+        :param condition_as_json: condition block can be returned as string or json. default is json.
         :return: A dict which can be provided as a secret manager policy to `create` and `update`.
         """
 
@@ -549,7 +550,8 @@ class Policies:
             approver_users=approver_users,
             approver_tags=approver_tags,
             access_type=access_type,
-            identifier_type=identifier_type
+            identifier_type=identifier_type,
+            condition_as_json=condition_as_json
         )
 
         policy.pop('permissions', None)
