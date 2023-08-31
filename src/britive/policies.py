@@ -14,7 +14,7 @@ class Policies:
               from_time: str = None, to_time: str = None, date_schedule: dict = None, days_schedule: dict = None,
               approval_notification_medium: Union[str, list] = None, time_to_approve: int = 5,
               access_validity_time: int = 120, approver_users: list = None, approver_tags: list = None,
-              access_type: str = 'Allow', identifier_type: str = 'name', condition_as_json: bool = True) -> dict:
+              access_type: str = 'Allow', identifier_type: str = 'name', condition_format: str = 'json_string') -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -76,7 +76,11 @@ class Policies:
         :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
             identifiers are being provided to the other parameters. Either all identifiers must be names or all
             identifiers must be IDs.
-        :param condition_as_json: condition block can be returned as string or json. default is string.
+        :param condition_format: Prior to version 2.21.0 the only acceptable format for the condition block of
+            a policy was as a stringifed json object. As of 2.21.0 the condition block can also be built as a raw
+            python dictionary. This parameter will default to `json_string` to support backwards compatibility. The
+            other acceptable value is `dict`. As of 2.21.0 the Britive backend supports providing the condition block
+            in either format.
         :return: A dict which can be provided as a policy to `create` and `update`.
         """
 
@@ -104,7 +108,7 @@ class Policies:
             approver_tags=approver_tags,
             access_type=access_type,
             identifier_type=identifier_type,
-            condition_as_json=condition_as_json
+            condition_format=condition_format
         )
 
 
