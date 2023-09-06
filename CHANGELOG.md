@@ -7,7 +7,7 @@ All changes to the package starting with v2.8.1 will be logged here.
 * None
 
 #### Enhancements
-* None
+* Support for `environment_association` in `profiles.list`
 
 #### Bug Fixes
 * Fixes a bug that will re-request access to a secret instead of raising an exception that the secret request was denied.
