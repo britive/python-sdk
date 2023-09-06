@@ -77,7 +77,7 @@ class MySecrets:
         data = {
             'justification': justification
         }
-
+        first = True
         while True:  # this is not loop forever due to exceptions raised or returning the secret value
             try:
                 # handle when the time has expired waiting for approval
@@ -88,7 +88,7 @@ class MySecrets:
                 return self.britive.post(
                     f'{self.base_url}/vault/{vault_id}/accesssecrets',
                     params=params,
-                    json=data
+                    json=data if first else None
                 )['value']
             # 403 will be returned when approval is required or pending or access is denied
             except exceptions.ForbiddenRequest as e:
@@ -97,6 +97,7 @@ class MySecrets:
                 if 'PE-0002' in str(e):
                     raise exceptions.AccessDenied()
                 if 'PE-0010' in str(e):  # approval to view the secret is pending...
+                    first = False
                     time.sleep(wait_time)
                 else:
                     raise e
