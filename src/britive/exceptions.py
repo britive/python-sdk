@@ -1,25 +1,21 @@
 
-class TenantMissingError(Exception):
+class AccessDenied(Exception):
     pass
 
 
-class TokenMissingError(Exception):
+class ApiTokenNotFound(Exception):
     pass
 
 
-class TooManyUsersFound(Exception):
+class ApprovalRequiredButNoJustificationProvided(Exception):
     pass
 
 
-class TooManyServiceIdentitiesFound(Exception):
+class ApprovalWorkflowRejected(Exception):
     pass
 
 
-class InvalidRequest(Exception):
-    pass
-
-
-class UnauthorizedRequest(Exception):
+class ApprovalWorkflowTimedOut(Exception):
     pass
 
 
@@ -27,7 +23,15 @@ class ForbiddenRequest(Exception):
     pass
 
 
-class NotFound(Exception):
+class InternalServerError(Exception):
+    pass
+
+
+class InvalidFederationProvider(Exception):
+    pass
+
+
+class InvalidRequest(Exception):
     pass
 
 
@@ -35,11 +39,87 @@ class MethodNotAllowed(Exception):
     pass
 
 
-class InternalServerError(Exception):
+class NoSecretsVaultFound(Exception):
+    pass
+
+
+class NotExecutingInAzureEnvironment(Exception):
+    pass
+
+
+class NotExecutingInBitbucketEnvironment(Exception):
+    pass
+
+
+class NotExecutingInGithubEnvironment(Exception):
+    pass
+
+
+class NotFound(Exception):
+    pass
+
+
+class ProfileApprovalMaxBlockTimeExceeded(Exception):
+    pass
+
+
+class ProfileApprovalRejected(Exception):
+    pass
+
+
+class ProfileApprovalTimedOut(Exception):
+    pass
+
+
+class ProfileApprovalWithdrawn(Exception):
+    pass
+
+
+class ProfileCheckoutAlreadyApproved(Exception):
+    pass
+
+
+class ProfileNotFound(Exception):
+    pass
+
+
+class RootEnvironmentGroupNotFound(Exception):
     pass
 
 
 class ServiceUnavailable(Exception):
+    pass
+
+
+class TenantMissingError(Exception):
+    pass
+
+
+class TenantNotEnabledForProfilesVersion1(Exception):
+    pass
+
+
+class TenantNotEnabledForProfilesVersion2(Exception):
+    pass
+
+
+class TokenMissingError(Exception):
+    pass
+
+
+class TooManyServiceIdentitiesFound(Exception):
+    pass
+
+
+class TooManyUsersFound(Exception):
+    pass
+
+
+class TransactionNotFound(Exception):
+    pass
+
+
+class UnauthorizedRequest(Exception):
     pass
 
 
@@ -52,86 +132,6 @@ class UserNotAllowedToChangePassword(Exception):
 
 
 class UserNotAssociatedWithDefaultIdentityProvider(Exception):
-    pass
-
-
-class ProfileNotFound(Exception):
-    pass
-
-
-class RootEnvironmentGroupNotFound(Exception):
-    pass
-
-
-class ApiTokenNotFound(Exception):
-    pass
-
-
-class TransactionNotFound(Exception):
-    pass
-
-
-class ApprovalRequiredButNoJustificationProvided(Exception):
-    pass
-
-
-class ApprovalWorkflowTimedOut(Exception):
-    pass
-
-
-class ApprovalWorkflowRejected(Exception):
-    pass
-
-
-class AccessDenied(Exception):
-    pass
-
-
-class TenantNotEnabledForProfilesVersion1(Exception):
-    pass
-
-
-class TenantNotEnabledForProfilesVersion2(Exception):
-    pass
-
-
-class ProfileApprovalTimedOut(Exception):
-    pass
-
-
-class ProfileApprovalRejected(Exception):
-    pass
-
-
-class ProfileApprovalWithdrawn(Exception):
-    pass
-
-
-class ProfileApprovalMaxBlockTimeExceeded(Exception):
-    pass
-
-
-class NoSecretsVaultFound(Exception):
-    pass
-
-
-class InvalidFederationProvider(Exception):
-    pass
-
-
-class NotExecutingInGithubEnvironment(Exception):
-    pass
-
-
-class NotExecutingInBitbucketEnvironment(Exception):
-    pass
-
-
-class NotExecutingInAzureEnvironment(Exception):
-    pass
-
-
-class ProfileCheckoutAlreadyApproved(Exception):
     pass
 
 

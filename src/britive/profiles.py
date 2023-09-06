@@ -79,15 +79,22 @@ class Profiles:
 
         return self.britive.post(f'{self.base_url}/{application_id}/paps', json=data)
 
-    def list(self, application_id: str, filter_expression: str = None) -> list:
+    def list(self, application_id: str, filter_expression: str = None, environment_association: str = None) -> list:
         """
         Return an optionally filtered list of profiles associated with the specified application.
 
         :param application_id: The ID of the application.
         :param filter_expression: Can filter based on `name`, `status`, `integrity check`. Valid operators are `eq` and
             `co`. Example: name co "Dev Account"
+        :param environment_association: Only list profiles with associations to the specified environment. Cannot be
+            used in conjunction with `filter_expression`. Example: `environment_association="109876543210"`
         :return: List of profiles.
         """
+
+        if filter_expression and environment_association:
+            raise exceptions.InvalidRequest(
+                'Cannot specify `filter_expression` and `environment_association` in the same request.'
+            )
 
         params = {
             'page': 0,
@@ -97,6 +104,9 @@ class Profiles:
 
         if filter_expression:
             params['filter'] = filter_expression
+
+        if environment_association:
+            params['environment'] = environment_association
 
         return self.britive.get(f'{self.base_url}/{application_id}/paps', params=params)
 
