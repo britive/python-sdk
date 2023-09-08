@@ -32,9 +32,16 @@ def test_get_name(cached_system_level_role):
 
 
 def test_update_id(cached_system_level_role):
+    permissions = britive.system.permissions.list()
+    permission_ids = []
+    permissions_to_add = ['SMAdminPermission', 'NMAdminPermission']
+    for permission in permissions:
+        if permission['name'] in permissions_to_add:
+            permission_ids.append(permission['id'])
+
     role = britive.system.roles.build(
         name=cached_system_level_role['name'],
-        permissions=['1885c914-aba8-4cf5-a2e7-1c6a6088b64b', '2e6ebf6b-bfaa-4a98-9345-a5f9b488de88'],
+        permissions=permission_ids,
         identifier_type='id'
     )
     response = britive.system.roles.update(

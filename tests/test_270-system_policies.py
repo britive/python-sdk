@@ -60,10 +60,17 @@ def test_get_name(cached_system_level_policy):
 
 
 def test_update_id(cached_system_level_policy, cached_tag):
+    roles = britive.system.roles.list()
+    role_ids = []
+    roles_to_add = ['ApplicationViewRole', 'TenantAdminRole']
+    for role in roles:
+        if role['name'] in roles_to_add:
+            role_ids.append(role['id'])
+
     policy = britive.system.policies.build(
         name=cached_system_level_policy['name'],
         tags=[cached_tag['userTagId']],
-        roles=['102c3d86-569f-4ae3-ae5d-db2b56921a55', '79f467cb-6c55-4a0a-a722-0a4aadc6222a'],
+        roles=role_ids,
         identifier_type='id'
     )
     response = britive.system.policies.update(
