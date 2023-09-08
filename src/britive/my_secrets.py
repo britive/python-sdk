@@ -67,6 +67,7 @@ class MySecrets:
         :raises ApprovalRequiredButNoJustificationProvided: if approval is required but no justification is provided.
         :raises AccessDenied: if the caller does not have access to the secret being requested.
         :raises ApprovalWorkflowTimedOut: if max_wait_time has been reached while waiting for approval.
+        :raises ApprovalWorkflowRejected: if the request to view the secret was rejected.
         """
 
         vault_id = self.__get_vault_id()
@@ -93,7 +94,10 @@ class MySecrets:
             # 403 will be returned when approval is required or pending or access is denied
             except exceptions.ForbiddenRequest as e:
                 if 'PE-0011' in str(e) and not justification:
-                    raise exceptions.ApprovalRequiredButNoJustificationProvided()
+                    if first:
+                        raise exceptions.ApprovalRequiredButNoJustificationProvided()
+                    else:
+                        raise exceptions.ApprovalWorkflowRejected()
                 if 'PE-0002' in str(e):
                     raise exceptions.AccessDenied()
                 if 'PE-0010' in str(e):  # approval to view the secret is pending...

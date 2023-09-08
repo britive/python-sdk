@@ -6,8 +6,6 @@ user_keys = [
     'external',
     'mappedAccounts',
     'identityProvider',
-    'mobile',
-    'externalId',
     'name',
     'firstName',
     'lastName',

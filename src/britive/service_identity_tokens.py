@@ -46,8 +46,7 @@ class ServiceIdentityTokens:
             'tokenExpirationDays': token_expiration_days
         }
 
-        self.britive.patch(f'{self.base_url}/users/{service_identity_id}/tokens', json=data)
-        return self.get(service_identity_id)
+        return self.britive.post(f'{self.base_url}/users/{service_identity_id}/tokens', json=data)
 
     def get(self, service_identity_id: str) -> dict:
         """

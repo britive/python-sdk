@@ -83,6 +83,7 @@ def test_service_identity_tokens_delete(cached_service_identity):
             britive.service_identity_tokens.get(cached_service_identity['userId'])
     finally:
         cleanup('service-identity-token')
+        cleanup('service-identity-token-updated')
 
 
 # 030-service_identities
