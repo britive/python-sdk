@@ -58,7 +58,7 @@ class Profiles:
             - destinationUrl: ''
             - useDefaultAppUrl: True
             - description: ''
-            - scope: if not provided no scopes will be applied. If provided it must follow the
+            - scope: if not provided, no scopes will be applied. If provided it must follow the
                 format listed below.
 
                 [
@@ -72,7 +72,7 @@ class Profiles:
         """
 
         kwargs['appContainerId'] = application_id
-        kwargs['name'] = name  # required field so it is being called out explicitly in the method parameters
+        kwargs['name'] = name  # required field, so it is being called out explicitly in the method parameters
 
         # merge defaults and provided information - keys in kwargs will overwrite the defaults in creation_defaults
         data = {**creation_defaults, **kwargs}  # note python 3.5 or greater but only 3.5 and up are supported so okay!
@@ -130,7 +130,7 @@ class Profiles:
         """
         Update details of the specified profile.
 
-        :param application_id: The ID of the applictation.
+        :param application_id: The ID of the application.
         :param profile_id: The ID of the profile to update.
         :param kwargs: Refer to the `create()` method for details on parameters that can be provided. For this update
             action no default values will be injected for missing parameters.
