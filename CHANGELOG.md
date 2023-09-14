@@ -11,12 +11,13 @@ All changes to the package starting with v2.8.1 will be logged here.
 
 #### Bug Fixes
 * Fixes a bug that will re-request access to a secret instead of raising an exception that the secret request was denied.
+* Fixes service identity tokens due to some changes in the way they are generated now that service identity workload federation is supported.
 
 #### Dependencies
 * None
 
 #### Other
-* None
+* Updates to the test suite.
 
 ## v2.20.1 [2023-06-26]
 #### What's New
