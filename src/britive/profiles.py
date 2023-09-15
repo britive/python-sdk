@@ -15,6 +15,10 @@ creation_defaults = {
     'description': ''
 }
 
+update_fields_to_keep: list = list(creation_defaults)
+update_fields_to_keep.append('name')
+update_fields_to_keep.remove('status')
+
 
 class Profiles:
     def __init__(self, britive, version: int = 2):  # default to profiles v2 as v2 will be enabled for new tenants
@@ -110,21 +114,31 @@ class Profiles:
 
         return self.britive.get(f'{self.base_url}/{application_id}/paps', params=params)
 
-    def get(self, application_id: str, profile_id: str) -> dict:
+    def get(self, application_id: str, profile_id: str, summary: bool = None) -> dict:
         """
         Return details of the provided profile.
 
         :param application_id: The ID of the application.
         :param profile_id: The ID of the profile.
+        :param summary: Whether to provide a summarized response. Defaults to None to support backwards compatibility
+            with the legacy functionality/way of obtaining details of the profile. Setting to True will return a
+            summarized set of attributes for the profile. Setting to False will return a larger set of attributes
+            for the profile.
         :return: Details of the profile.
         :raises: ProfileNotFound if the profile does not exist.
         """
 
-        for profile in self.list(application_id=application_id):
-            if profile['papId'] == profile_id:
-                return profile
+        if summary is None:
+            for profile in self.list(application_id=application_id):
+                if profile['papId'] == profile_id:
+                    return profile
 
-        raise exceptions.ProfileNotFound()
+            raise exceptions.ProfileNotFound()
+        else:
+            params = {}
+            if summary:
+                params['view'] = 'summary'
+            return self.britive.get(f'{self.britive.base_url}/paps/{profile_id}', params=params)
 
     def update(self, application_id: str, profile_id: str, **kwargs) -> dict:
         """
@@ -137,8 +151,13 @@ class Profiles:
         :return: Details of the updated profile.
         """
 
+        existing = self.get(application_id=application_id, profile_id=profile_id, summary=True)
+        base = {key: existing[key] for key in update_fields_to_keep}
+
         kwargs['appContainerId'] = application_id
-        return self.britive.patch(f'{self.base_url}/{application_id}/paps/{profile_id}', json=kwargs)
+        data = {**base, **kwargs}
+
+        return self.britive.patch(f'{self.base_url}/{application_id}/paps/{profile_id}', json=data)
 
     def available_resources(self, profile_id: str, filter_expression: str = None) -> list:
         """
