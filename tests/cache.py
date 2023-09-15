@@ -99,6 +99,12 @@ def cached_service_identity_token(pytestconfig, cached_service_identity):
 
 
 @pytest.fixture(scope='session')
+@cached_resource(name='service-identity-token-updated')
+def cached_service_identity_token_updated(pytestconfig, cached_service_identity):
+    return britive.service_identity_tokens.update(cached_service_identity['userId'], 45)
+
+
+@pytest.fixture(scope='session')
 @cached_resource(name='catalog')
 def cached_catalog(pytestconfig):
     apps = britive.applications.catalog()
@@ -295,7 +301,7 @@ def cached_task(pytestconfig, cached_task_service, cached_application, cached_en
 
 @pytest.fixture(scope='session')
 @cached_resource(name='security-policy')
-def cached_security_policy(pytestconfig, cached_service_identity_token):
+def cached_security_policy(pytestconfig, cached_service_identity_token_updated):
     r = str(random.randint(0, 1000000))
 
     return britive.security_policies.create(
@@ -303,7 +309,7 @@ def cached_security_policy(pytestconfig, cached_service_identity_token):
             description='test',
             ips=['1.1.1.1', '10.0.0.0/16'],
             effect='Allow',
-            tokens=[cached_service_identity_token['id']]
+            tokens=[cached_service_identity_token_updated['id']]
         )
 
 

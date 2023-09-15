@@ -4,7 +4,6 @@ from .cache import *  # will also import some globals like `britive`
 service_identity_keys = [
     'userId',
     'status',
-    'description',
     'name',
     'type',
     'adminRoles'

@@ -119,14 +119,14 @@ def test_secret_update(cached_secret, cached_vault):
     assert update is None
 
 
+def test_policies_create(cached_policy):
+    assert isinstance(cached_policy, dict)
+
+
 def test_policies_list():
     sec_policies = britive.secrets_manager.policies.list()
     assert isinstance(sec_policies, list)
     assert isinstance(sec_policies[0], dict)
-
-
-def test_policies_create(cached_policy):
-    assert isinstance(cached_policy, dict)
 
 
 def test_resources_get():
