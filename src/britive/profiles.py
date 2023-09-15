@@ -15,6 +15,10 @@ creation_defaults = {
     'description': ''
 }
 
+update_fields_to_keep: list = list(creation_defaults)
+update_fields_to_keep.append('name')
+update_fields_to_keep.remove('status')
+
 
 class Profiles:
     def __init__(self, britive, version: int = 2):  # default to profiles v2 as v2 will be enabled for new tenants
@@ -58,7 +62,7 @@ class Profiles:
             - destinationUrl: ''
             - useDefaultAppUrl: True
             - description: ''
-            - scope: if not provided no scopes will be applied. If provided it must follow the
+            - scope: if not provided, no scopes will be applied. If provided it must follow the
                 format listed below.
 
                 [
@@ -72,22 +76,29 @@ class Profiles:
         """
 
         kwargs['appContainerId'] = application_id
-        kwargs['name'] = name  # required field so it is being called out explicitly in the method parameters
+        kwargs['name'] = name  # required field, so it is being called out explicitly in the method parameters
 
         # merge defaults and provided information - keys in kwargs will overwrite the defaults in creation_defaults
         data = {**creation_defaults, **kwargs}  # note python 3.5 or greater but only 3.5 and up are supported so okay!
 
         return self.britive.post(f'{self.base_url}/{application_id}/paps', json=data)
 
-    def list(self, application_id: str, filter_expression: str = None) -> list:
+    def list(self, application_id: str, filter_expression: str = None, environment_association: str = None) -> list:
         """
         Return an optionally filtered list of profiles associated with the specified application.
 
         :param application_id: The ID of the application.
         :param filter_expression: Can filter based on `name`, `status`, `integrity check`. Valid operators are `eq` and
             `co`. Example: name co "Dev Account"
+        :param environment_association: Only list profiles with associations to the specified environment. Cannot be
+            used in conjunction with `filter_expression`. Example: `environment_association="109876543210"`
         :return: List of profiles.
         """
+
+        if filter_expression and environment_association:
+            raise exceptions.InvalidRequest(
+                'Cannot specify `filter_expression` and `environment_association` in the same request.'
+            )
 
         params = {
             'page': 0,
@@ -98,37 +109,55 @@ class Profiles:
         if filter_expression:
             params['filter'] = filter_expression
 
+        if environment_association:
+            params['environment'] = environment_association
+
         return self.britive.get(f'{self.base_url}/{application_id}/paps', params=params)
 
-    def get(self, application_id: str, profile_id: str) -> dict:
+    def get(self, application_id: str, profile_id: str, summary: bool = None) -> dict:
         """
         Return details of the provided profile.
 
         :param application_id: The ID of the application.
         :param profile_id: The ID of the profile.
+        :param summary: Whether to provide a summarized response. Defaults to None to support backwards compatibility
+            with the legacy functionality/way of obtaining details of the profile. Setting to True will return a
+            summarized set of attributes for the profile. Setting to False will return a larger set of attributes
+            for the profile.
         :return: Details of the profile.
         :raises: ProfileNotFound if the profile does not exist.
         """
 
-        for profile in self.list(application_id=application_id):
-            if profile['papId'] == profile_id:
-                return profile
+        if summary is None:
+            for profile in self.list(application_id=application_id):
+                if profile['papId'] == profile_id:
+                    return profile
 
-        raise exceptions.ProfileNotFound()
+            raise exceptions.ProfileNotFound()
+        else:
+            params = {}
+            if summary:
+                params['view'] = 'summary'
+            return self.britive.get(f'{self.britive.base_url}/paps/{profile_id}', params=params)
 
     def update(self, application_id: str, profile_id: str, **kwargs) -> dict:
         """
         Update details of the specified profile.
 
-        :param application_id: The ID of the applictation.
+        :param application_id: The ID of the application.
         :param profile_id: The ID of the profile to update.
         :param kwargs: Refer to the `create()` method for details on parameters that can be provided. For this update
             action no default values will be injected for missing parameters.
         :return: Details of the updated profile.
         """
 
+        existing = self.get(application_id=application_id, profile_id=profile_id, summary=True)
+        base = {key: existing[key] for key in update_fields_to_keep}
+
         kwargs['appContainerId'] = application_id
-        return self.britive.patch(f'{self.base_url}/{application_id}/paps/{profile_id}', json=kwargs)
+        data = {**base, **kwargs}
+
+        return self.britive.patch(f'{self.base_url}/{application_id}/paps/{profile_id}', json=data)
 
     def available_resources(self, profile_id: str, filter_expression: str = None) -> list:
         """

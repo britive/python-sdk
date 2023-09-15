@@ -2,6 +2,25 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.21.0 [2023-09-15]
+#### What's New
+* None
+
+#### Enhancements
+* Support for `environment_association` in `profiles.list`
+* Support for `summary` parameter on `profiles.get`
+
+#### Bug Fixes
+* Fixes a bug that will re-request access to a secret instead of raising an exception that the secret request was denied.
+* Fixes service identity tokens due to some changes in the way they are generated now that service identity workload federation is supported.
+* Fixes a bug with `profiles.update` which was not including all the proper fields in the update request.
+
+#### Dependencies
+* None
+
+#### Other
+* Updates to the test suite.
+
 ## v2.20.1 [2023-06-26]
 #### What's New
 * None
