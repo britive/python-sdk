@@ -1,7 +1,7 @@
 from . import exceptions
 import datetime
 from typing import Union
-
+from britive.system.policies import SystemPolicies
 
 creation_defaults = {
     'expirationDuration': 3600000,
@@ -912,7 +912,7 @@ class ProfilePolicies:
         policy = self.britive.get(f'{self.base_url}/{profile_id}/policies/{policy_id}')
 
         if 'condition' in policy.keys():
-            policy['condition'] = self.format_condition_block(policy['condition'], condition_format)
+            policy['condition'] = SystemPolicies.format_condition_block(policy['condition'], condition_format)
         return policy
 
     def create(self, profile_id: str, policy: dict) -> dict:

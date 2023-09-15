@@ -235,7 +235,7 @@ def cached_profile_policy_condition_as_json_str(pytestconfig, cached_profile, ca
         description=cached_tag['name'],
         tags=[cached_tag['name']],
         ips = ['12.12.12.12', '13.13.13.13'],
-        condition_as_json=True
+        condition_format='json_string'
     )
     return britive.profiles.policies.create(
         profile_id=cached_profile['papId'],
@@ -251,7 +251,7 @@ def cached_profile_policy_condition_as_dict(pytestconfig, cached_profile, cached
         description=cached_tag['name'],
         tags=[cached_tag['name']],
         ips = ['12.12.12.12', '13.13.13.13'],
-        condition_as_json=False
+        condition_format='dict'
     )
     return britive.profiles.policies.create(
         profile_id=cached_profile['papId'],
@@ -597,7 +597,8 @@ def cached_system_level_policy_condition_as_default_json_str(pytestconfig, cache
         name=f'python-sdk-condition-default{r}',
         tags=[cached_tag['name']],
         roles=['UserViewRole'],
-        ips=['11.11.11.11', '12.12.12.12']
+        ips=['11.11.11.11', '12.12.12.12'],
+        condition_format='json_string'
     )
     response = britive.system.policies.create(policy=policy)
     return response
@@ -611,7 +612,7 @@ def cached_system_level_policy_condition_as_dictionary(pytestconfig, cached_tag)
         tags=[cached_tag['name']],
         roles=['UserViewRole'],
         ips=['11.11.11.11', '12.12.12.12'],
-        condition_as_json=False
+        condition_format='dict'
     )
     response = britive.system.policies.create(policy=policy)
     return response
