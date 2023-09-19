@@ -231,7 +231,7 @@ def cached_profile_policy(pytestconfig, cached_profile, cached_tag):
 @cached_resource(name='profile-policy-str')
 def cached_profile_policy_condition_as_json_str(pytestconfig, cached_profile, cached_tag):
     policy = britive.profiles.policies.build(
-        name=cached_profile['papId'],
+        name=cached_profile['papId'] + '_json',
         description=cached_tag['name'],
         tags=[cached_tag['name']],
         ips = ['12.12.12.12', '13.13.13.13'],
@@ -247,7 +247,7 @@ def cached_profile_policy_condition_as_json_str(pytestconfig, cached_profile, ca
 @cached_resource(name='profile-policy-dict')
 def cached_profile_policy_condition_as_dict(pytestconfig, cached_profile, cached_tag):
     policy = britive.profiles.policies.build(
-        name=cached_profile['papId'],
+        name=cached_profile['papId'] + '_dict',
         description=cached_tag['name'],
         tags=[cached_tag['name']],
         ips = ['12.12.12.12', '13.13.13.13'],

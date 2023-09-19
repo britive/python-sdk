@@ -250,7 +250,7 @@ def test_policies_get(cached_profile, cached_profile_policy):
 
 
 @pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
-def test_policies_get_condition_format_default(cached_profile, cached_profile_policy_condition_as_json_str):
+def test_policies_condition_created_as_json_get_formatted_passthrough(cached_profile, cached_profile_policy_condition_as_json_str):
     policy = britive.profiles.policies.get(
         profile_id=cached_profile['papId'],
         policy_id=cached_profile_policy_condition_as_json_str['id'], condition_format ='passthrough'
@@ -259,16 +259,7 @@ def test_policies_get_condition_format_default(cached_profile, cached_profile_po
 
 
 @pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
-def test_policies_get_condition_format_default(cached_profile, cached_profile_policy_condition_as_json_str):
-    policy = britive.profiles.policies.get(
-        profile_id=cached_profile['papId'],
-        policy_id=cached_profile_policy_condition_as_json_str['id'], condition_format ='passthrough'
-    )
-    assert isinstance(policy['condition'], str)
-
-
-@pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
-def test_policies_get_condition_format_json(cached_profile, cached_profile_policy_condition_as_json_str):
+def test_policies_condition_created_as_json_get_formatted_json(cached_profile, cached_profile_policy_condition_as_json_str):
     policy = britive.profiles.policies.get(
         profile_id=cached_profile['papId'],
         policy_id=cached_profile_policy_condition_as_json_str['id'], condition_format='json_string'
@@ -277,7 +268,7 @@ def test_policies_get_condition_format_json(cached_profile, cached_profile_polic
 
 
 @pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
-def test_policies_get_condition_format_dict(cached_profile, cached_profile_policy_condition_as_json_str):
+def test_policies_condition_created_as_json_get_formatted_dict(cached_profile, cached_profile_policy_condition_as_json_str):
     policy = britive.profiles.policies.get(
         profile_id=cached_profile['papId'],
         policy_id=cached_profile_policy_condition_as_json_str['id'], condition_format='dict'
@@ -286,16 +277,16 @@ def test_policies_get_condition_format_dict(cached_profile, cached_profile_polic
 
 
 @pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
-def test_policies_get_condition_format_default2(cached_profile, cached_profile_policy_condition_as_dict):
+def test_policies_condition_created_as_dict_get_formatted_passthrough(cached_profile, cached_profile_policy_condition_as_dict):
     policy = britive.profiles.policies.get(
         profile_id=cached_profile['papId'],
         policy_id=cached_profile_policy_condition_as_dict['id'], condition_format='passthrough'
     )
-    assert isinstance(policy['condition'], str)
+    assert isinstance(policy['condition'], dict)
 
 
 @pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
-def test_policies_get_condition_format_json2(cached_profile, cached_profile_policy_condition_as_dict):
+def test_policies_condition_created_as_dict_get_formatted_json(cached_profile, cached_profile_policy_condition_as_dict):
     policy = britive.profiles.policies.get(
         profile_id=cached_profile['papId'],
         policy_id=cached_profile_policy_condition_as_dict['id'], condition_format='json_string'
@@ -304,7 +295,7 @@ def test_policies_get_condition_format_json2(cached_profile, cached_profile_poli
 
 
 @pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
-def test_policies_get_condition_format_dict2(cached_profile, cached_profile_policy_condition_as_dict):
+def test_policies_condition_created_as_dict_get_formatted_dict(cached_profile, cached_profile_policy_condition_as_dict):
     policy = britive.profiles.policies.get(
         profile_id=cached_profile['papId'],
         policy_id=cached_profile_policy_condition_as_dict['id'], condition_format='dict'
