@@ -836,10 +836,10 @@ class ProfilePolicies:
         :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
             identifiers are being provided to the other parameters. Either all identifiers must be names or all
             identifiers must be IDs.
-        :param condition_format: Prior to version 2.21.0 the only acceptable format for the condition block of
-            a policy was as a stringifed json object. As of 2.21.0 the condition block can also be built as a raw
+        :param condition_format: Prior to version 2.22.0 the only acceptable format for the condition block of
+            a policy was as a stringifed json object. As of 2.22.0 the condition block can also be built as a raw
             python dictionary. This parameter will default to `json_string` to support backwards compatibility. The
-            other acceptable value is `dict`. As of 2.21.0 the Britive backend supports providing the condition block
+            other acceptable value is `dict`. As of 2.22.0 the Britive backend supports providing the condition block
             in either format.
         :return: A dict which can be provided as a profile policy to `create` and `update`.
         """
@@ -897,8 +897,8 @@ class ProfilePolicies:
 
         :param profile_id: The ID of the profile.
         :param policy_id: The ID of the policy.
-        :param condition_format: Prior to version 2.21.0 a policy condition block was always returned as stringified
-            json. As of 2.21.0 the SDK now supports returning the condition block of a policy as either stringified json
+        :param condition_format: Prior to version 2.22.0 a policy condition block was always returned as stringified
+            json. As of 2.22.0 the SDK now supports returning the condition block of a policy as either stringified json
             or a raw python dictionary. The Britive backend will also return the condition block in either format,
             depending on how the policy was initially created. The valid values for this parameter follow.
             * `json_string`: this is the default value in order to support backwards compatibility - will always return

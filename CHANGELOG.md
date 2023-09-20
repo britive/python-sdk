@@ -2,6 +2,22 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.22.0 [2023-09-XX]
+#### What's New
+* None
+
+#### Enhancements
+* Support additional policy condition format. Historically only "stringified" JSON was supported by the Britive backend. Now standard JSON is supported and this SDK will now optionally offer to convert the policy condition block to a python dictonary.
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.21.0 [2023-09-15]
 #### What's New
 * None
