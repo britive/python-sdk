@@ -1,7 +1,8 @@
+import json
 from . import exceptions
 import datetime
 from typing import Union
-from britive.system.policies import SystemPolicies
+
 
 creation_defaults = {
     'expirationDuration': 3600000,
@@ -779,7 +780,7 @@ class ProfilePolicies:
               days_schedule: dict = None, approval_notification_medium: Union[str, list] = None,
               time_to_approve: int = 5, access_validity_time: int = 120, approver_users: list = None,
               approver_tags: list = None, access_type: str = 'Allow', identifier_type: str = 'name',
-              condition_format: str = 'json_string') -> dict:
+              condition_as_dict: bool = False) -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -836,11 +837,10 @@ class ProfilePolicies:
         :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
             identifiers are being provided to the other parameters. Either all identifiers must be names or all
             identifiers must be IDs.
-        :param condition_format: Prior to version 2.22.0 the only acceptable format for the condition block of
+        :param condition_as_dict: Prior to version 2.22.0 the only acceptable format for the condition block of
             a policy was as a stringifed json object. As of 2.22.0 the condition block can also be built as a raw
-            python dictionary. This parameter will default to `json_string` to support backwards compatibility. The
-            other acceptable value is `dict`. As of 2.22.0 the Britive backend supports providing the condition block
-            in either format.
+            python dictionary. This parameter will default to `False` to support backwards compatibility. Setting to
+            `True` will result in the policy condition being returned/built as a python dictionary.
         :return: A dict which can be provided as a profile policy to `create` and `update`.
         """
 
@@ -865,7 +865,7 @@ class ProfilePolicies:
             approver_tags=approver_tags,
             access_type=access_type,
             identifier_type=identifier_type,
-            condition_format=condition_format
+            condition_as_dict=condition_as_dict
         )
 
         # clean up the generic policy response and customize for profiles
@@ -888,7 +888,7 @@ class ProfilePolicies:
 
         return self.britive.get(f'{self.base_url}/{profile_id}/policies')
 
-    def get(self, profile_id: str, policy_id: str, condition_format: str = 'json_string') -> dict:
+    def get(self, profile_id: str, policy_id: str, condition_as_dict: bool = False) -> dict:
         """
         Retrieve details about a specific policy which is associated with the provided profile.
 
@@ -897,22 +897,26 @@ class ProfilePolicies:
 
         :param profile_id: The ID of the profile.
         :param policy_id: The ID of the policy.
-        :param condition_format: Prior to version 2.22.0 a policy condition block was always returned as stringified
+        :param condition_as_dict: Prior to version 2.22.0 a policy condition block was always returned as stringified
             json. As of 2.22.0 the SDK now supports returning the condition block of a policy as either stringified json
             or a raw python dictionary. The Britive backend will also return the condition block in either format,
-            depending on how the policy was initially created. The valid values for this parameter follow.
-            * `json_string`: this is the default value in order to support backwards compatibility - will always return
-                the condition block as stringified json regardless of how the policy was created
-            * `dict`: will return the condition block as a python dictionary regardless of how the policy was created
-            * `passthrough`: will return the condition block in whatever format it was created with - no modifications
-                will be performed to the data returned from the backend
-        "return: Details of the policy.
+            depending on a query parameter value. Setting this value to `True` will result in the condition block being
+            returned as a python dictionary. The default of `False` is to support backwards compatibility.
+        :return: Details of the policy.
         """
 
-        policy = self.britive.get(f'{self.base_url}/{profile_id}/policies/{policy_id}')
+        params = {
+            'conditionJson': condition_as_dict
+        }
 
-        if 'condition' in policy.keys():
-            policy['condition'] = SystemPolicies.format_condition_block(policy['condition'], condition_format)
+        policy = self.britive.get(f'{self.base_url}/{profile_id}/policies/{policy_id}', params=params)
+
+        # it seems profile policy is not honoring conditionJson parameter so doing some extra work here
+        # to get things into the correct format. if in the future that changes we can perhaps remove
+        # the below logic.
+        if 'condition' in policy and condition_as_dict and isinstance(policy['condition'], str):
+            policy['condition'] = json.loads(policy['condition'])
+
         return policy
 
     def create(self, profile_id: str, policy: dict) -> dict:

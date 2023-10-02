@@ -149,5 +149,8 @@ def test_rotate_keys(cached_vault):
         except exceptions.NoSecretsVaultFound:
             time.sleep(3)
             tries += 1
+        except exceptions.NotFound:
+            time.sleep(3)
+            tries += 1
 
 

@@ -70,37 +70,21 @@ def test_get_id(cached_system_level_policy):
     assert response['name'].startswith('python-sdk')
 
 
-def test_policies_condition_created_as_str_get_formatted_passthrough(cached_system_level_policy_condition_as_default_json_str):
-    response = britive.system.policies.get(policy_identifier=cached_system_level_policy_condition_as_default_json_str['id']
-                                           , identifier_type='id'
-                                           , condition_format='passthrough')
-    assert 'condition' in response.keys()
-    assert 'name' in response.keys()
-    assert isinstance(response['condition'], str)
-
-
 def test_policies_condition_created_as_str_get_formatted_json(cached_system_level_policy_condition_as_default_json_str):
-    response = britive.system.policies.get(policy_identifier=cached_system_level_policy_condition_as_default_json_str['id']
-                                           , identifier_type='id'
-                                           , condition_format='json_string')
+    response = britive.system.policies.get(
+        policy_identifier=cached_system_level_policy_condition_as_default_json_str['id']
+        , identifier_type='id'
+        , condition_as_dict=False)
     assert 'condition' in response.keys()
     assert 'name' in response.keys()
     assert isinstance(response['condition'], str)
 
 
 def test_policies_condition_created_as_str_get_formatted_dict(cached_system_level_policy_condition_as_default_json_str):
-    response = britive.system.policies.get(policy_identifier=cached_system_level_policy_condition_as_default_json_str['id']
-                                           , identifier_type='id'
-                                           , condition_format='dict')
-    assert 'condition' in response.keys()
-    assert 'name' in response.keys()
-    assert isinstance(response['condition'], dict)
-
-
-def test_policies_condition_created_as_dict_get_formatted_passthrough(cached_system_level_policy_condition_as_dictionary):
-    response = britive.system.policies.get(policy_identifier=cached_system_level_policy_condition_as_dictionary['id']
-                                           , identifier_type='id'
-                                           , condition_format='passthrough')
+    response = britive.system.policies.get(
+        policy_identifier=cached_system_level_policy_condition_as_default_json_str['id']
+        , identifier_type='id'
+        , condition_as_dict=True)
     assert 'condition' in response.keys()
     assert 'name' in response.keys()
     assert isinstance(response['condition'], dict)
@@ -109,7 +93,7 @@ def test_policies_condition_created_as_dict_get_formatted_passthrough(cached_sys
 def test_policies_condition_created_as_dict_get_formatted_json(cached_system_level_policy_condition_as_dictionary):
     response = britive.system.policies.get(policy_identifier=cached_system_level_policy_condition_as_dictionary['id']
                                            , identifier_type='id'
-                                           , condition_format='json_string')
+                                           , condition_as_dict=False)
     print(response)
     assert 'condition' in response.keys()
     assert 'name' in response.keys()
@@ -119,7 +103,7 @@ def test_policies_condition_created_as_dict_get_formatted_json(cached_system_lev
 def test_policies_condition_created_as_dict_get_formatted_dict(cached_system_level_policy_condition_as_dictionary):
     response = britive.system.policies.get(policy_identifier=cached_system_level_policy_condition_as_dictionary['id']
                                            , identifier_type='id'
-                                           , condition_format='dict')
+                                           , condition_as_dict=True)
     assert 'condition' in response.keys()
     assert 'name' in response.keys()
     assert isinstance(response['condition'], dict)
@@ -227,7 +211,8 @@ def test_delete(cached_system_level_policy):
             policy_identifier=cached_system_level_policy['id'],
             identifier_type='id'
         ) is None
-        assert britive.system.policies.get(cached_system_level_policy['id'])['errorCode'] == 'PA-0045'
+        with pytest.raises(exceptions.NotFound):
+            britive.system.policies.get(cached_system_level_policy['id'])
     finally:
         cleanup('policy-system-level')
 

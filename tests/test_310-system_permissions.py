@@ -88,7 +88,9 @@ def test_delete(cached_system_level_permission):
             permission_identifier=cached_system_level_permission['id'],
             identifier_type='id'
         ) is None
-        assert britive.system.permissions.get(cached_system_level_permission['id'])['errorCode'] == 'PA-0024'
+
+        with pytest.raises(exceptions.NotFound):
+            britive.system.permissions.get(cached_system_level_permission['id'])
     finally:
         cleanup('permission-system-level')
 

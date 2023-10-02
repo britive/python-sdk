@@ -21,28 +21,8 @@ class SystemPolicies:
 
         return self.britive.get(self.base_url)
 
-    @staticmethod
-    def format_condition_block(condition, condition_format: str):
-        """
-        Formats a condition block.
-
-        Internal method used to format a policy condition block based on how the condition block was returned from the
-        backend and how the caller wishes to receive the condition block.
-
-        This method is "public" as it will be called by other methods in this SDK.
-        """
-        if condition_format not in ['passthrough', 'json_string', 'dict']:
-            raise  ValueError(f'condition_format of {condition_format} is not valid')
-        if condition_format == 'passthrough':
-            return condition
-        if condition_format == 'dict' and isinstance(condition, str):
-            return json.loads(condition)
-        if condition_format == 'json_string' and isinstance(condition, dict):
-            return json.dumps(condition, default=str)
-        return condition
-
     def get(self, policy_identifier: str, identifier_type: str = 'name', verbose: bool = False,
-            condition_format: str = 'json_string') -> dict:
+            condition_as_dict: bool = False) -> dict:
         """
         Get details of the specified system policy.
 
@@ -50,28 +30,22 @@ class SystemPolicies:
         :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
             identifiers will be returned. Either all identifiers must be names or all identifiers must be IDs.
         :param verbose: Whether to return a more compact response (the default) or a more verbose response.
-        :param condition_format: Prior to version 2.22.0 a policy condition block was always returned as stringified
+        :param condition_as_dict: Prior to version 2.22.0 a policy condition block was always returned as stringified
             json. As of 2.22.0 the SDK now supports returning the condition block of a policy as either stringified json
             or a raw python dictionary. The Britive backend will also return the condition block in either format,
-            depending on how the policy was initially created. The valid values for this parameter follow.
-            * `json_string`: this is the default value in order to support backwards compatibility - will always return
-                the condition block as stringified json regardless of how the policy was created
-            * `dict`: will return the condition block as a python dictionary regardless of how the policy was created
-            * `passthrough`: will return the condition block in whatever format it was created with - no modifications
-                will be performed to the data returned from the backend
-        :returns: Details of the specified policy.
+            depending on a query parameter value. Setting this value to `True` will result in the condition block being
+            returned as a python dictionary. The default of `False` is to support backwards compatibility.
+        :return: Details of the specified policy.
         """
 
         self._validate_identifier_type(identifier_type)
+
         params = {
-            'compactResponse': not verbose
+            'compactResponse': not verbose,
+            'conditionJson': condition_as_dict
         }
 
-        policy = self.britive.get(f'{self.base_url}/{policy_identifier}', params=params)
-
-        if 'condition' in policy.keys():
-            policy['condition'] = self.format_condition_block(policy['condition'], condition_format)
-        return policy
+        return self.britive.get(f'{self.base_url}/{policy_identifier}', params=params)
 
     def create(self, policy: dict) -> dict:
         """
@@ -185,7 +159,7 @@ class SystemPolicies:
               from_time: str = None, to_time: str = None, date_schedule: dict = None, days_schedule: dict = None,
               approval_notification_medium: Union[str, list] = None, time_to_approve: int = 5,
               access_validity_time: int = 120, approver_users: list = None, approver_tags: list = None,
-              access_type: str = 'Allow', identifier_type: str = 'name', condition_format: str = 'json_string') -> dict:
+              access_type: str = 'Allow', identifier_type: str = 'name', condition_as_dict: bool = False) -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -247,17 +221,12 @@ class SystemPolicies:
         :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
             identifiers are being provided to the other parameters. Either all identifiers must be names or all
             identifiers must be IDs.
-        :param condition_format: Prior to version 2.22.0 the only acceptable format for the condition block of
+        :param condition_as_dict: Prior to version 2.22.0 the only acceptable format for the condition block of
             a policy was as a stringifed json object. As of 2.22.0 the condition block can also be built as a raw
-            python dictionary. This parameter will default to `json_string` to support backwards compatibility. The
-            other acceptable value is `dict`. As of 2.22.0 the Britive backend supports providing the condition block
-            in either format.
+            python dictionary. This parameter will default to `False` to support backwards compatibility. Setting to
+            `True` will result in the policy condition being returned/built as a python dictionary.
         :return: A dict which can be provided as a policy to `create` and `update`.
         """
-
-        if condition_format not in ['json_string', 'dict']:
-            raise ValueError(f'condition format of {condition_format} is not acceptable - only `json_string` '
-                             f'and `dict` are allowed values')
 
         condition = {}
 
@@ -356,6 +325,6 @@ class SystemPolicies:
         if roles:
             policy['roles'] = [{identifier_type: r} for r in roles]
         if condition:
-            policy['condition'] = json.dumps(condition, default=str) if condition_format == 'json_string' else condition
+            policy['condition'] = condition if condition_as_dict else json.dumps(condition, default=str)
 
         return policy
