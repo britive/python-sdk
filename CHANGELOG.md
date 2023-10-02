@@ -2,15 +2,15 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
-## v2.22.0 [2023-09-XX]
+## v2.22.0 [2023-10-XX]
 #### What's New
 * None
 
 #### Enhancements
-* Support additional policy condition format. Historically only "stringified" JSON was supported by the Britive backend. Now standard JSON is supported and this SDK will now optionally offer to convert the policy condition block to a python dictonary.
+* Support additional policy condition format. Historically only "stringified" JSON was supported by the Britive backend. Now standard JSON is supported and this SDK will now optionally offer to convert the policy condition block to a python dictionary.
 
 #### Bug Fixes
-* None
+* Enhanced error handling when a secret or node/path in secrets manager does not exist
 
 #### Dependencies
 * None
