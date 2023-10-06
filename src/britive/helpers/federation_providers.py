@@ -104,7 +104,7 @@ class AwsFederationProvider(FederationProvider):
         self.duration = duration
         temp_tenant = tenant
         if not temp_tenant:
-            self.tenant = os.getenv('BRITIVE_TENANT')
+            temp_tenant = os.getenv('BRITIVE_TENANT')
         if not temp_tenant:
             print('Error: the aws federation provider requires the britive tenant as part of the signing algorithm')
             raise exceptions.TenantMissingError()
