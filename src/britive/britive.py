@@ -98,19 +98,20 @@ class Britive:
 
         self.tenant = tenant or os.environ.get(BRITIVE_TENANT_ENV_NAME)
 
-        if token_federation_provider:
-            self.__token = self.source_federation_token_from(
-                provider=token_federation_provider,
-                duration_seconds=token_federation_provider_duration_seconds
-            )
-        else:
-            self.__token = token or os.environ.get(BRITIVE_TOKEN_ENV_NAME)
-
         if not self.tenant:
             raise TenantMissingError(
                 'Tenant not explicitly provided and could not be sourced '
                 f'from environment variable {BRITIVE_TENANT_ENV_NAME}'
             )
+
+        if token_federation_provider:
+            self.__token = self.source_federation_token_from(
+                provider=token_federation_provider,
+                tenant=self.tenant,
+                duration_seconds=token_federation_provider_duration_seconds
+            )
+        else:
+            self.__token = token or os.environ.get(BRITIVE_TOKEN_ENV_NAME)
 
         if not self.__token:
             raise TokenMissingError(
