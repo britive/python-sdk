@@ -21,7 +21,7 @@ class MySecrets:
         self.base_url = f'{self.britive.base_url}/v1/secretmanager'
 
     def __get_vault_id(self):
-        # only 1 vault is allowed per tenant so we can reliably grab the ID of that vault
+        # only 1 vault is allowed per tenant, so we can reliably grab the ID of that vault
         try:
             return self.britive.get(f'{self.base_url}/vault')['id']
         except KeyError as e:
@@ -68,6 +68,7 @@ class MySecrets:
         :raises AccessDenied: if the caller does not have access to the secret being requested.
         :raises ApprovalWorkflowTimedOut: if max_wait_time has been reached while waiting for approval.
         :raises ApprovalWorkflowRejected: if the request to view the secret was rejected.
+        :raises InvalidRequest: if the node/secret does not exist
         """
 
         vault_id = self.__get_vault_id()
@@ -91,6 +92,7 @@ class MySecrets:
                     params=params,
                     json=data if first else None
                 )['value']
+
             # 403 will be returned when approval is required or pending or access is denied
             except exceptions.ForbiddenRequest as e:
                 if 'PE-0011' in str(e) and not justification:

@@ -83,7 +83,9 @@ def test_update_name(cached_system_level_role):
 def test_delete(cached_system_level_role):
     try:
         assert britive.system.roles.delete(role_identifier=cached_system_level_role['id'], identifier_type='id') is None
-        assert britive.system.roles.get(cached_system_level_role['id'])['errorCode'] == 'PA-0055'
+
+        with pytest.raises(exceptions.NotFound):
+            britive.system.roles.get(cached_system_level_role['id'])
     finally:
         cleanup('role-system-level')
 
