@@ -2,7 +2,7 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
-## v2.22.0 [2023-10-XX]
+## v2.22.0 [2023-10-12]
 #### What's New
 * None
 
@@ -11,6 +11,7 @@ All changes to the package starting with v2.8.1 will be logged here.
 
 #### Bug Fixes
 * Enhanced error handling when a secret or node/path in secrets manager does not exist
+* Fixed bug related to AWS federation provider when a tenant was not provided via the BRITIVE_TENANT environment variable
 
 #### Dependencies
 * None
