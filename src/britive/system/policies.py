@@ -21,7 +21,8 @@ class SystemPolicies:
 
         return self.britive.get(self.base_url)
 
-    def get(self, policy_identifier: str, identifier_type: str = 'name', verbose: bool = False) -> dict:
+    def get(self, policy_identifier: str, identifier_type: str = 'name', verbose: bool = False,
+            condition_as_dict: bool = False) -> dict:
         """
         Get details of the specified system policy.
 
@@ -29,13 +30,21 @@ class SystemPolicies:
         :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
             identifiers will be returned. Either all identifiers must be names or all identifiers must be IDs.
         :param verbose: Whether to return a more compact response (the default) or a more verbose response.
-        :returns: Details of the specified policy.
+        :param condition_as_dict: Prior to version 2.22.0 a policy condition block was always returned as stringified
+            json. As of 2.22.0 the SDK now supports returning the condition block of a policy as either stringified json
+            or a raw python dictionary. The Britive backend will also return the condition block in either format,
+            depending on a query parameter value. Setting this value to `True` will result in the condition block being
+            returned as a python dictionary. The default of `False` is to support backwards compatibility.
+        :return: Details of the specified policy.
         """
 
         self._validate_identifier_type(identifier_type)
+
         params = {
-            'compactResponse': not verbose
+            'compactResponse': not verbose,
+            'conditionJson': condition_as_dict
         }
+
         return self.britive.get(f'{self.base_url}/{policy_identifier}', params=params)
 
     def create(self, policy: dict) -> dict:
@@ -150,7 +159,7 @@ class SystemPolicies:
               from_time: str = None, to_time: str = None, date_schedule: dict = None, days_schedule: dict = None,
               approval_notification_medium: Union[str, list] = None, time_to_approve: int = 5,
               access_validity_time: int = 120, approver_users: list = None, approver_tags: list = None,
-              access_type: str = 'Allow', identifier_type: str = 'name') -> dict:
+              access_type: str = 'Allow', identifier_type: str = 'name', condition_as_dict: bool = False) -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -212,6 +221,10 @@ class SystemPolicies:
         :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
             identifiers are being provided to the other parameters. Either all identifiers must be names or all
             identifiers must be IDs.
+        :param condition_as_dict: Prior to version 2.22.0 the only acceptable format for the condition block of
+            a policy was as a stringifed json object. As of 2.22.0 the condition block can also be built as a raw
+            python dictionary. This parameter will default to `False` to support backwards compatibility. Setting to
+            `True` will result in the policy condition being returned/built as a python dictionary.
         :return: A dict which can be provided as a policy to `create` and `update`.
         """
 
@@ -312,6 +325,6 @@ class SystemPolicies:
         if roles:
             policy['roles'] = [{identifier_type: r} for r in roles]
         if condition:
-            policy['condition'] = json.dumps(condition, default=str)
+            policy['condition'] = condition if condition_as_dict else json.dumps(condition, default=str)
 
         return policy

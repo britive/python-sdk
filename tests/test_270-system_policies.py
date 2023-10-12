@@ -17,6 +17,24 @@ def test_create(cached_system_level_policy):
     assert cached_system_level_policy['name'].startswith('python-sdk')
 
 
+def test_create_default(cached_system_level_policy_condition_as_default_json_str):
+    assert isinstance(cached_system_level_policy_condition_as_default_json_str, dict)
+    assert 'id' in cached_system_level_policy_condition_as_default_json_str.keys()
+    assert 'name' in cached_system_level_policy_condition_as_default_json_str.keys()
+    assert cached_system_level_policy_condition_as_default_json_str['name'].startswith('python-sdk-')
+    assert 'condition' in cached_system_level_policy_condition_as_default_json_str.keys()
+    assert isinstance(cached_system_level_policy_condition_as_default_json_str['condition'], str)
+
+
+def test_create_condition_dictionary(cached_system_level_policy_condition_as_dictionary):
+    assert isinstance(cached_system_level_policy_condition_as_dictionary, dict)
+    assert 'id' in cached_system_level_policy_condition_as_dictionary.keys()
+    assert 'name' in cached_system_level_policy_condition_as_dictionary.keys()
+    assert cached_system_level_policy_condition_as_dictionary['name'].startswith('python-sdk-')
+    assert 'condition' in cached_system_level_policy_condition_as_dictionary.keys()
+    assert isinstance(cached_system_level_policy_condition_as_dictionary['condition'], dict)
+
+
 def test_create_single_nm(cached_tag):
     policy = britive.system.policies.build(
         name='python-sdk',
@@ -50,6 +68,45 @@ def test_get_id(cached_system_level_policy):
     assert 'id' in response.keys()
     assert 'name' in response.keys()
     assert response['name'].startswith('python-sdk')
+
+
+def test_policies_condition_created_as_str_get_formatted_json(cached_system_level_policy_condition_as_default_json_str):
+    response = britive.system.policies.get(
+        policy_identifier=cached_system_level_policy_condition_as_default_json_str['id']
+        , identifier_type='id'
+        , condition_as_dict=False)
+    assert 'condition' in response.keys()
+    assert 'name' in response.keys()
+    assert isinstance(response['condition'], str)
+
+
+def test_policies_condition_created_as_str_get_formatted_dict(cached_system_level_policy_condition_as_default_json_str):
+    response = britive.system.policies.get(
+        policy_identifier=cached_system_level_policy_condition_as_default_json_str['id']
+        , identifier_type='id'
+        , condition_as_dict=True)
+    assert 'condition' in response.keys()
+    assert 'name' in response.keys()
+    assert isinstance(response['condition'], dict)
+
+
+def test_policies_condition_created_as_dict_get_formatted_json(cached_system_level_policy_condition_as_dictionary):
+    response = britive.system.policies.get(policy_identifier=cached_system_level_policy_condition_as_dictionary['id']
+                                           , identifier_type='id'
+                                           , condition_as_dict=False)
+    print(response)
+    assert 'condition' in response.keys()
+    assert 'name' in response.keys()
+    assert isinstance(response['condition'], str)
+
+
+def test_policies_condition_created_as_dict_get_formatted_dict(cached_system_level_policy_condition_as_dictionary):
+    response = britive.system.policies.get(policy_identifier=cached_system_level_policy_condition_as_dictionary['id']
+                                           , identifier_type='id'
+                                           , condition_as_dict=True)
+    assert 'condition' in response.keys()
+    assert 'name' in response.keys()
+    assert isinstance(response['condition'], dict)
 
 
 def test_get_name(cached_system_level_policy):
@@ -154,7 +211,8 @@ def test_delete(cached_system_level_policy):
             policy_identifier=cached_system_level_policy['id'],
             identifier_type='id'
         ) is None
-        assert britive.system.policies.get(cached_system_level_policy['id'])['errorCode'] == 'PA-0045'
+        with pytest.raises(exceptions.NotFound):
+            britive.system.policies.get(cached_system_level_policy['id'])
     finally:
         cleanup('policy-system-level')
 

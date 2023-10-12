@@ -91,9 +91,11 @@ def test_service_identities_delete(cached_service_identity):
     try:
         response = britive.service_identities.delete(service_identity_id=cached_service_identity['userId'])
         assert response is None
-        users = britive.service_identities.get_by_name(name=cached_service_identity['name'])
-        assert isinstance(users, list)
-        assert len(users) == 0
+
+        with pytest.raises(exceptions.NotFound):
+            britive.service_identities.get_by_name(name=cached_service_identity['name'])
+    except exceptions.NotFound:
+        pass
     finally:
         cleanup('service-identity')
 
