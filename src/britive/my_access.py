@@ -59,6 +59,46 @@ class MyAccess:
                 return t
         raise exceptions.TransactionNotFound()
 
+    def extend_checkout(self, transaction_id: str) -> dict:
+        """
+        Extend the expiration time of a currently checked out profile.
+
+        :param transaction_id: The ID of the transaction.
+        :return: Details of the given profile/transaction.
+        """
+
+        return self.britive.patch(f'{self.base_url}/extensions/{transaction_id}')
+
+    def extend_checkout_by_name(self, profile_name: str, environment_name: str, application_name: str = None,
+                                programmatic: bool = True) -> dict:
+        """
+        Extend the expiration time of a currently checked out profile by supplying the names of entities.
+
+        :param profile_name: The name of the profile. Use `list_profiles()` to obtain the eligible profiles.
+        :param environment_name: The name of the environment. Use `list_profiles()` to obtain the eligible environments.
+        :param application_name: Optionally the name of the application, which can help disambiguate between profiles
+            with the same name across applications.
+        :param programmatic: True for programmatic credential checkout. False for console checkout.
+        :return: Details of the given profile/transaction.
+        """
+
+        ids = self._get_profile_and_environment_ids_given_names(profile_name, environment_name, application_name)
+        profile_id = ids['profile_id']
+        environment_id = ids['environment_id']
+        access_type = 'PROGRAMMATIC' if programmatic else 'CONSOLE'
+
+        transaction_id = None
+        for transaction in self.list_checked_out_profiles():
+            is_profile = transaction['papId'] == profile_id
+            is_environment = transaction['environmentId'] == environment_id
+            is_type = transaction['accessType'] == access_type
+            if all([is_profile, is_environment, is_type]):
+                transaction_id = transaction['transactionId']
+                break
+        if not transaction_id:
+            raise exceptions.TransactionNotFound()
+        return self.extend_checkout(transaction_id=transaction_id)
+
     def request_approval_by_name(self, profile_name: str, environment_name: str, application_name: str = None,
                                  justification: str = None, wait_time: int = 60, max_wait_time: int = 600,
                                  block_until_disposition: bool = False, progress_func: Callable = None) -> any:
