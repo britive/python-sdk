@@ -2,6 +2,22 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.23.0 [2023-11-07]
+#### What's New
+* None
+
+#### Enhancements
+* Support for extending a checked out profile via `my_access.extend_checkout` and `my_access.extend_checkout_by_name`
+* 
+#### Bug Fixes
+* None
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.23.0rc1 [2023-11-03]
 #### What's New
 * None
