@@ -167,7 +167,7 @@ class Britive:
         self.permissions = Permissions(self)
         self.groups = Groups(self)
         self.identity_attributes = IdentityAttributes(self)
-        self.profiles = Profiles(self, 1 if self.feature_flags.get('profile-v1') else 2)
+        self.profiles = Profiles(self)
         self.task_services = TaskServices(self)
         self.tasks = Tasks(self)
         self.security_policies = SecurityPolicies(self)
