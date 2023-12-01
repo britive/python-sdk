@@ -11,7 +11,7 @@ from britive import exceptions  # exceptions used in test files so including her
 
 
 britive = Britive()  # source details from environment variables
-profiles_v1 = britive.feature_flags['profile-v1']
+profiles_v1 = False
 profiles_v2 = not profiles_v1
 profile_v2_skip = 'requires profiles v1'
 profile_v1_skip = 'requires profiles v2'
@@ -378,25 +378,15 @@ def cached_checked_out_profile(pytestconfig, cached_profile, cached_user, cached
 
     calling_user_details = britive.my_access.whoami()
 
-    if profiles_v1:
-        try:
-            britive.profiles.identities.add(
-                profile_id=cached_profile['papId'],
-                user_id=calling_user_details['userId']
-            )
-        except exceptions.InvalidRequest as e:
-            if str(e) == 'P-0003 - User is already assigned to the profile - no further details available':
-                pass
-    else:
-        policy = britive.profiles.policies.build(
-            name=cached_profile['papId'],
-            users=[calling_user_details['username']],
-            description=cached_tag['name'],
-        )
-        britive.profiles.policies.create(
-            profile_id=cached_profile['papId'],
-            policy=policy
-        )
+    policy = britive.profiles.policies.build(
+        name=cached_profile['papId'],
+        users=[calling_user_details['username']],
+        description=cached_tag['name'],
+    )
+    britive.profiles.policies.create(
+        profile_id=cached_profile['papId'],
+        policy=policy
+    )
 
     # add a permission (just take the first in the list)
     permissions = britive.profiles.permissions.list_available(profile_id=cached_profile['papId'])
