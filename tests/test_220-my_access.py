@@ -87,7 +87,6 @@ def test_favorites():
 
 
 @pytest.mark.skipif(scan_skip, reason=scan_skip_message)
-@pytest.mark.skipif(profiles_v1, reason=profile_v1_skip)
 def test_request_and_approve(cached_profile, cached_service_identity_token, cached_environment,
                              cached_service_identity):
 

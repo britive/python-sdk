@@ -11,10 +11,6 @@ from britive import exceptions  # exceptions used in test files so including her
 
 
 britive = Britive()  # source details from environment variables
-profiles_v1 = False
-profiles_v2 = not profiles_v1
-profile_v2_skip = 'requires profiles v1'
-profile_v1_skip = 'requires profiles v2'
 scan_skip = True if os.getenv('BRITIVE_TEST_IGNORE_SCAN') else False
 scan_skip_message = 'ignore scan requested'
 constraints = False if os.getenv('BRITIVE_GCP_TEST_APP_ID') and os.getenv('BRITIVE_TENANT') == 'engv2-ea' else True
