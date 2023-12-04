@@ -29,13 +29,6 @@ class Profiles:
         self.session_attributes = ProfileSessionAttributes(britive)
         self.policies = ProfilePolicies(britive)
 
-    def __getattr__(self, name):
-        if name in ['identities', 'tags'] and self.version == 2:
-            raise exceptions.TenantNotEnabledForProfilesVersion1('Tenant not enabled for profiles v1')
-        if name in ['policies'] and self.version == 1:
-            raise exceptions.TenantNotEnabledForProfilesVersion2('Tenant not enabled for profiles v2')
-        raise AttributeError(f"'Profiles' object has no attribute '{name}'")
-
     def create(self, application_id: str, name: str, **kwargs) -> dict:
         """
         Create a profile.

@@ -95,14 +95,6 @@ class TenantMissingError(Exception):
     pass
 
 
-class TenantNotEnabledForProfilesVersion1(Exception):
-    pass
-
-
-class TenantNotEnabledForProfilesVersion2(Exception):
-    pass
-
-
 class TokenMissingError(Exception):
     pass
 
