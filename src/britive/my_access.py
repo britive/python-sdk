@@ -204,15 +204,15 @@ class MyAccess:
         else:
             return request
 
-    # def approval_request_status(self, request_id: str) -> dict:
-    #     """
-    #     Provides details on and approval request.
-    #
-    #     :param request_id: The ID of the approval request.
-    #     :return: Details of the approval request.
-    #     """
-    #
-    #     return self.britive.get(f'{self.britive.base_url}/v1/approvals/{request_id}')
+    def approval_request_status(self, request_id: str) -> dict:
+        """
+        Provides details on and approval request.
+
+        :param request_id: The ID of the approval request.
+        :return: Details of the approval request.
+        """
+
+        return self.britive.get(f'{self.britive.base_url}/v1/approvals/{request_id}')
 
     def withdraw_approval_request_by_name(self, profile_name: str, environment_name: str,
                                           application_name: str = None) -> None:
@@ -233,73 +233,73 @@ class MyAccess:
             environment_id=ids['environment_id']
         )
 
-    # def withdraw_approval_request(self, request_id: str = None, profile_id: str = None,
-    #                               environment_id: str = None) -> None:
-    #     """
-    #     Withdraws a pending approval request.
-    #
-    #     Either `request_id` or (`profile_id` AND `environment_id`) are required.
-    #
-    #     :param request_id: The ID of the approval request.
-    #     :param profile_id: The ID of the profile.
-    #     :param environment_id: The ID of the environment.
-    #     :return: None
-    #     """
-    #
-    #     url = None
-    #     if request_id:
-    #         url = f'{self.britive.base_url}/v1/approvals/{request_id}'
-    #     else:
-    #         if not profile_id:
-    #             raise ValueError('profile_id is required.')
-    #         if not environment_id:
-    #             raise ValueError('environment_id is required')
-    #         url = f'{self.britive.base_url}/v1/approvals/consumer/papservice/resource?resourceId=' \
-    #               f'{profile_id}/{environment_id}'
-    #
-    #     return self.britive.delete(url)
+    def withdraw_approval_request(self, request_id: str = None, profile_id: str = None,
+                                  environment_id: str = None) -> None:
+        """
+        Withdraws a pending approval request.
 
-    # def approve_request(self, request_id: str) -> None:
-    #     """
-    #     Approves a request.
-    #
-    #     :param request_id: The ID of the request.
-    #     :return: None.
-    #     """
-    #
-    #     params = {
-    #         'approveRequest': 'yes'
-    #     }
-    #
-    #     return self.britive.patch(f'{self.britive.base_url}/v1/approvals/{request_id}', params=params)
+        Either `request_id` or (`profile_id` AND `environment_id`) are required.
 
-    # def reject_request(self, request_id: str):
-    #     """
-    #     Rejects a request.
-    #
-    #     :param request_id: The ID of the request.
-    #     :return: None.
-    #     """
-    #
-    #     params = {
-    #         'approveRequest': 'no'
-    #     }
-    #
-    #     return self.britive.patch(f'{self.britive.base_url}/v1/approvals/{request_id}', params=params)
+        :param request_id: The ID of the approval request.
+        :param profile_id: The ID of the profile.
+        :param environment_id: The ID of the environment.
+        :return: None
+        """
 
-    # def list_approvals(self) -> dict:
-    #     """
-    #     Lists approval requests.
-    #
-    #     :return: List of approval requests.
-    #     """
-    #
-    #     params = {
-    #         'requestType': 'myApprovals',
-    #         'consumer': 'papservice'
-    #     }
-    #
-    #     return self.britive.get(f'{self.britive.base_url}/v1/approvals/', params=params)
+        url = None
+        if request_id:
+            url = f'{self.britive.base_url}/v1/approvals/{request_id}'
+        else:
+            if not profile_id:
+                raise ValueError('profile_id is required.')
+            if not environment_id:
+                raise ValueError('environment_id is required')
+            url = f'{self.britive.base_url}/v1/approvals/consumer/papservice/resource?resourceId=' \
+                  f'{profile_id}/{environment_id}'
+
+        return self.britive.delete(url)
+
+    def approve_request(self, request_id: str) -> None:
+        """
+        Approves a request.
+
+        :param request_id: The ID of the request.
+        :return: None.
+        """
+
+        params = {
+            'approveRequest': 'yes'
+        }
+
+        return self.britive.patch(f'{self.britive.base_url}/v1/approvals/{request_id}', params=params)
+
+    def reject_request(self, request_id: str):
+        """
+        Rejects a request.
+
+        :param request_id: The ID of the request.
+        :return: None.
+        """
+
+        params = {
+            'approveRequest': 'no'
+        }
+
+        return self.britive.patch(f'{self.britive.base_url}/v1/approvals/{request_id}', params=params)
+
+    def list_approvals(self) -> dict:
+        """
+        Lists approval requests.
+
+        :return: List of approval requests.
+        """
+
+        params = {
+            'requestType': 'myApprovals',
+            'consumer': 'papservice'
+        }
+
+        return self.britive.get(f'{self.britive.base_url}/v1/approvals/', params=params)
 
     def _checkout(self, profile_id: str, environment_id: str, programmatic: bool = True,
                   include_credentials: bool = False, justification: str = None, wait_time: int = 60,
