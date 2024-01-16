@@ -24,7 +24,6 @@ class Profiles:
     def __init__(self, britive):
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
-
         self.permissions = ProfilePermissions(britive)
         self.session_attributes = ProfileSessionAttributes(britive)
         self.policies = ProfilePolicies(britive)
