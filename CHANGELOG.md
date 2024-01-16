@@ -2,12 +2,12 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
-## v2.24.0 [2023-12-XX]
+## v2.24.0 [2024-01-XX]
 #### What's New
 * None
 
 #### Enhancements
-* None
+* Implement logic to catch and present user-friendly error if a tenant is under maintenance
 
 #### Bug Fixes
 * None
