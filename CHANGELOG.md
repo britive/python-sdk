@@ -2,13 +2,30 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.24.0 [2024-01-XX]
+#### What's New
+* None
+
+#### Enhancements
+* Implement logic to catch and present user-friendly error if a tenant is under maintenance
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* None
+
+#### Other
+* Remove references to version 1 of profiles as the Britive Platform no longer supports version 1 and all customers have been migrated to version 2
+
+
 ## v2.23.0 [2023-11-07]
 #### What's New
 * None
 
 #### Enhancements
 * Support for extending a checked out profile via `my_access.extend_checkout` and `my_access.extend_checkout_by_name`
-* 
+
 #### Bug Fixes
 * None
 
