@@ -118,7 +118,6 @@ pytest tests/test_190-audit_logs.py -v
 pytest tests/test_200-reports.py -v
 pytest tests/test_210-identity_providers.py -v
 pytest tests/test_215-workload.py -v
-pytest tests/test_217-settings_banner.py -v
 pytest tests/test_220-my_access.py -v
 pytest tests/test_230-notifications.py -v
 pytest tests/test_240-secrets_manager.py -v
@@ -129,6 +128,7 @@ pytest tests/test_280_system_actions.py -v
 pytest tests/test_290_system_consumers.py -v
 pytest tests/test_300-system_roles.py -v
 pytest tests/test_310-system_permissions.py -v
+pytest tests/test_320-settings_banner.py -v
 
 pytest tests/test_990-delete_all_resources.py -v
 ~~~

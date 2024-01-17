@@ -5,7 +5,7 @@ All changes to the package starting with v2.8.1 will be logged here.
 ## v2.24.0rc1 [2024-01-XX]
 #### What's New
 * `britive.settings.banner.*` - administer the banner/system announcement
-* `britive.my_access.banner` - view the banner/system announcement (all end users can view the banner)
+* `britive.banner` - view the banner/system announcement (all end users can view the banner)
 
 #### Enhancements
 * Implement logic to catch and present user-friendly error if a tenant is under maintenance

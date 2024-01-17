@@ -82,3 +82,10 @@ def test_set_with_incorrect_schedule():
             message_type='INFO',
             time_zone='UTC'
         )
+
+
+def test_banner_end_user():
+    banner = britive.banner()
+    assert isinstance(banner, dict)
+    assert 'message' in banner
+    assert 'messageType' in banner

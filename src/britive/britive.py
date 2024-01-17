@@ -303,6 +303,9 @@ class Britive:
             features[feature['name']] = feature['enabled']
         return features
 
+    def banner(self) -> dict:
+        return self.get(f'{self.base_url}/banner')
+
     def get(self, url, params=None):
         """Internal use only."""
 

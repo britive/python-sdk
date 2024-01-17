@@ -682,5 +682,3 @@ class MyAccess:
         # we can use the `ids` dict with confidence
         return ids
 
-    def banner(self) -> dict:
-        return self.britive.get(f'{self.britive.base_url}/banner')
