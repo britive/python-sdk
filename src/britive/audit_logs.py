@@ -36,10 +36,10 @@ class AuditLogs:
 
         :param from_time: Lower end of the time frame to search. If not provided will default to
             7 days before `to_time`. `from_time` will be interpreted as if in UTC timezone so it is up to the caller to
-            ensure that the datetime object represents UTC. Not timezone manipulation will occur.
+            ensure that the datetime object represents UTC. No timezone manipulation will occur.
         :param to_time: Upper end of the time frame to search. If not provided will default to
             `datetime.datetime.utcnow()`. `to_time` will be interpreted as if in UTC timezone so it is up to the caller
-            to ensure that the datetime object represents UTC. Not timezone manipulation will occur.
+            to ensure that the datetime object represents UTC. No timezone manipulation will occur.
         :param filter_expression: The expression used to filter the results. A list of available fields and operators
             can be found by querying `britive.audit_logs.fields()` and `britive.audit_logs.operators`, respectively.
             Multiple filter expressions must be joined together by `and`. No other join operator is support.

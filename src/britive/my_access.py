@@ -681,3 +681,6 @@ class MyAccess:
         # if we get here we found both the profile and environment and they are unique so
         # we can use the `ids` dict with confidence
         return ids
+
+    def banner(self) -> dict:
+        return self.britive.get(f'{self.britive.base_url}/banner')

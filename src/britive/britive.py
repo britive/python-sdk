@@ -36,6 +36,7 @@ from .secrets_manager import SecretsManager
 from .notification_mediums import NotificationMediums
 from .workload import Workload
 from .system.system import System
+from .settings.settings import Settings
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
 BRITIVE_TOKEN_ENV_NAME = 'BRITIVE_API_TOKEN'
@@ -185,6 +186,7 @@ class Britive:
         self.notification_mediums = NotificationMediums(self)
         self.workload = Workload(self)
         self.system = System(self)
+        self.settings = Settings(self)
 
     @staticmethod
     def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:

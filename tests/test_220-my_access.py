@@ -149,3 +149,9 @@ def test_request_and_approve(cached_profile, cached_service_identity_token, cach
             assert approval['status'] == 'APPROVED'
             break
 
+
+def test_banner():
+    banner = britive.my_access.banner()
+    assert isinstance(banner, dict)
+    assert 'message' in banner
+    assert 'messageType' in banner

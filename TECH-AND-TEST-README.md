@@ -118,6 +118,7 @@ pytest tests/test_190-audit_logs.py -v
 pytest tests/test_200-reports.py -v
 pytest tests/test_210-identity_providers.py -v
 pytest tests/test_215-workload.py -v
+pytest tests/test_217-settings_banner.py -v
 pytest tests/test_220-my_access.py -v
 pytest tests/test_230-notifications.py -v
 pytest tests/test_240-secrets_manager.py -v
