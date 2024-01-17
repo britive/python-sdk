@@ -89,3 +89,11 @@ def test_banner_end_user():
     assert isinstance(banner, dict)
     assert 'message' in banner
     assert 'messageType' in banner
+
+
+def test_banner_off():
+    banner = britive.settings.banner.set(display_banner=False, message='dont care', message_type='INFO')
+    assert 'status' in banner
+    assert banner['status'] == 'OFF'
+    banner = britive.banner()
+    assert banner is None
