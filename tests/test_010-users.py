@@ -156,5 +156,14 @@ def test_remove_custom_identity_attributes(cached_user, cached_identity_attribut
     assert len(attributes) == 0
 
 
+def test_minimized_user_details(cached_user):
+    details = britive.users.minimized_user_details(user_id=cached_user['userId'])
+    assert isinstance(details, list)
+    assert len(details) == 1
+    details = britive.users.minimized_user_details(user_ids=cached_user['userId'])
+    assert isinstance(details, list)
+    assert len(details) == 1
+
+
 
 
