@@ -1,6 +1,5 @@
 import json
 from . import exceptions
-import datetime
 from typing import Union
 
 
@@ -22,28 +21,12 @@ update_fields_to_keep.remove('status')
 
 
 class Profiles:
-    def __init__(self, britive, version: int = 2):  # default to profiles v2 as v2 will be enabled for new tenants
+    def __init__(self, britive):
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
-        self.version = version
-
         self.permissions = ProfilePermissions(britive)
         self.session_attributes = ProfileSessionAttributes(britive)
-
-        if self.version == 1:
-            self.identities = ProfileIdentities(britive)
-            self.tags = ProfileTags(britive)
-        elif self.version == 2:
-            self.policies = ProfilePolicies(britive)
-        else:
-            raise Exception(f'invalid profile version - {self.version} - cannot continue')
-
-    def __getattr__(self, name):
-        if name in ['identities', 'tags'] and self.version == 2:
-            raise exceptions.TenantNotEnabledForProfilesVersion1('Tenant not enabled for profiles v1')
-        if name in ['policies'] and self.version == 1:
-            raise exceptions.TenantNotEnabledForProfilesVersion2('Tenant not enabled for profiles v2')
-        raise AttributeError(f"'Profiles' object has no attribute '{name}'")
+        self.policies = ProfilePolicies(britive)
 
     def create(self, application_id: str, name: str, **kwargs) -> dict:
         """
@@ -467,178 +450,6 @@ class ProfilePermissionConstraints:
             constraint = {}
 
         return self.britive.put(url, params=params, json=constraint)
-
-
-class ProfileIdentities:
-    def __init__(self, britive):
-        self.britive = britive
-        self.base_url = f'{self.britive.base_url}/paps'
-
-    def add(self, profile_id: str, user_id: str, start: datetime = None, end: datetime = None) -> dict:
-        """
-        Add a user to the profile.
-
-        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
-        `britive.profiles.policies.*` instead.
-
-        :param profile_id: The ID of the profile.
-        :param user_id: The ID of the user.
-        :param start: The optional start time of when the association should be in effect. Providing start implies that
-            end will also be provided. `start` will be interpreted as if in UTC timezone so it is up to the caller to
-            ensure that the datetime object represents UTC. Not timezone manipulation will occur.
-        :param end: The optional end time of when the association should be in effect. Providing end implies that start
-            will also be provided. `end` will be interpreted as if in UTC timezone so it is up to the caller to
-            ensure that the datetime object represents UTC. Not timezone manipulation will occur.
-        :return: Details of added user.
-        """
-
-        data = {}
-        if start and end:
-            data['start'] = start.isoformat(sep='T', timespec='seconds') + 'Z'
-            data['end'] = end.isoformat(sep='T', timespec='seconds') + 'Z'
-
-        return self.britive.post(f'{self.base_url}/{profile_id}/users/{user_id}', json=data)
-
-    def list_assigned(self, profile_id: str, filter_expression: str = None) -> list:
-        """
-        List the users assigned to the profile.
-
-        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
-        `britive.profiles.policies.*` instead.
-
-        :param profile_id: The ID of the profile.
-        :param filter_expression: Can filter based on `name`, `status`, `integrity check`. Valid operators are `eq` and
-            `co`. Example: name co "Dev Account"
-        :return: List of permissions assigned to the profile.
-        """
-
-        params = {
-            'page': 0,
-            'size': 100
-        }
-
-        if filter_expression:
-            params['filter'] = filter_expression
-
-        return self.britive.get(f'{self.base_url}/{profile_id}/users', params=params)
-
-    def list_available(self, profile_id: str) -> list:
-        """
-        List users available to be assigned to the profile.
-
-        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
-        `britive.profiles.policies.*` instead.
-
-        :param profile_id: The ID of the profile.
-        :return: List of users that are available to be assigned to the profile.
-        """
-
-        params = {
-            'page': 0,
-            'size': 100,
-            'query': 'available'
-        }
-        return self.britive.get(f'{self.base_url}/{profile_id}/users', params=params)
-
-    def remove(self, profile_id: str, user_id: str) -> None:
-        """
-        Remove the user from the profile.
-
-        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
-        `britive.profiles.policies.*` instead.
-
-        :param profile_id: The ID of the profile.
-        :param user_id: The ID of the user.
-        :return: None.
-        """
-
-        return self.britive.delete(f'{self.base_url}/{profile_id}/users/{user_id}')
-
-
-class ProfileTags:
-    def __init__(self, britive):
-        self.britive = britive
-        self.base_url = f'{self.britive.base_url}/paps'
-
-    def add(self, profile_id: str, tag_id: str, start: datetime = None, end: datetime = None) -> dict:
-        """
-        Add a tag to the profile.
-
-        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
-        `britive.profiles.policies.*` instead.
-
-        :param profile_id: The ID of the profile.
-        :param tag_id: The ID of the tag.
-        :param start: The optional start time of when the association should be in effect. Providing start implies that
-            end will also be provided. `start` will be interpreted as if in UTC timezone so it is up to the caller to
-            ensure that the datetime object represents UTC. Not timezone manipulation will occur.
-        :param end: The optional end time of when the association should be in effect. Providing end implies that start
-            will also be provided. `end` will be interpreted as if in UTC timezone so it is up to the caller to
-            ensure that the datetime object represents UTC. Not timezone manipulation will occur.
-        :return: Details of added tag.
-        """
-
-        data = {}
-        if start and end:
-            data['start'] = start.isoformat(sep='T', timespec='seconds') + 'Z'
-            data['end'] = end.isoformat(sep='T', timespec='seconds') + 'Z'
-
-        return self.britive.post(f'{self.base_url}/{profile_id}/user-tags/{tag_id}', json=data)
-
-    def list_assigned(self, profile_id: str, filter_expression: str = None) -> list:
-        """
-        List the tags assigned to the profile.
-
-        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
-        `britive.profiles.policies.*` instead.
-
-        :param profile_id: The ID of the profile.
-        :param filter_expression: Can filter based on `name`, `status`, `integrity check`. Valid operators are `eq` and
-            `co`. Example: name co "Dev Account"
-        :return: List of tags assigned to the profile.
-        """
-
-        params = {
-            'page': 0,
-            'size': 100
-        }
-
-        if filter_expression:
-            params['filter'] = filter_expression
-
-        return self.britive.get(f'{self.base_url}/{profile_id}/user-tags', params=params)
-
-    def list_available(self, profile_id: str) -> list:
-        """
-        List users available to be assigned to the profile.
-
-        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
-        `britive.profiles.policies.*` instead.
-
-        :param profile_id: The ID of the profile.
-        :return: List of tags that are available to be assigned to the profile.
-        """
-
-        params = {
-            'page': 0,
-            'size': 100,
-            'query': 'available'
-        }
-        return self.britive.get(f'{self.base_url}/{profile_id}/user-tags', params=params)
-
-    def remove(self, profile_id: str, tag_id: str) -> None:
-        """
-        Remove the tag from the profile.
-
-        Only applicable to tenants using version 1 of profiles. If the tenant is on version 2 of profiles then use
-        `britive.profiles.policies.*` instead.
-
-        :param profile_id: The ID of the profile.
-        :param tag_id: The ID of the tag.
-        :return: None.
-        """
-
-        return self.britive.delete(f'{self.base_url}/{profile_id}/user-tags/{tag_id}')
 
 
 class ProfileSessionAttributes:

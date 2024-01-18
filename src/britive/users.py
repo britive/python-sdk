@@ -256,3 +256,20 @@ class Users:
             raise UserDoesNotHaveMFAEnabled()
 
         return self.britive.patch(f'{self.base_url}/{user_id}/resetmfa')
+
+    def minimized_user_details(self, user_id: str = None, user_ids: list = []) -> list:
+        """
+        Retrieve a small set of user fields given a user id.
+
+        :param user_id: The ID of the user. Will be combined with `user_ids`.
+        :param user_ids: The list of user ids. Will be combined with `user_id`.
+        :return: List of users with a small set of attributes.
+        """
+        if user_ids is None:
+            user_ids = []
+        if user_id and user_id not in user_ids:
+            user_ids.append(user_id)
+        if len(user_ids) == 0:
+            return []
+
+        return self.britive.post(f'{self.base_url}/minimized-user-details', json=user_ids)

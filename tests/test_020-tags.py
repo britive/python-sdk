@@ -143,5 +143,10 @@ def test_membership_rules_delete(cached_tag):
     assert len(response) == 0
 
 
-
-
+def test_minimized_user_details(cached_tag):
+    details = britive.tags.minimized_tag_details(tag_id=cached_tag['userTagId'])
+    assert isinstance(details, list)
+    assert len(details) == 1
+    details = britive.tags.minimized_tag_details(tag_ids=[cached_tag['userTagId']])
+    assert isinstance(details, list)
+    assert len(details) == 1
