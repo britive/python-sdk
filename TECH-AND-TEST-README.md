@@ -128,6 +128,7 @@ pytest tests/test_280_system_actions.py -v
 pytest tests/test_290_system_consumers.py -v
 pytest tests/test_300-system_roles.py -v
 pytest tests/test_310-system_permissions.py -v
+pytest tests/test_320-settings_banner.py -v
 
 pytest tests/test_990-delete_all_resources.py -v
 ~~~

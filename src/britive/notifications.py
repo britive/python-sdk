@@ -95,7 +95,7 @@ class Notifications:
         return self.britive.get(f'{self.base_url}/{notification_id}/available-apps')
 
     def configure(self, notification_id: str, rules: list = None, users: list = None, user_tags: list = None,
-                  applications: list = None, send_no_changes: bool = None) -> dict:
+                  applications: list = None, send_no_changes: bool = None, notification_medium_id: str = None) -> dict:
         """
         Configure the details of a notification.
 
@@ -104,17 +104,16 @@ class Notifications:
         :param notification_id: The ID of the notification.
         :param rules: List of rules to apply. Obtain rule options from `britive.notifications.available_rules()` and
             use results from that API call to populate this list. Maximum of 3 rules are allowed.
-        :param users: List of users to apply. This is the list of users who will be notified if any of the rules are
-            triggered. Obtain user options from `britive.notifications.available_users()` and use results from that API
-            call to populate this list. An empty list means that no users will be notified.
-        :param user_tags: List of user tags to apply. This is the list of user tags who will be notified if any of the
-            rules are triggered. Obtain user tag options from `britive.notifications.available_user_tags()` and use
-            results from that API call to populate this list. An empty list means that no user tags will be notified.
+        :param users: List of user ids to apply. This is the list of users who will be notified if any of the rules are
+            triggered. An empty list means that no users will be notified.
+        :param user_tags: List of user tag ids to apply. This is the list of user tags who will be notified if any of
+            the rules are triggered. An empty list means that no user tags will be notified.
         :param applications: List of applications to which this notification applies. Obtain applications options from
             `britive.notifications.available_applications()` and use results from that API call to populate this list.
             An empty list indicates the event applies to all applications.
         :param send_no_changes: Boolean indicating whether to send notification regardless of whether any changes have
             occurred or not.
+        :param notification_medium_id: The ID of the notification medium to use for this notification.
         :return: Details of the newly updated notification.
         """
 
@@ -125,13 +124,34 @@ class Notifications:
         # start with the existing notification details
         data = self.get(notification_id=notification_id)
 
+        members = []
+        for user in self.britive.users.minimized_user_details(user_ids=users):
+            members.append(
+                {
+                    'id': user['id'],
+                    'memberType': 'User',
+                    'name': user['username'],
+                    'condition': None
+                }
+            )
+
+        for tag in self.britive.tags.minimized_tag_details(tag_ids=user_tags):
+            members.append(
+                {
+                    'id': tag['userTagId'],
+                    'memberType': 'Tag',
+                    'name': tag['name'],
+                    'condition': None
+                }
+            )
+
         # set the possible parameters
         params = {
             'rules': rules,
-            'recipientUsers': users,
-            'recipientUserTags': user_tags,
+            'memberRules': members,
             'applications': applications,
-            'sendNoChanges': send_no_changes
+            'sendNoChanges': send_no_changes,
+            'notificationMedium': notification_medium_id
         }
 
         # fo each parameter update the existing notification data if the parameter was provided

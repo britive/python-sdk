@@ -1,6 +1,6 @@
 import os
+import time
 import requests
-from requests.adapters import HTTPAdapter, Retry
 import json as native_json
 import pkg_resources
 import socket
@@ -36,6 +36,7 @@ from .secrets_manager import SecretsManager
 from .notification_mediums import NotificationMediums
 from .workload import Workload
 from .system.system import System
+from .settings.settings import Settings
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
 BRITIVE_TOKEN_ENV_NAME = 'BRITIVE_API_TOKEN'
@@ -124,8 +125,9 @@ class Britive:
 
         self.base_url = f'https://{self.tenant}/api'
         self.session = requests.Session()
-        retries = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
-        self.session.mount('https://', HTTPAdapter(max_retries=retries))
+        self.retry_max_times = 5
+        self.retry_backoff_factor = 1
+        self.retry_response_status = [429, 500, 502, 503, 504]
 
         # allow the disabling of TLS/SSL verification for testing in development (mostly local development)
         if os.getenv('BRITIVE_NO_VERIFY_SSL') and '.dev.' in self.tenant:
@@ -167,7 +169,7 @@ class Britive:
         self.permissions = Permissions(self)
         self.groups = Groups(self)
         self.identity_attributes = IdentityAttributes(self)
-        self.profiles = Profiles(self, 1 if self.feature_flags.get('profile-v1') else 2)
+        self.profiles = Profiles(self)
         self.task_services = TaskServices(self)
         self.tasks = Tasks(self)
         self.security_policies = SecurityPolicies(self)
@@ -184,6 +186,7 @@ class Britive:
         self.notification_mediums = NotificationMediums(self)
         self.workload = Workload(self)
         self.system = System(self)
+        self.settings = Settings(self)
 
     @staticmethod
     def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:
@@ -300,6 +303,9 @@ class Britive:
             features[feature['name']] = feature['enabled']
         return features
 
+    def banner(self) -> dict:
+        return self.get(f'{self.base_url}/banner')
+
     def get(self, url, params=None):
         """Internal use only."""
 
@@ -392,13 +398,47 @@ class Britive:
             return 'secmgr'
         return 'none'
 
+    @staticmethod
+    def __tenant_is_under_maintenance(response):
+        try:
+            return response.status_code == 503 and response.json().get('errorCode') == 'MAINT0001'
+        except:
+            return False
+
+    def __request_with_exponential_backoff_and_retry(self, method, url, params, data, json):
+        num_retries = 0
+        response = {}
+        while num_retries <= self.retry_max_times:
+            response = self.session.request(method, url, params=params, data=data, json=json)
+
+            # handle the use case of a tenant being in maintenance mode
+            # which means we should break out of this loop early and
+            # not perform the backoff and retry logic
+            if self.__tenant_is_under_maintenance(response=response):
+                raise TenantUnderMaintenance(response.json().get('message'))
+
+            # check for error - if so perform exponential backoff
+            if response.status_code in self.retry_response_status:
+                wait_time = (2 ** num_retries) * self.retry_backoff_factor
+                time.sleep(wait_time)
+                num_retries += 1
+            else:  # we got a "good" response so break out of while loop
+                break
+        self.__check_response_for_error(response)  # handle an error response
+        return response
+
     def __request(self, method, url, params=None, data=None, json=None):
         return_data = []
         num_iterations = 1
         pagination_type = None
         while True:  # infinite loop in case of pagination - we will break the loop when needed
-            response = self.session.request(method, url, params=params, data=data, json=json)
-            self.__check_response_for_error(response)   # handle an error response
+            response = self.__request_with_exponential_backoff_and_retry(
+                method=method,
+                url=url,
+                params=params,
+                data=data,
+                json=json
+            )
             if self.__response_has_no_content(response):  # handle no content responses
                 return None
 

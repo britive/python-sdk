@@ -95,14 +95,6 @@ class TenantMissingError(Exception):
     pass
 
 
-class TenantNotEnabledForProfilesVersion1(Exception):
-    pass
-
-
-class TenantNotEnabledForProfilesVersion2(Exception):
-    pass
-
-
 class TokenMissingError(Exception):
     pass
 
@@ -132,6 +124,10 @@ class UserNotAllowedToChangePassword(Exception):
 
 
 class UserNotAssociatedWithDefaultIdentityProvider(Exception):
+    pass
+
+
+class TenantUnderMaintenance(Exception):
     pass
 
 
