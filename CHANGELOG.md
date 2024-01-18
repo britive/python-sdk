@@ -10,6 +10,8 @@ All changes to the package starting with v2.8.1 will be logged here.
 #### Enhancements
 * Implement logic to catch and present user-friendly error if a tenant is under maintenance
 * `britive.users.minimized_user_details` method to get a summarized set of user attributes given a list of user ids
+* `britive.tags.minimized_tag_details` method to get a summarized set of tag attributes given a list of tag ids
+* `britive.notification.configure` method changes to support the `memberRules` attribute
 
 #### Bug Fixes
 * None

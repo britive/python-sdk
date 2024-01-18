@@ -268,3 +268,19 @@ class Tags:
 
         return self.britive.delete(f'{self.base_url}/{tag_id}')
 
+    def minimized_tag_details(self, tag_id: str = None, tag_ids: list = []) -> list:
+        """
+        Retrieve a small set of user fields given a user id.
+
+        :param tag_id: The ID of the tag. Will be combined with `tag_ids`.
+        :param tag_ids: The list of tag ids. Will be combined with `tag_id`.
+        :return: List of tags with a small set of attributes.
+        """
+        if tag_ids is None:
+            tag_ids = []
+        if tag_id and tag_id not in tag_ids:
+            tag_ids.append(tag_id)
+        if len(tag_ids) == 0:
+            return []
+
+        return self.britive.post(f'{self.base_url}/minimized-tag-details', json=tag_ids)

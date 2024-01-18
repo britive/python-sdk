@@ -55,15 +55,7 @@ def test_available_applications(cached_notification_applications):
     assert isinstance(cached_notification_applications, list)
 
 
-def test_configure(cached_notification, cached_notification_rules, cached_notification_users,
-                   cached_notification_user_tags, cached_notification_applications, cached_user):
-
-    users = []
-    for user in cached_notification_users:
-        if user['userId'] == cached_user['userId']:
-            users.append(user)
-            break
-
+def test_configure(cached_notification, cached_notification_rules, cached_notification_applications, cached_user):
     rules = []
     for rule in cached_notification_rules:
         if rule['predicate'] in ['AccountsCreated', 'AccountsDeleted']:
@@ -71,14 +63,14 @@ def test_configure(cached_notification, cached_notification_rules, cached_notifi
 
     response = britive.notifications.configure(
         notification_id=cached_notification['notificationId'],
-        users=users,
+        users=[cached_user['userId']],
         rules=rules,
         send_no_changes=True
     )
 
     assert isinstance(response, dict)
     assert response['sendNoChanges']
-    assert len(response['recipientUsers']) == 1
+    assert len(response['memberRules']) == 1
     assert len(response['rules']) == 2
 
 
