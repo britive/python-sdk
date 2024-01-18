@@ -2,7 +2,7 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
-## v2.24.0rc1 [2024-01-XX]
+## v2.24.0rc1 [2024-01-18]
 #### What's New
 * `britive.settings.banner.*` - administer the banner/system announcement
 * `britive.banner` - view the banner/system announcement (all end users can view the banner)
