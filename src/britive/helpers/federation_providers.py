@@ -267,3 +267,16 @@ class BitbucketFederationProvider(FederationProvider):
                   'is not set on the pipeline step'
             raise exceptions.NotExecutingInBitbucketEnvironment(msg)
         return f'OIDC::{id_token}'
+
+
+class SpaceliftFederationProvider(FederationProvider):
+    def __init__(self):
+        super().__init__()
+
+    # https://docs.spacelift.io/integrations/cloud-providers/oidc/
+    def get_token(self):
+        id_token = os.environ.get('SPACELIFT_OIDC_TOKEN')
+        if not id_token:
+            msg = 'the codebase is not executing in a spacelift.io environment or not using a paid account'
+            raise exceptions.NotExecutingInSpaceliftEnvironment(msg)
+        return f'OIDC::{id_token}'
