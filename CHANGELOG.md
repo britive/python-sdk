@@ -2,6 +2,23 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.24.0rc2 [2024-01-24]
+#### What's New
+* None
+
+#### Enhancements
+* Native [spacelift.io](https://docs.spacelift.io/integrations/cloud-providers/oidc/) OIDC workload federation support
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
+
 ## v2.24.0rc1 [2024-01-18]
 #### What's New
 * `britive.settings.banner.*` - administer the banner/system announcement

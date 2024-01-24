@@ -196,25 +196,26 @@ class Britive:
         The caller must persist this token if required. New tokens can be generated on each invocation
         of this class as well.
 
-        This method only works when running with the context of the specified provider.
+        This method only works when running within the context of the specified provider.
         It is meant to abstract away the complexities of obtaining a federation token
         from common federation providers. Other provider federation tokens can still be
         sourced outside of this SDK and provided as input via the standard token presentation
         options.
 
-        Five federation providers are currently supported by this method.
+        Six federation providers are currently supported by this method.
 
         * AWS IAM/STS, with optional profile specified - (aws)
         * Github Actions (github)
         * Bitbucket Pipelines (bitbucket)
         * Azure System Assigned Managed Identities (azuresmi)
         * Azure User Assigned Managed Identities (azureumi)
+        * spacelift.io (spacelift)
 
         Any other OIDC federation provider can be used and tokens can be provided to this class for authentication
         to a Britive tenant. Details of how to construct these tokens can be found at https://docs.britive.com.
 
         :param provider: The name of the federation provider. Valid options are `aws`, `github`, `bitbucket`,
-            `azuresmi`, and `azureumi`.
+            `azuresmi`, `azureumi`, and `spacelift`.
 
             For the AWS provider it is possible to provide a profile via value `aws-profile`. If no profile is provided
             then the boto3 `Session.get_credentials()` method will be used to obtain AWS credentials, which follows
@@ -274,6 +275,9 @@ class Britive:
                 client_id=client_id,
                 audience=audience
             ).get_token()
+
+        if provider == 'spacelift':
+            return fp.SpaceliftFederationProvider().get_token()
 
         raise InvalidFederationProvider(f'federation provider {provider} not supported')
 
