@@ -5,7 +5,6 @@ enable_defaults = {
     'profileExpirationTimeout': 360
 }
 
-
 class AccessBuilderSettings:
     def __init__(self, britive):
         self.britive = britive
