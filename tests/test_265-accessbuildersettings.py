@@ -54,7 +54,7 @@ def test_enable_access_builder_settings(cached_enable_access_requests):
     assert cached_enable_access_requests.get('allowAccessRequests') == True
 
 
-def test_cached_disable_access_requests(cached_enable_access_requests):
-    assert isinstance(cached_enable_access_requests, dict)
-    assert cached_enable_access_requests.get('allowAccessRequests') == False
+def test_cached_disable_access_requests(cached_disable_access_requests):
+    assert isinstance(cached_disable_access_requests, dict)
+    assert cached_disable_access_requests.get('allowAccessRequests') == False
 
