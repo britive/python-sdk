@@ -483,6 +483,126 @@ def cached_notification_medium(pytestconfig, timestamp):
 
 
 @pytest.fixture(scope='session')
+@cached_resource(name='accessbuilder')
+def cached_accesbuilder_settings(pytestconfig, cached_application, cached_user):
+    r = str(random.randint(0, 1000000))
+    return britive.access_builder.approvers_groups.create(
+        application_id=cached_application['appContainerId']
+        , name=f'python-sdk-a-b-s-a-g-test-{r}'
+        , condition='Any'
+        , member_list=[{'id': cached_user.get('userId')
+                           , 'memberType': 'User'}]
+    )
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='accessbuilder_update')
+def cached_accessbuilder_settings_update(pytestconfig, cached_application
+                                         , cached_user, cached_tag
+                                         , cached_accesbuilder_settings):
+    r = str(random.randint(0, 1000000))
+    temp = britive.access_builder.approvers_groups.update(
+        application_id=cached_application['appContainerId']
+        , approver_group_id=cached_accesbuilder_settings.get('id')
+        , name=cached_accesbuilder_settings.get('name')
+        , condition='Any'
+        , member_list=[{'id': cached_user.get('userId')
+                           , 'memberType': 'User'}
+            , {'id': cached_tag.get('userTagId')
+                           , 'memberType': 'Tag'}]
+    )
+
+    return britive.access_builder.approvers_groups.list_approver_group_members(
+        application_id=cached_application['appContainerId']
+        , approver_group_id=cached_accesbuilder_settings.get('id')
+    )
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='accessbuilder_Associations')
+def cached_access_builder_associations(pytestconfig, cached_application, cached_environment
+                                       , cached_accesbuilder_settings):
+    associations = [{'type': 0, 'id': cached_environment.get('nativeId')}]
+    approvers_groups = [{'id': cached_accesbuilder_settings.get('id')}]
+    britive.access_builder.associations.create(application_id=cached_application['appContainerId']
+                                                      , name='AccessBuilderAssocication'
+                                                      , associations=associations
+                                                      , approvers_groups=approvers_groups)
+
+    return britive.access_builder.associations.list(application_id=cached_application['appContainerId'])
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='accessbuilder_Associations')
+def cached_access_builder_associations_update(pytestconfig, cached_application, cached_environment
+                                              , cached_environment_group, cached_accesbuilder_settings
+                                              , cached_access_builder_associations):
+    associations = [{'type': 0, 'id': cached_environment.get('nativeId')}
+        , {'type': 1, 'id': cached_environment_group.get('id')}]
+    approvers_groups = [{'id': cached_accesbuilder_settings.get('id')}]
+    temp = britive.access_builder.associations.update(application_id=cached_application['appContainerId']
+                                                      , association_id=cached_access_builder_associations['id']
+                                                      , associations=associations
+                                                      , approvers_groups=approvers_groups)
+
+    return britive.access_builder.associations.get(application_id=cached_application['appContainerId']
+                                                   , association_id=cached_access_builder_associations['id'])
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='accessbuilder_Associations')
+def cached_access_builder_associations_list(pytestconfig, cached_application):
+    return britive.access_builder.associations.list(application_id=cached_application['appContainerId'])
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='accessbuilder_requesters')
+def cached_add_requesters_to_access_builder(pytestconfig, cached_application
+                                            , cached_user):
+    user_tag_members = [{'id': cached_user.get('userId')
+                            , 'memberType': 'User'
+                            , 'condition': 'Include'}]
+
+    britive.access_builder.requesters.update(application_id=cached_application['appContainerId']
+                                             , user_tag_members=user_tag_members)
+
+    return britive.access_builder.requesters.list(application_id=cached_application['appContainerId'])
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='accessbuilder_notifications')
+def cached_add_notification_to_access_builder(pytestconfig, cached_application
+                                              , cached_notification_medium):
+    notification_medium = {'id': cached_notification_medium.get('id')
+        , 'name': cached_notification_medium.get('name')
+        , 'description': cached_notification_medium.get('description')
+        , 'application': cached_notification_medium.get('type')
+        , 'channels': cached_notification_medium.get('channels', [])
+        , 'connectionParameters' : cached_notification_medium.get('connectionParameters', {})}
+
+    test = britive.access_builder.notifications.update(application_id=cached_application['appContainerId']
+                                                       , notification_medium=[notification_medium])
+
+    return britive.access_builder.notifications.list(application_id=cached_application['appContainerId'])
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='accessbuilder_enable')
+def cached_enable_access_requests(pytestconfig, cached_application):
+    britive.access_builder.enable(application_id=cached_application['appContainerId'])
+
+    return britive.access_builder.get(application_id=cached_application['appContainerId'])
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='accessbuilder_disable')
+def cached_disable_access_requests(pytestconfig, cached_application):
+    britive.access_builder.disable(application_id=cached_application['appContainerId'])
+
+    return britive.access_builder.get(application_id=cached_application['appContainerId'])
+
+
+@pytest.fixture(scope='session')
 @cached_resource(name='workload-identity-provider-aws')
 def cached_workload_identity_provider_aws(pytestconfig, timestamp, cached_identity_attribute):
     # do this up front to avoid the exponential backoff and retry logic

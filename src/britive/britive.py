@@ -1,5 +1,6 @@
 import json as native_json
 import os
+# import pkg_resources
 import socket
 import time
 
@@ -46,6 +47,7 @@ from .task_services import TaskServices
 from .tasks import Tasks
 from .users import Users
 from .workload import Workload
+from .access_builder import AccessBuilderSettings
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
 BRITIVE_TOKEN_ENV_NAME = 'BRITIVE_API_TOKEN'
@@ -213,6 +215,7 @@ class Britive:
         self.settings = Settings(self)
         self.step_up = StepUpAuth(self)
         self.my_resources = MyResources(self)
+        self.access_builder = AccessBuilderSettings(self)
 
     @staticmethod
     def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:
