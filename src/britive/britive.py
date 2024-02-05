@@ -2,7 +2,7 @@ import os
 import time
 import requests
 import json as native_json
-import pkg_resources
+# import pkg_resources
 import socket
 from .helpers import methods as helper_methods
 from .helpers import federation_providers as fp
@@ -37,6 +37,7 @@ from .notification_mediums import NotificationMediums
 from .workload import Workload
 from .system.system import System
 from .settings.settings import Settings
+from .access_builder import AccessBuilderSettings
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
 BRITIVE_TOKEN_ENV_NAME = 'BRITIVE_API_TOKEN'
@@ -187,6 +188,7 @@ class Britive:
         self.workload = Workload(self)
         self.system = System(self)
         self.settings = Settings(self)
+        self.access_builder = AccessBuilderSettings(self)
 
     @staticmethod
     def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:
