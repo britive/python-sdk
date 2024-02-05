@@ -572,10 +572,12 @@ def cached_access_builder_associations(pytestconfig, cached_application, cached_
                                        , cached_accesbuilder_settings):
     associations = [{'type': 0, 'id': cached_environment.get('nativeId')}]
     approvers_groups = [{'id': cached_accesbuilder_settings.get('id')}]
-    return britive.access_builder.associations.create(application_id=cached_application['appContainerId']
+    britive.access_builder.associations.create(application_id=cached_application['appContainerId']
                                                       , name='AccessBuilderAssocication'
                                                       , associations=associations
                                                       , approvers_groups=approvers_groups)
+
+    return britive.access_builder.associations.list(application_id=cached_application['appContainerId'])
 
 
 @pytest.fixture(scope='session')
@@ -593,6 +595,12 @@ def cached_access_builder_associations_update(pytestconfig, cached_application, 
 
     return britive.access_builder.associations.get(application_id=cached_application['appContainerId']
                                                    , association_id=cached_access_builder_associations['id'])
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='accessbuilder_Associations')
+def cached_access_builder_associations_list(pytestconfig, cached_application):
+    return britive.access_builder.associations.list(application_id=cached_application['appContainerId'])
 
 
 @pytest.fixture(scope='session')
@@ -636,16 +644,8 @@ def cached_enable_access_requests(pytestconfig, cached_application):
 
 @pytest.fixture(scope='session')
 @cached_resource(name='accessbuilder_disable')
-def cached_disable_access_requests(pytestconfig, cached_application):
+def cached_disable_access_requests(pytestconfig, cached_application, cached_enable_access_requests):
     britive.access_builder.disable(application_id=cached_application['appContainerId'])
-
-    return britive.access_builder.get(application_id=cached_application['appContainerId'])
-
-
-@pytest.fixture(scope='session')
-@cached_resource(name='accessbuilder_enable')
-def cached_disable_access_requests(pytestconfig, cached_application):
-    britive.access_builder.enable(application_id=cached_application['appContainerId'])
 
     return britive.access_builder.get(application_id=cached_application['appContainerId'])
 

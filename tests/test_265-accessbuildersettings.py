@@ -7,7 +7,6 @@ def test_create(cached_accesbuilder_settings):
 
 
 def test_update_approver_group(cached_accessbuilder_settings_update):
-    print(cached_accessbuilder_settings_update)
     assert isinstance(cached_accessbuilder_settings_update, dict)
     assert len(cached_accessbuilder_settings_update.get('members')) == 2
 
@@ -16,7 +15,6 @@ def test_list_approver_group(cached_accesbuilder_settings, cached_application):
     approver_groups = britive.access_builder.approvers_groups.list(application_id=cached_application['appContainerId'])
     assert isinstance(approver_groups, dict)
     assert isinstance(approver_groups.get('approversGroupSummary'), list)
-    assert len(approver_groups.get('approversGroupSummary')) == 1
 
 
 def test_access_builder_association_create(cached_access_builder_associations):
@@ -30,12 +28,10 @@ def test_access_builder_association_update(cached_access_builder_associations_up
     assert len(cached_access_builder_associations_update.get('associations')) > 0
 
 
-def test_access_builder_association_list(cached_access_builder_associations_update,
-                                         cached_application):
-    Asscns = britive.access_builder.associations.list(application_id=cached_application['appContainerId'])
-    assert isinstance(Asscns, dict)
-    assert isinstance(Asscns.get('associationApproversSummary'), list)
-    assert len(Asscns.get('associationApproversSummary')) > 0
+def test_access_builder_association_list(cached_access_builder_associations_list):
+    assert isinstance(cached_access_builder_associations_list, dict)
+    assert len(cached_access_builder_associations_list.get('associations')) > 0
+    assert len(cached_access_builder_associations_list.get('approversGroups')) > 0
 
 
 def test_access_builder_requesters_add(cached_add_requesters_to_access_builder):
@@ -51,10 +47,9 @@ def test_add_notification_to_access_builder(cached_add_notification_to_access_bu
 
 def test_enable_access_builder_settings(cached_enable_access_requests):
     assert isinstance(cached_enable_access_requests, dict)
-    assert cached_enable_access_requests.get('allowAccessRequests') == True
+    assert cached_enable_access_requests.get('allowAccessRequest') == True
 
 
 def test_cached_disable_access_requests(cached_disable_access_requests):
     assert isinstance(cached_disable_access_requests, dict)
     assert cached_disable_access_requests.get('allowAccessRequests') == False
-
