@@ -270,7 +270,8 @@ class ProfilePermissions:
         cloud provider directly (AssumeRole for AWS).
 
         :param profile_id: The ID of the profile.
-        :param permission_type: The type of permission. Valid values are `role`, `group`, and `policy`.
+        :param permission_type: The type of permission. Valid values are `role`, `group`, and `policy`. Values are
+            case-sensitive
         :param permission_name: The name of the permission.
         :return: Details of the permission added.
         """
@@ -328,7 +329,8 @@ class ProfilePermissions:
         Remove a permission to a profile.
 
         :param profile_id: The ID of the profile.
-        :param permission_type: The type of permission. Valid values are `role`, `group`, and `policy`.
+        :param permission_type: The type of permission. Valid values are `role`, `group`, and `policy`. Values are
+            case-sensitive
         :param permission_name: The name of the permission.
         :return: Details of the permission removed.
         """
