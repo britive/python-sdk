@@ -84,6 +84,13 @@ export BRITIVE_TENANT=...
 export BRITIVE_TEST_ENV_ACCOUNT_ID=<12 digit AWS account id>
 ~~~
 
+Optionally you can set 2 variables which will override the IDP and Integration Role names from above.
+
+~~~
+export BRITIVE_IDP_NAME_OVERRIDE=...
+export BRITIVE_INTEGRATION_ROLE_NAME_OVERRIDE=...
+~~~
+
 If you want to skip running a scan (and waiting a long time for the results) you can set
 
 ~~~

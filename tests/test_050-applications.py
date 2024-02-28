@@ -55,8 +55,8 @@ def test_test_failure(cached_application):
 
 def test_update(cached_application):
     tenant = britive.tenant.replace('.britive-app.com', '')
-    idp = f'BritivePythonApiWrapperTesting-{tenant}'
-    role = f'britive-integration-role-{tenant}'
+    idp = os.environ.get('BRITIVE_IDP_NAME_OVERRIDE') or 'BritivePythonApiWrapperTesting-{tenant}'
+    role = os.environ.get('BRITIVE_INTEGRATION_ROLE_NAME_OVERRIDE') or f'britive-integration-role-{tenant}'
 
     app = britive.applications.update(
         application_id=cached_application['appContainerId'],
