@@ -370,6 +370,21 @@ class Secrets:
             f'{self.base_url}/{vault_id}/secrets?path={path}', json={'value': value}
         )
 
+    def rename(self, vault_id: str, path: str = '/', new_name: str = '') -> None:
+        """
+        Updates a secret's value
+
+        :param vault_id: ID of the vault to update the secret in
+        :param path: path of the secret, include the / at the beginning and the secret name
+        :param new_name: new name of the secret
+        :return: None
+        """
+
+        return self.britive.patch(
+            f'{self.base_url}/{vault_id}/secrets?path={path}', json={'name': new_name}
+        )
+
+
     def get(
         self,
         vault_id: str,
