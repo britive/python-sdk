@@ -118,6 +118,25 @@ def test_secret_update(cached_secret, cached_vault):
     )
     assert update is None
 
+def test_secret_rename(cached_secret, cached_vault):
+    name = cached_secret['name']
+    rename = britive.secrets_manager.secrets.rename(
+        cached_vault['id']
+        , cached_secret['path']
+        , 'testSecretRename')
+    assert rename is None
+
+    new_path_list = cached_secret['path'].split('/')
+    new_path_list.pop()
+    new_path_list.append('testSecretRename')
+    new_path = '/'.join(new_path_list)
+
+    rollback = britive.secrets_manager.secrets.rename(
+        cached_vault['id']
+        , new_path
+        , name)
+    assert rollback is None
+
 
 def test_policies_create(cached_policy):
     assert isinstance(cached_policy, dict)
