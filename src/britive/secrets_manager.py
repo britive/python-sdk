@@ -372,7 +372,7 @@ class Secrets:
 
     def rename(self, vault_id: str, path: str = '/', new_name: str = '') -> None:
         """
-        Updates a secret's value
+        Update the name of a secret
 
         :param vault_id: ID of the vault to update the secret in
         :param path: path of the secret, include the / at the beginning and the secret name
