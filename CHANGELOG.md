@@ -2,15 +2,15 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
-## v2.24.0rc3 [2024-02-28]
+## v2.24.0rc3 [2024-03-01]
 #### What's New
 * None
 
 #### Enhancements
-* None
+* Add `filter_expression` to listing of system policies/roles/permissions
 
 #### Bug Fixes
-* None
+* Fix bug related to pagination with system policies/roles/permissions (https://github.com/britive/python-sdk/issues/97)
 
 #### Dependencies
 * None
