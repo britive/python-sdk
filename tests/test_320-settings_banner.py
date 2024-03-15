@@ -16,12 +16,14 @@ def test_set_no_schedule():
 
 
 def test_set_with_schedule():
+    today = datetime.date.today()
+    start_datetime = datetime.date.today()
     banner = britive.settings.banner.set(
         message='test',
         display_banner=True,
         message_type='INFO',
-        start_datetime=datetime.datetime(year=2024, month=1, day=1),
-        end_datetime=datetime.datetime(year=2024, month=1, day=31),
+        start_datetime=start_datetime,
+        end_datetime=start_datetime + datetime.timedelta(days=1),
         time_zone='UTC'
     )
     assert isinstance(banner, dict)

@@ -490,11 +490,9 @@ class Britive:
                 params = {}  # the next-page header has all the URL parameters we need so unset them here
             elif pagination_type == 'secmgr':
                 return_data += result['result']
-                next_page = result['pagination'].get('next', '')
-                if next_page == '':
+                url = result['pagination'].get('next', '')
+                if url == '':
                     break
-                else:
-                    params['pageToken'] = next_page
             else:  # we are not dealing with pagination so just return the response as-is
                 return_data = result
                 break
