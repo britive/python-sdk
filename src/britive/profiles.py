@@ -67,7 +67,8 @@ class Profiles:
 
         return self.britive.post(f'{self.base_url}/{application_id}/paps', json=data)
 
-    def list(self, application_id: str, filter_expression: str = None, environment_association: str = None) -> list:
+    def list(self, application_id: str, filter_expression: str = None, environment_association: str = None,
+             include_policies: bool = False) -> list:
         """
         Return an optionally filtered list of profiles associated with the specified application.
 
@@ -76,6 +77,8 @@ class Profiles:
             `co`. Example: name co "Dev Account"
         :param environment_association: Only list profiles with associations to the specified environment. Cannot be
             used in conjunction with `filter_expression`. Example: `environment_association="109876543210"`
+        :param include_policies: Defaults to False. If set to True will include all policies on each profile and all
+            members on each policy. Cannot be used in conjunction with `filter_expression`.
         :return: List of profiles.
         """
 
@@ -89,6 +92,9 @@ class Profiles:
             'size': 100,
             'view': 'summary'  # this is required - omitting it results in a 400 not authorized error
         }
+
+        if include_policies:
+            params['view'] = 'includePolicies'
 
         if filter_expression:
             params['filter'] = filter_expression

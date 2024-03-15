@@ -17,6 +17,15 @@ def test_list(cached_profile):
     assert profiles[0]['name'].startswith('test')
 
 
+def test_list_include_policies(cached_profile):
+    profiles = britive.profiles.list(application_id=cached_profile['appContainerId'], include_policies=True)
+    assert isinstance(profiles, list)
+    assert len(profiles) > 0
+    assert isinstance(profiles[0], dict)
+    assert profiles[0]['profileName'].startswith('test')
+    assert 'policies' in profiles[0]
+
+
 def test_get(cached_profile):
     profile = britive.profiles.get(application_id=cached_profile['appContainerId'], profile_id=cached_profile['papId'])
     assert isinstance(profile, dict)
