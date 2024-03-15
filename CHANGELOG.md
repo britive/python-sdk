@@ -2,6 +2,24 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.24.0rc3 [2024-03-15]
+#### What's New
+* None
+
+#### Enhancements
+* Add `filter_expression` to listing of system policies/roles/permissions
+* Add `secrets_manager.rename()` method
+* Add `view=includePolicies` as an option 
+
+#### Bug Fixes
+* Fix bug related to pagination with system policies/roles/permissions (https://github.com/britive/python-sdk/issues/97)
+
+#### Dependencies
+* None
+
+#### Other
+* Updates to the test suite
+
 ## v2.24.0rc2 [2024-01-24]
 #### What's New
 * None
