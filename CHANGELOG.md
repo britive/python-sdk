@@ -2,6 +2,26 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.24.0rc4 [2024-04-01]
+#### What's New
+* None
+
+#### Enhancements
+* None
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* None
+
+#### Other
+* Updates to the test suite
+
+## v2.24.0rc2 [2024-01-24]
+#### What's New
+* None
+
 ## v2.24.0rc3 [2024-03-15]
 #### What's New
 * None
