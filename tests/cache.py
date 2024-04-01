@@ -534,6 +534,13 @@ def cached_notification_medium(pytestconfig):
 @cached_resource(name='workload-identity-provider-aws')
 def cached_workload_identity_provider_aws(pytestconfig, cached_identity_attribute):
     r = str(random.randint(0, 1000000))
+
+    # do this up front to avoid the exponential backoff and retry logic
+    # if the aws identity provider already exists
+    for idp in britive.workload.identity_providers.list():
+        if idp['idpType'] == 'AWS':
+            return idp
+
     try:
         response = britive.workload.identity_providers.create_aws(
             name=f'python-sdk-aws-{r}',
@@ -543,10 +550,7 @@ def cached_workload_identity_provider_aws(pytestconfig, cached_identity_attribut
         )
         return response
     except exceptions.InternalServerError:
-        for idp in britive.workload.identity_providers.list():
-            if idp['idpType'] == 'AWS':
-                return idp
-        raise Exception('AWS provider could not be created and non-found')
+        raise Exception('AWS provider could not be created and none found')
 
 
 @pytest.fixture(scope='session')
