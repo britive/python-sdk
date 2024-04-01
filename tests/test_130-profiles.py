@@ -17,15 +17,6 @@ def test_list(cached_profile):
     assert profiles[0]['name'].startswith('test')
 
 
-def test_list_include_policies(cached_profile):
-    profiles = britive.profiles.list(application_id=cached_profile['appContainerId'], include_policies=True)
-    assert isinstance(profiles, list)
-    assert len(profiles) > 0
-    assert isinstance(profiles[0], dict)
-    assert profiles[0]['profileName'].startswith('test')
-    assert 'policies' in profiles[0]
-
-
 def test_get(cached_profile):
     profile = britive.profiles.get(application_id=cached_profile['appContainerId'], profile_id=cached_profile['papId'])
     assert isinstance(profile, dict)
@@ -159,6 +150,15 @@ def test_session_attributes_remove(cached_profile, cached_static_session_attribu
 def test_policies_create(cached_profile_policy):
     assert isinstance(cached_profile_policy, dict)
     assert cached_profile_policy['members']['tags']
+
+
+def test_list_include_policies(cached_profile):
+    profiles = britive.profiles.list(application_id=cached_profile['appContainerId'], include_policies=True)
+    assert isinstance(profiles, list)
+    assert len(profiles) > 0
+    assert isinstance(profiles[0], dict)
+    assert profiles[0]['profileName'].startswith('test')
+    assert 'policies' in profiles[0]
 
 
 def test_policies_create_with_approval_single_notification_medium(cached_profile_approval_policy):

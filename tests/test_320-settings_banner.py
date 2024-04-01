@@ -16,8 +16,7 @@ def test_set_no_schedule():
 
 
 def test_set_with_schedule():
-    today = datetime.date.today()
-    start_datetime = datetime.date.today()
+    start_datetime = datetime.datetime.today()
     banner = britive.settings.banner.set(
         message='test',
         display_banner=True,

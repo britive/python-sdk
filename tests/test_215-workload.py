@@ -123,7 +123,8 @@ def test_service_identity_assign_and_unassign(cached_service_identity, cached_id
     )
 
     assert isinstance(attrs, list)
-    assert len(attrs) == 0
+    assert len(attrs) == 1
+    assert attrs[0]['attributeName'] is None
 
     response = britive.workload.service_identities.assign(
         service_identity_id=cached_service_identity['userId'],
@@ -155,7 +156,8 @@ def test_service_identity_assign_and_unassign(cached_service_identity, cached_id
     )
 
     assert isinstance(attrs, list)
-    assert len(attrs) == 0
+    assert len(attrs) == 1
+    assert attrs[0]['attributeName'] is None
 
 
 def test_identity_provider_delete(cached_workload_identity_provider_oidc, cached_workload_identity_provider_aws):
