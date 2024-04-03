@@ -17,16 +17,28 @@ pip install -r requirements.txt
 ~~~
 
 
-## Building
+## Local Install
 
-Steps from here: https://packaging.python.org/en/latest/tutorials/packaging-projects/
+~~~
+pip install --editable .
+~~~
 
-Inside the existing virtualenv...
+## Build
+
+* Update version in `setup.cfg` and `src/britive/__init__.py` (TODO: create some pre-build script that will update one of these automatically)
+* Push code to GitHub
+* Cut a new PR and merge when appropriate
+* Run below commands
+
 
 ~~~
 python -m pip install --upgrade build
 python -m build
 ~~~
+
+* Cut a new release in GitHub with the version tag
+* Add the assets from `dist` directory to the release
+
 
 We will now have a new `/dist` directory containing a `.tar.gz` tarball and `whl` wheel. The wheel is considered
 a "built distribution" meaning it is compiled for various OSes and architectures. In our case this is a pure Python
