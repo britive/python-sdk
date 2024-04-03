@@ -2,7 +2,6 @@ import os
 import time
 import requests
 import json as native_json
-import pkg_resources
 import socket
 from .helpers import methods as helper_methods
 from .helpers import federation_providers as fp
@@ -145,7 +144,8 @@ class Britive:
             token_type = 'WorkloadToken'
 
         try:
-            version = pkg_resources.get_distribution('britive').version
+            import britive
+            version = britive.__version__
         except Exception:
             version = 'unknown'
 
