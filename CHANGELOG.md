@@ -2,6 +2,22 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.24.0rc5 [2024-04-03]
+#### What's New
+* None
+
+#### Enhancements
+* None
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* Removal of `pkg_resources` dependency
+
+#### Other
+* Addition of `__version__` in `__init__.py`
+
 ## v2.24.0rc4 [2024-04-01]
 #### What's New
 * None
