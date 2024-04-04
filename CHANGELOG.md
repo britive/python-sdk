@@ -2,6 +2,33 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.24.0 [2024-04-05]
+#### What's New
+* `britive.settings.banner.*` - administer the banner/system announcement
+* `britive.banner` - view the banner/system announcement (all end users can view the banner)
+
+#### Enhancements
+* Implement logic to catch and present user-friendly error if a tenant is under maintenance
+* `britive.users.minimized_user_details` method to get a summarized set of user attributes given a list of user ids
+* `britive.tags.minimized_tag_details` method to get a summarized set of tag attributes given a list of tag ids
+* `britive.notification.configure` method changes to support the `memberRules` attribute
+* Native [spacelift.io](https://docs.spacelift.io/integrations/cloud-providers/oidc/) OIDC workload federation support
+* Add `filter_expression` to listing of system policies/roles/permissions
+* Add `secrets_manager.rename()` method
+* Add `view=includePolicies` as an option to the listing of profiles
+
+#### Bug Fixes
+* Fix bug related to pagination with system policies/roles/permissions (https://github.com/britive/python-sdk/issues/97)
+
+
+#### Dependencies
+* Removal of `pkg_resources` dependency
+
+#### Other
+* Remove references to version 1 of profiles as the Britive Platform no longer supports version 1 and all customers have been migrated to version 2
+* Updates to the test suite
+* Addition of `__version__` in `__init__.py`
+
 ## v2.24.0rc5 [2024-04-03]
 #### What's New
 * None
@@ -33,10 +60,6 @@ All changes to the package starting with v2.8.1 will be logged here.
 
 #### Other
 * Updates to the test suite
-
-## v2.24.0rc2 [2024-01-24]
-#### What's New
-* None
 
 ## v2.24.0rc3 [2024-03-15]
 #### What's New
@@ -72,7 +95,6 @@ All changes to the package starting with v2.8.1 will be logged here.
 #### Other
 * None
 
-
 ## v2.24.0rc1 [2024-01-18]
 #### What's New
 * `britive.settings.banner.*` - administer the banner/system announcement
@@ -92,7 +114,6 @@ All changes to the package starting with v2.8.1 will be logged here.
 
 #### Other
 * Remove references to version 1 of profiles as the Britive Platform no longer supports version 1 and all customers have been migrated to version 2
-
 
 ## v2.23.0 [2023-11-07]
 #### What's New
