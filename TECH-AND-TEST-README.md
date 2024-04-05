@@ -8,14 +8,12 @@ We use `typing` in this package so a requirement is Python 3.5 or greater - http
 Use of {**dict1, **dict2} exists in profiles.py and that also requires Python 3.5 or greater.
 `requests` package will stop supporting 3.6 in 2022 so we should bump to only supporting Python 3.7 and up
 
-
 ## Production Use
 Install requirements.
 
 ~~~
 pip install -r requirements.txt
 ~~~
-
 
 ## Local Install
 
