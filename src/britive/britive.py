@@ -210,12 +210,13 @@ class Britive:
         * Azure System Assigned Managed Identities (azuresmi)
         * Azure User Assigned Managed Identities (azureumi)
         * spacelift.io (spacelift)
+        * Gitlab (gitlab)
 
         Any other OIDC federation provider can be used and tokens can be provided to this class for authentication
         to a Britive tenant. Details of how to construct these tokens can be found at https://docs.britive.com.
 
         :param provider: The name of the federation provider. Valid options are `aws`, `github`, `bitbucket`,
-            `azuresmi`, `azureumi`, and `spacelift`.
+            `azuresmi`, `azureumi`, `spacelift`, and `gitlab`.
 
             For the AWS provider it is possible to provide a profile via value `aws-profile`. If no profile is provided
             then the boto3 `Session.get_credentials()` method will be used to obtain AWS credentials, which follows
@@ -233,6 +234,10 @@ class Britive:
             For both Azure Managed Identity options it is possible to provide an OIDC audience value via
             `azuresmi-<audience>` and `azureumi-<client-id>|<audience>`. If no audience is provided the default audience
              of `https://management.azure.com/` will be used.
+
+            For the Gitlab provider a token environment variable name can optionally be specified via `gitlab-ENV_VAR`.
+            Anything after `gitlab-` will be interpreted to represent the name of the environment variable specified
+            in the YAML file for the ID token. If not provided it will default to `BRITIVE_OIDC_TOKEN`.
 
         :param tenant: The name of the tenant. This field is optional but if not provided then the tenant will be
             sourced from environment variable BRITIVE_TENANT. Knowing the actual tenant is required for the AWS
@@ -278,6 +283,10 @@ class Britive:
 
         if provider == 'spacelift':
             return fp.SpaceliftFederationProvider().get_token()
+
+        if provider == 'gitlab':
+            token_name = helper_methods.safe_list_get(helper, 1, None)
+            return fp.GitlabFederationProvider(token_env_var=token_name).get_token()
 
         raise InvalidFederationProvider(f'federation provider {provider} not supported')
 
