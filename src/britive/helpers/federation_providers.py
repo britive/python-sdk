@@ -280,3 +280,17 @@ class SpaceliftFederationProvider(FederationProvider):
             msg = 'the codebase is not executing in a spacelift.io environment or not using a paid account'
             raise exceptions.NotExecutingInSpaceliftEnvironment(msg)
         return f'OIDC::{id_token}'
+
+
+class GitlabFederationProvider(FederationProvider):
+    def __init__(self, token_env_var: str = 'BRITIVE_OIDC_TOKEN'):
+        super().__init__()
+        self.token_env_var = token_env_var
+
+    def get_token(self):
+        id_token = os.environ.get(self.token_env_var)
+        if not id_token:
+            msg = 'the codebase is not executing in a gitlab environment or the incorrect token environment variable ' \
+                  'was specified'
+            raise exceptions.NotExecutingInGitlabEnvironment(msg)
+        return f'OIDC::{id_token}'

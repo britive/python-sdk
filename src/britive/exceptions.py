@@ -58,6 +58,9 @@ class NotExecutingInGithubEnvironment(Exception):
 class NotExecutingInSpaceliftEnvironment(Exception):
     pass
 
+class NotExecutingInGitlabEnvironment(Exception):
+    pass
+
 
 class NotFound(Exception):
     pass
