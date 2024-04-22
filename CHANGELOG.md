@@ -2,6 +2,22 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.25.0rc1 [2024-04-22]
+#### What's New
+* None
+
+#### Enhancements
+* Addition of `gitlab` federation provider
+
+#### Bug Fixes
+* None
+
+#### Dependencies
+* None
+
+#### Other
+* None
+
 ## v2.24.0 [2024-04-05]
 #### What's New
 * `britive.settings.banner.*` - administer the banner/system announcement
