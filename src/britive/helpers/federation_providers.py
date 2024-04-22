@@ -283,9 +283,9 @@ class SpaceliftFederationProvider(FederationProvider):
 
 
 class GitlabFederationProvider(FederationProvider):
-    def __init__(self, token_env_var: str = 'BRITIVE_OIDC_TOKEN'):
+    def __init__(self, token_env_var: str = None):
         super().__init__()
-        self.token_env_var = token_env_var
+        self.token_env_var = token_env_var or 'BRITIVE_OIDC_TOKEN'
 
     def get_token(self):
         id_token = os.environ.get(self.token_env_var)
