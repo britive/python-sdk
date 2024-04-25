@@ -206,16 +206,18 @@ def cached_profile(pytestconfig, cached_application):
     return britive.profiles.create(
             application_id=cached_application['appContainerId'],
             name=f'test-{r}'
-        )
+    )
 
 
 @pytest.fixture(scope='session')
 @cached_resource(name='profile-policy')
 def cached_profile_policy(pytestconfig, cached_profile, cached_tag):
     policy = britive.profiles.policies.build(
-        name=cached_profile['papId'],
-        description=cached_tag['name'],
-        tags=[cached_tag['name']]
+        name=cached_profile['papId']
+        , description=cached_tag['name']
+        , tags=[cached_tag['name']]
+        , stepup_auth=True
+        , always_prompt_stepup_auth=False
     )
     return britive.profiles.policies.create(
         profile_id=cached_profile['papId'],

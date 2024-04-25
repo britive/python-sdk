@@ -2,7 +2,6 @@ from . import exceptions
 import time
 from typing import Callable
 
-
 approval_exceptions = {
     'rejected': exceptions.ProfileApprovalRejected(),
     'cancelled': exceptions.ProfileApprovalWithdrawn(),
@@ -302,8 +301,9 @@ class MyAccess:
         return self.britive.get(f'{self.britive.base_url}/v1/approvals/', params=params)
 
     def _checkout(self, profile_id: str, environment_id: str, programmatic: bool = True,
-                  include_credentials: bool = False, justification: str = None, wait_time: int = 60,
-                  max_wait_time: int = 600, progress_func: Callable = None, iteration_num: int = 1) -> dict:
+                  include_credentials: bool = False, justification: str = None, otp: str = None,
+                  wait_time: int = 60, max_wait_time: int = 600, progress_func: Callable = None,
+                  iteration_num: int = 1) -> dict:
 
         params = {
             'accessType': 'PROGRAMMATIC' if programmatic else 'CONSOLE'
@@ -341,12 +341,21 @@ class MyAccess:
 
         # if not check it out
         if not transaction:
+            if otp:
+                response = self.britive.step_up.authenticate(otp=otp)
+                print(str(response))
+                if response.get('result') == 'FAILED':
+                    raise exceptions.StepUpAuthFailed()
+
             try:
                 transaction = self.britive.post(
                     f'{self.base_url}/{profile_id}/environments/{environment_id}',
                     params=params,
                     json=data
                 )
+            except exceptions.ForbiddenRequest as e:
+                if 'PE-0028' in str(e):  # Check for stepup totp
+                    raise exceptions.StepUpAuthRequiredButNotProvided()
             except exceptions.InvalidRequest as e:
                 if 'MA-0009' in str(e):  # old approval process that coupled approval and checkout
                     raise exceptions.ApprovalRequiredButNoJustificationProvided()
@@ -401,7 +410,7 @@ class MyAccess:
                         iteration_num=iteration_num+1
                     )
                 else:
-                    raise e
+                    raise e.lower()
 
         transaction_id = transaction['transactionId']
 
@@ -441,8 +450,8 @@ class MyAccess:
         return transaction
 
     def checkout(self, profile_id: str, environment_id: str, programmatic: bool = True,
-                 include_credentials: bool = False, justification: str = None, wait_time: int = 60,
-                 max_wait_time: int = 600, progress_func: Callable = None) -> dict:
+                 include_credentials: bool = False, justification: str = None, otp: str = None,
+                 wait_time: int = 60, max_wait_time: int = 600, progress_func: Callable = None) -> dict:
         """
         Checkout a profile.
 
@@ -483,7 +492,8 @@ class MyAccess:
             justification=justification,
             wait_time=wait_time,
             max_wait_time=max_wait_time,
-            progress_func=progress_func
+            progress_func=progress_func,
+            otp=otp
         )
 
     def checkout_by_name(self, profile_name: str, environment_name: str, application_name: str = None,
