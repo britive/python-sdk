@@ -171,7 +171,7 @@ def test_disable_mfa(cached_profile, cached_tag, cached_profile_policy):
         , policy_id=cached_profile_policy['id']
     )
     assert isinstance(json.loads(response.get('condition')), dict)
-    assert json.loads(response.get('condition')).get('stepUpCondition').get('factor') == 'TOTP'
+    assert json.loads(response.get('condition')).get('stepUpCondition', '') == ''
 
 
 def test_enable_mfa(cached_profile, cached_tag, cached_profile_policy):

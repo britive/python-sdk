@@ -305,6 +305,8 @@ class SystemPolicies:
                 prompt = 'false'
             step_up_condition = {'factor': 'TOTP', 'alwaysPrompt': prompt}
             condition['stepUpCondition'] = step_up_condition
+        # else:
+        #     condition = {}
 
         # put it all together
         policy = {
@@ -335,7 +337,7 @@ class SystemPolicies:
             policy['permissions'] = [{identifier_type: p} for p in permissions]
         if roles:
             policy['roles'] = [{identifier_type: r} for r in roles]
-        if condition:
-            policy['condition'] = condition if condition_as_dict else json.dumps(condition, default=str)
+
+        policy['condition'] = condition if condition_as_dict else json.dumps(condition, default=str)
 
         return policy
