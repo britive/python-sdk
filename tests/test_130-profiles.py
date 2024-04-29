@@ -161,7 +161,7 @@ def test_disable_mfa(cached_profile, cached_tag, cached_profile_policy):
         stepup_auth=False,
         always_prompt_stepup_auth=False
     )
-    temp = britive.profiles.policies.update(
+    response = britive.profiles.policies.update(
         profile_id=cached_profile['papId']
         , policy_id=cached_profile_policy['id']
         , policy=profile_policy
