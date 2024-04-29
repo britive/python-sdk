@@ -484,6 +484,7 @@ class MyAccess:
         :raises ProfileApprovalRejected: if the approval request was rejected by the approver.
         :raises ProfileApprovalWithdrawn: if the approval request was withdrawn by the requester.
         """
+
         return self._checkout(
             profile_id=profile_id,
             environment_id=environment_id,
