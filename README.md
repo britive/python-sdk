@@ -96,6 +96,7 @@ they exist.
 * Security Policies
 * Service Identities
 * Service Identity Tokens
+* System Announcement (aka banner)
 * Tags (aka User Tags)
 * Task Services
 * Tasks
