@@ -39,6 +39,23 @@ version = {attr = "britive.__version__"}
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py311
+isolated_build = True
+
+[testenv]
+# install pytest in the virtualenv where commands will be executed
+deps =
+    pytest
+    requests>=2.31.0
+commands =
+    # NOTE: you can run any command line tool here - not just tests
+    pytest -v
+passenv = BRITIVE_TENANT,BRITIVE_API_TOKEN,BRITIVE_TEST_ENV_ACCOUNT_ID,BRITIVE_TEST_IGNORE_SCAN,BRITIVE_GCP_TEST_APP_ID
+"""
+
 [tool.pymarkdown]
 plugins.md013.line_length = 120
 plugins.md013.code_block_line_length = 120
