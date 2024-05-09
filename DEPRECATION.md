@@ -4,18 +4,17 @@ This document holds the items which are deprecated and will be retired in the ne
 
 ## Deprecations in Major Release 2.x.x (Retire in Major Release 3.x.x)
 
-#### `policies.py`
+### `policies.py`
 
-This python file only holds one method `build`. The remainder of the system policy logic has been created
-in `system.policies` so as not to cause confusion with secrets manager and profile policies.
+This python file only holds one method `build`. The remainder of the system policy logic has been created in
+`system.policies` so as not to cause confusion with secrets manager and profile policies.
 
-In the next major release, `policies.py` will be retired. As of release `2.17.0` the `polices.build` method
-simply calls `system.policies.build`. 
+In the next major release, `policies.py` will be retired. As of release `2.17.0` the `polices.build` method simply calls
+`system.policies.build`.
 
+### Policy Condition Attributes `from_time` and `to_time`
 
-#### Policy Condition Attributes `from_time` and `to_time`
-
-The following policy `build` method parameters `from_time` and `to_time` are deprecated as of release `2.19.0`. The 
+The following policy `build` method parameters `from_time` and `to_time` are deprecated as of release `2.19.0`. The
 parameters are still being accepted and will be converted to the go forward policy condition format.
 
 * `system.polices.build`
