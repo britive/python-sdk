@@ -1,3 +1,4 @@
+> __TODO:__ _add structure/development/convention sections._
 
 # Python Britive SDK
 
