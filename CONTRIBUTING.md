@@ -155,12 +155,3 @@ pytest tests/test_990-delete_all_resources.py -v
 
 Or you can simply run `pytest -v` to test everything all at once. The above commands however allow you to halt testing
 to fix issues that might arise.
-
-## Secrets Manager Testing
-
-Since the admin API actions for Secrets Manager are not yet built into this Python API Wrapper then some manual setup
-has to occur in the tenant used for testing. Specifically these tests will need at least 1 secret available to the
-calling user/service identity and one of those secrets has to be named "/Test".
-
-This will change once the admin API actions are built into this package as we can then programmatically create the vault
-and secrets before testing the `britive.my_secrets` functionality.
