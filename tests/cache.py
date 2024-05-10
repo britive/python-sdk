@@ -36,7 +36,7 @@ def generate_random_password(length=30):
 
 
 def cleanup(resource):
-    file = f'./.pytest_cache/v/resources/{resource}'  # ./ instead of ../ since this is being run from  root directory
+    file = f'./.pytest_cache/v/resources/{resource}'  # ./ instead of ../ since this is being run from root directory
     if os.path.isfile(file):
         os.remove(file)
 

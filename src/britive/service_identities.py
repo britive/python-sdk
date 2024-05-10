@@ -11,12 +11,13 @@ class ServiceIdentities:
         self.base_url = f'{self.britive.base_url}/users'
         self.custom_attributes = CustomAttributes(self)
 
-    def list(self, filter_expression: str = None) -> list:
+    def list(self, filter_expression: str = None, include_tags: bool = False) -> list:
         """
         Provide an optionally filtered list of all service identities.
 
         :param filter_expression: filter list of users based on name, status, or role. The supported operators
              are 'eq' and 'co'. Example: 'name co "Smith"'
+        :param include_tags: if this is set to true, tags/group memberships are returned.
         :return: List of service identity records
         """
 
@@ -27,6 +28,8 @@ class ServiceIdentities:
         }
         if filter_expression:
             params['filter'] = filter_expression
+        if include_tags:
+            params['includeTags'] = 'true'
 
         return self.britive.get(self.base_url, params)
 

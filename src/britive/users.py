@@ -14,12 +14,13 @@ class Users:
         self.base_url = f'{self.britive.base_url}/users'
         self.custom_attributes = CustomAttributes(self)
 
-    def list(self, filter_expression: str = None) -> list:
+    def list(self, filter_expression: str = None, include_tags: bool = False) -> list:
         """
         Provide an optionally filtered list of all users.
 
         :param filter_expression: filter list of users based on name, status, or role. The supported operators
              are 'eq' and 'co'. Example: 'name co "Smith"'
+        :param include_tags: if this is set to true, tags/group memberships are returned.
         :return: List of user records
         """
 
@@ -30,6 +31,8 @@ class Users:
         }
         if filter_expression:
             params['filter'] = filter_expression
+        if include_tags:
+            params['includeTags'] = 'true'
 
         return self.britive.get(self.base_url, params)
 
