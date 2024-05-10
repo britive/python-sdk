@@ -2,6 +2,28 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.25.0rc2 [2024-05-10]
+
+__What's New:__
+
+* None
+
+__Enhancements:__
+
+* Addition of `include_tags` on `users.list` and `service_identities.list`
+
+__Bug Fixes:__
+
+* None
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v2.25.0rc1 [2024-04-22]
 
 __What's New:__
