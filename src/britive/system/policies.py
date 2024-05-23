@@ -61,7 +61,7 @@ class SystemPolicies:
         """
 
         return self.britive.post(self.base_url, json=policy)
-    
+
     def update(self, policy_identifier: str, policy: dict, identifier_type: str = 'name') -> None:
         """
         Update a system level policy.

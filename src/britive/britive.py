@@ -1,42 +1,42 @@
+import json as native_json
 import os
+import socket
 import time
 import requests
-import json as native_json
-import socket
-from .helpers import methods as helper_methods
-from .helpers import federation_providers as fp
-from .users import Users
-from .service_identity_tokens import ServiceIdentityTokens
-from .service_identities import ServiceIdentities
-from .exceptions import *
-from .tags import Tags
-from .applications import Applications
-from .environments import Environments
-from .environment_groups import EnvironmentGroups
-from .scans import Scans
 from .accounts import Accounts
-from .permissions import Permissions
-from .groups import Groups
-from .identity_attributes import IdentityAttributes
-from .profiles import Profiles
-from .task_services import TaskServices
-from .tasks import Tasks
-from .security_policies import SecurityPolicies
-from .saml import Saml
 from .api_tokens import ApiTokens
+from .applications import Applications
 from .audit_logs import AuditLogs
-from .reports import Reports
+from .environment_groups import EnvironmentGroups
+from .environments import Environments
+from .exceptions import *
+from .groups import Groups
+from .helpers import federation_providers as fp
+from .helpers import methods as helper_methods
+from .identity_attributes import IdentityAttributes
 from .identity_providers import IdentityProviders
 from .my_access import MyAccess
-from .notifications import Notifications
 from .my_secrets import MySecrets
-from .policies import Policies
-from .secrets_manager import SecretsManager
 from .notification_mediums import NotificationMediums
-from .workload import Workload
-from .system.system import System
+from .notifications import Notifications
+from .permissions import Permissions
+from .policies import Policies
+from .profiles import Profiles
+from .reports import Reports
+from .saml import Saml
+from .scans import Scans
+from .secrets_manager import SecretsManager
+from .security_policies import SecurityPolicies
+from .service_identities import ServiceIdentities
+from .service_identity_tokens import ServiceIdentityTokens
 from .settings.settings import Settings
 from .step_up import StepUpAuth
+from .system.system import System
+from .tags import Tags
+from .task_services import TaskServices
+from .tasks import Tasks
+from .users import Users
+from .workload import Workload
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
 BRITIVE_TOKEN_ENV_NAME = 'BRITIVE_API_TOKEN'
@@ -77,8 +77,14 @@ class Britive:
     must persist responses to disk if and when that is required.
     """
 
-    def __init__(self, tenant: str = None, token: str = None, query_features: bool = True,
-                 token_federation_provider: str = None, token_federation_provider_duration_seconds: int = 900):
+    def __init__(
+        self,
+        tenant: str = None,
+        token: str = None,
+        query_features: bool = True,
+        token_federation_provider: str = None,
+        token_federation_provider_duration_seconds: int = 900,
+    ):
         """
         Instantiate an authenticated interface that can be used to communicate with the Britive API.
 
@@ -109,7 +115,7 @@ class Britive:
             self.__token = self.source_federation_token_from(
                 provider=token_federation_provider,
                 tenant=self.tenant,
-                duration_seconds=token_federation_provider_duration_seconds
+                duration_seconds=token_federation_provider_duration_seconds,
             )
         else:
             self.__token = token or os.environ.get(BRITIVE_TOKEN_ENV_NAME)
@@ -150,11 +156,13 @@ class Britive:
         except Exception:
             version = 'unknown'
 
-        self.session.headers.update({
-            'Authorization': f'{token_type} {self.__token}',
-            'Content-Type': 'application/json',
-            'User-Agent': f'britive-python-sdk/{version} {requests.utils.default_user_agent()}'
-        })
+        self.session.headers.update(
+            {
+                'Authorization': f'{token_type} {self.__token}',
+                'Content-Type': 'application/json',
+                'User-Agent': f'britive-python-sdk/{version} {requests.utils.default_user_agent()}',
+            }
+        )
 
         self.feature_flags = self.features() if query_features else {}
 
@@ -254,11 +262,7 @@ class Britive:
 
         if provider == 'aws':
             profile = helper_methods.safe_list_get(helper, 1, None)
-            return fp.AwsFederationProvider(
-                profile=profile,
-                tenant=tenant,
-                duration=duration_seconds
-            ).get_token()
+            return fp.AwsFederationProvider(profile=profile, tenant=tenant, duration=duration_seconds).get_token()
 
         if provider == 'github':
             audience = helper_methods.safe_list_get(helper, 1, None)
@@ -279,8 +283,7 @@ class Britive:
             client_id = additional_attributes[0]
             audience = helper_methods.safe_list_get(additional_attributes, 1, None)
             return fp.AzureUserAssignedManagedIdentityFederationProvider(
-                client_id=client_id,
-                audience=audience
+                client_id=client_id, audience=audience
             ).get_token()
 
         if provider == 'spacelift':
@@ -294,7 +297,7 @@ class Britive:
 
     @staticmethod
     def parse_tenant(tenant: str) -> str:
-        domain = tenant.replace('https://', '').replace('http://', '')   # remove scheme
+        domain = tenant.replace('https://', '').replace('http://', '')  # remove scheme
         domain = domain.split('/')[0]  # remove any paths as they will not be needed
         try:
             domain_helper = domain.split(':')
@@ -352,15 +355,13 @@ class Britive:
     def patch_upload(self, url, file_content_as_str, content_type, filename):
         """Internal use only."""
 
-        files = {
-            filename: (f'{filename}.xml', file_content_as_str, content_type)
-        }
+        files = {filename: (f'{filename}.xml', file_content_as_str, content_type)}
         response = self.session.patch(url, files=files, headers={'Content-Type': None})
         try:
             return response.json()
         except native_json.decoder.JSONDecodeError:  # if we cannot decode json then the response isn't json
             return response.content.decode('utf-8')
-    
+
     # note - this method is only used to upload a file when creating a secret
     def post_upload(self, url, params=None, files=None):
         """Internal use only."""
@@ -372,16 +373,18 @@ class Britive:
 
     @staticmethod
     def __check_response_for_error(response):
-        if response.status_code in allowed_exceptions.keys():
+        if response.status_code in allowed_exceptions:
             try:
                 content = native_json.loads(response.content.decode('utf-8'))
-                message = f"{response.status_code} - " \
-                          f"{content.get('errorCode') or 'E0000'} - " \
-                          f"{content.get('message') or 'no message available'}"
+                message = (
+                    f"{response.status_code} - "
+                    f"{content.get('errorCode') or 'E0000'} - "
+                    f"{content.get('message') or 'no message available'}"
+                )
                 if content.get('details'):
                     message += f" - {content.get('details')}"
                 raise allowed_exceptions[response.status_code](message)
-            except native_json.decoder.JSONDecodeError as e:
+            except native_json.decoder.JSONDecodeError:
                 content = response.content.decode('utf-8')
                 message = f"{response.status_code} - {content}"
                 raise allowed_exceptions[response.status_code](message)
@@ -417,7 +420,7 @@ class Britive:
     def __tenant_is_under_maintenance(response):
         try:
             return response.status_code == 503 and response.json().get('errorCode') == 'MAINT0001'
-        except:
+        except Exception:
             return False
 
     def __request_with_exponential_backoff_and_retry(self, method, url, params, data, json):
@@ -434,7 +437,7 @@ class Britive:
 
             # check for error - if so perform exponential backoff
             if response.status_code in self.retry_response_status:
-                wait_time = (2 ** num_retries) * self.retry_backoff_factor
+                wait_time = (2**num_retries) * self.retry_backoff_factor
                 time.sleep(wait_time)
                 num_retries += 1
             else:  # we got a "good" response so break out of while loop
@@ -448,11 +451,7 @@ class Britive:
         pagination_type = None
         while True:  # infinite loop in case of pagination - we will break the loop when needed
             response = self.__request_with_exponential_backoff_and_retry(
-                method=method,
-                url=url,
-                params=params,
-                data=data,
-                json=json
+                method=method, url=url, params=params, data=data, json=json
             )
             if self.__response_has_no_content(response):  # handle no content responses
                 return None
@@ -485,8 +484,7 @@ class Britive:
                 size = result['size']
                 if size * (page + 1) >= count:  # if we have reached the max number of records time to break the loop
                     break
-                else:  # else loop again after incrementing the page number by 1
-                    params['page'] = page + 1
+                params['page'] = page + 1
             elif pagination_type == 'audit':
                 return_data += result  # result is already a list
                 if 'next-page' not in response.headers.keys():
@@ -522,4 +520,3 @@ class Britive:
             if group['parentId'] == '':
                 return group['id']
         raise RootEnvironmentGroupNotFound()
-

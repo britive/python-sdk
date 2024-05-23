@@ -122,13 +122,13 @@ class Users:
         else:
             required_fields.append('password')
 
-        if 'status' not in kwargs.keys():
+        if 'status' not in kwargs:
             kwargs['status'] = 'active'
 
         if kwargs['status'] not in valid_statues:
             raise ValueError(f'invalid status {kwargs["status"]}')
 
-        if not all(x in kwargs.keys() for x in required_fields):
+        if not all(x in kwargs for x in required_fields):
             raise ValueError('Not all required keyword arguments were provided.')
 
         response = self.britive.post(self.base_url, json=kwargs)
@@ -149,10 +149,10 @@ class Users:
         # add some required elements to the kwargs passed in by the caller
         kwargs['type'] = 'User'
 
-        if 'username' not in kwargs.keys():
+        if 'username' not in kwargs:
             kwargs['username'] = user['username']
 
-        if 'email' not in kwargs.keys():
+        if 'email' not in kwargs:
             kwargs['email'] = user['email']
 
         self.britive.patch(f'{self.base_url}/{user_id}', json=kwargs)
@@ -261,7 +261,7 @@ class Users:
 
         return self.britive.patch(f'{self.base_url}/{user_id}/resetmfa')
 
-    def minimized_user_details(self, user_id: str = None, user_ids: list = []) -> list:
+    def minimized_user_details(self, user_id: str = None, user_ids: list = None) -> list:
         """
         Retrieve a small set of user fields given a user id.
 
@@ -293,4 +293,3 @@ class EnableMFA:
 
         data = {'action': 'GENERATE_SECRET'}
         return self.britive.post(self.base_url, json=data)
-

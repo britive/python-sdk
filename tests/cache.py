@@ -1,8 +1,8 @@
-import functools
-import pytest
 import os
-import string
+import functools
 import random
+import string
+import pytest
 
 # don't worry about these invalid references - it will be fixed up if we are running local tests
 # vs running it through tox
@@ -11,9 +11,14 @@ from britive import exceptions  # exceptions used in test files so including her
 
 
 britive = Britive()  # source details from environment variables
-scan_skip = True if os.getenv('BRITIVE_TEST_IGNORE_SCAN') else False
+scan_skip = bool(os.getenv('BRITIVE_TEST_IGNORE_SCAN'))
 scan_skip_message = 'ignore scan requested'
-constraints = False if os.getenv('BRITIVE_GCP_TEST_APP_ID') and os.getenv('BRITIVE_TENANT') == 'engv2-ea' else True
+constraints = bool(
+    not (
+        os.getenv('BRITIVE_GCP_TEST_APP_ID')
+        and os.getenv('BRITIVE_TENANT') == 'engv2-ea'
+    )
+)
 constraints_skip = 'not using engv2-ea and/or BRITIVE_GCP_TEST_APP_ID not set'
 characters = list(string.ascii_letters + string.digits + "!@#$%^&*()")
 
@@ -24,7 +29,7 @@ def generate_random_password(length=30):
 
     # picking random characters from the list
     password = []
-    for i in range(length):
+    while len(password) < length:
         password.append(random.choice(characters))
 
     # shuffling the resultant password
@@ -213,11 +218,11 @@ def cached_profile(pytestconfig, cached_application):
 @cached_resource(name='profile-policy')
 def cached_profile_policy(pytestconfig, cached_profile, cached_tag):
     policy = britive.profiles.policies.build(
-        name=cached_profile['papId']
-        , description=cached_tag['name']
-        , tags=[cached_tag['name']]
-        , stepup_auth=True
-        , always_prompt_stepup_auth=False
+        name=cached_profile['papId'],
+        description=cached_tag['name'],
+        tags=[cached_tag['name']],
+        stepup_auth=True,
+        always_prompt_stepup_auth=False
     )
     return britive.profiles.policies.create(
         profile_id=cached_profile['papId'],
@@ -371,7 +376,7 @@ def cached_scim_token(pytestconfig, cached_identity_provider):
 
 @pytest.fixture(scope='session')
 @cached_resource(name='checked-out-profile')
-def cached_checked_out_profile(pytestconfig, cached_profile, cached_user, cached_environment, cached_tag):
+def cached_checked_out_profile(pytestconfig, cached_profile, cached_environment, cached_tag):
     # add the currently authenticated user
 
     calling_user_details = britive.my_access.whoami()
@@ -408,7 +413,7 @@ def cached_checked_out_profile(pytestconfig, cached_profile, cached_user, cached
 
 @pytest.fixture(scope='session')
 @cached_resource(name='checked-out-profile-by-name')
-def cached_checked_out_profile_by_name(pytestconfig, cached_profile, cached_user, cached_environment,
+def cached_checked_out_profile_by_name(pytestconfig, cached_profile, cached_environment,
                                        cached_application):
 
     # note that cached_checked_out_profile has to be run first so all the permissions and user entitlements
@@ -472,25 +477,25 @@ def cached_folder(pytestconfig, cached_vault):
 
 @pytest.fixture(scope='session')
 @cached_resource(name='password-policies')
-def cached_PasswordPolicies(pytestconfig):
+def cached_password_policies(pytestconfig):
     r = str(random.randint(0, 1000000))
     return britive.secrets_manager.password_policies.create(name=f"pytestpwdpolicy-{r}")
 
 
 @pytest.fixture(scope='session')
 @cached_resource(name='pin-policies')
-def cached_PinPolicies(pytestconfig):
+def cached_pin_policies(pytestconfig):
     r = str(random.randint(0, 1000000))
     return britive.secrets_manager.password_policies.create_pin(name=f"pytestpinpolicy-{r}")
 
 
 @pytest.fixture(scope='session')
 @cached_resource(name='static-secret-templates')
-def cached_static_secret_template(pytestconfig, cached_PasswordPolicies):
+def cached_static_secret_template(pytestconfig, cached_password_policies):
     r = str(random.randint(0, 1000000))
     return britive.secrets_manager.static_secret_templates.create(
         name=f"test_name-{r}",
-        password_policy_id=cached_PasswordPolicies['id'],
+        password_policy_id=cached_password_policies['id'],
         parameters=
         {
             'name': "Note",
@@ -515,7 +520,7 @@ def cached_secret(pytestconfig, cached_vault, cached_static_secret_template):
 
 @pytest.fixture(scope='session')
 @cached_resource(name='policy')
-def cached_policy(pytestconfig, cached_user):
+def cached_policy(pytestconfig):
     r = str(random.randint(0, 1000000))
     policy = britive.secrets_manager.policies.build(f"pytestpolicy-{r}", draft=True, active=False)
     return britive.secrets_manager.policies.create(policy=policy, path='/')

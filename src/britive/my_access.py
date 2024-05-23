@@ -1,11 +1,12 @@
-from . import exceptions
+import sys
 import time
 from typing import Callable
+from . import exceptions
 
 approval_exceptions = {
     'rejected': exceptions.ProfileApprovalRejected(),
     'cancelled': exceptions.ProfileApprovalWithdrawn(),
-    'timeout': exceptions.ProfileApprovalTimedOut()
+    'timeout': exceptions.ProfileApprovalTimedOut(),
 }
 
 
@@ -14,7 +15,7 @@ class MyAccess:
     This class is meant to be called by end users (as part of custom API integration work or the yet to be built
     Python based Britive CLI tooling). It is an API layer on top of the actions that can be performed on the
     "My Access" page of the Britive UI.
-    
+
     No "administrative" access is required by the methods in this class. Each method will only return resources/allow
     actions which are permitted to be performed by the user/service identity, as identified by an API token or
     interactive login bearer token.
@@ -68,8 +69,9 @@ class MyAccess:
 
         return self.britive.patch(f'{self.base_url}/extensions/{transaction_id}')
 
-    def extend_checkout_by_name(self, profile_name: str, environment_name: str, application_name: str = None,
-                                programmatic: bool = True) -> dict:
+    def extend_checkout_by_name(
+        self, profile_name: str, environment_name: str, application_name: str = None, programmatic: bool = True
+    ) -> dict:
         """
         Extend the expiration time of a currently checked out profile by supplying the names of entities.
 
@@ -98,9 +100,17 @@ class MyAccess:
             raise exceptions.TransactionNotFound()
         return self.extend_checkout(transaction_id=transaction_id)
 
-    def request_approval_by_name(self, profile_name: str, environment_name: str, application_name: str = None,
-                                 justification: str = None, wait_time: int = 60, max_wait_time: int = 600,
-                                 block_until_disposition: bool = False, progress_func: Callable = None) -> any:
+    def request_approval_by_name(
+        self,
+        profile_name: str,
+        environment_name: str,
+        application_name: str = None,
+        justification: str = None,
+        wait_time: int = 60,
+        max_wait_time: int = 600,
+        block_until_disposition: bool = False,
+        progress_func: Callable = None,
+    ) -> any:
         """
         Requests approval to checkout a profile at a later time, using names of entities instead of IDs.
 
@@ -134,12 +144,19 @@ class MyAccess:
             wait_time=wait_time,
             max_wait_time=max_wait_time,
             block_until_disposition=block_until_disposition,
-            progress_func=progress_func
+            progress_func=progress_func,
         )
 
-    def request_approval(self, profile_id: str, environment_id: str, justification: str, wait_time: int = 60,
-                         max_wait_time: int = 600, block_until_disposition: bool = False,
-                         progress_func: Callable = None) -> any:
+    def request_approval(
+        self,
+        profile_id: str,
+        environment_id: str,
+        justification: str,
+        wait_time: int = 60,
+        max_wait_time: int = 600,
+        block_until_disposition: bool = False,
+        progress_func: Callable = None,
+    ) -> any:
         """
         Requests approval to checkout a profile at a later time.
 
@@ -162,13 +179,10 @@ class MyAccess:
         :raises ProfileApprovalMaxBlockTimeExceeded: if max_wait_time has been reached while waiting for approval.
         """
 
-        data = {
-            'justification': justification
-        }
+        data = {'justification': justification}
 
         request = self.britive.post(
-            f'{self.base_url}/{profile_id}/environments/{environment_id}/approvalRequest',
-            json=data
+            f'{self.base_url}/{profile_id}/environments/{environment_id}/approvalRequest', json=data
         )
 
         if request is None:
@@ -188,17 +202,17 @@ class MyAccess:
                             progress_func('awaiting approval')
                         time.sleep(wait_time)
                         continue
-                    else:  # status == timeout or approved or rejected or cancelled
-                        return status
+                    # status == timeout or approved or rejected or cancelled
+                    return status
             except KeyboardInterrupt:  # handle Ctrl+C (^C)
                 # the first ^C we get we will try to withdraw the request
                 # if we get another ^C while doing this we simply exit immediately
                 try:
                     time.sleep(1)  # give the caller a small window to ^C again
                     self.withdraw_approval_request(request_id=request_id)
-                    exit()
+                    sys.exit()
                 except KeyboardInterrupt:
-                    exit()
+                    sys.exit()
 
         else:
             return request
@@ -213,8 +227,9 @@ class MyAccess:
 
         return self.britive.get(f'{self.britive.base_url}/v1/approvals/{request_id}')
 
-    def withdraw_approval_request_by_name(self, profile_name: str, environment_name: str,
-                                          application_name: str = None) -> None:
+    def withdraw_approval_request_by_name(
+        self, profile_name: str, environment_name: str, application_name: str = None
+    ) -> None:
         """
         Withdraws a pending approval request, using names of entities instead of IDs.
 
@@ -227,13 +242,11 @@ class MyAccess:
 
         ids = self._get_profile_and_environment_ids_given_names(profile_name, environment_name, application_name)
 
-        return self.withdraw_approval_request(
-            profile_id=ids['profile_id'],
-            environment_id=ids['environment_id']
-        )
+        return self.withdraw_approval_request(profile_id=ids['profile_id'], environment_id=ids['environment_id'])
 
-    def withdraw_approval_request(self, request_id: str = None, profile_id: str = None,
-                                  environment_id: str = None) -> None:
+    def withdraw_approval_request(
+        self, request_id: str = None, profile_id: str = None, environment_id: str = None
+    ) -> None:
         """
         Withdraws a pending approval request.
 
@@ -253,8 +266,10 @@ class MyAccess:
                 raise ValueError('profile_id is required.')
             if not environment_id:
                 raise ValueError('environment_id is required')
-            url = f'{self.britive.base_url}/v1/approvals/consumer/papservice/resource?resourceId=' \
-                  f'{profile_id}/{environment_id}'
+            url = (
+                f'{self.britive.base_url}/v1/approvals/consumer/papservice/resource?resourceId='
+                f'{profile_id}/{environment_id}'
+            )
 
         return self.britive.delete(url)
 
@@ -266,9 +281,7 @@ class MyAccess:
         :return: None.
         """
 
-        params = {
-            'approveRequest': 'yes'
-        }
+        params = {'approveRequest': 'yes'}
 
         return self.britive.patch(f'{self.britive.base_url}/v1/approvals/{request_id}', params=params)
 
@@ -280,9 +293,7 @@ class MyAccess:
         :return: None.
         """
 
-        params = {
-            'approveRequest': 'no'
-        }
+        params = {'approveRequest': 'no'}
 
         return self.britive.patch(f'{self.britive.base_url}/v1/approvals/{request_id}', params=params)
 
@@ -293,25 +304,26 @@ class MyAccess:
         :return: List of approval requests.
         """
 
-        params = {
-            'requestType': 'myApprovals',
-            'consumer': 'papservice'
-        }
+        params = {'requestType': 'myApprovals', 'consumer': 'papservice'}
 
         return self.britive.get(f'{self.britive.base_url}/v1/approvals/', params=params)
 
-    def _checkout(self, profile_id: str, environment_id: str, programmatic: bool = True,
-                  include_credentials: bool = False, justification: str = None, otp: str = None,
-                  wait_time: int = 60, max_wait_time: int = 600, progress_func: Callable = None,
-                  iteration_num: int = 1) -> dict:
+    def _checkout(
+        self,
+        profile_id: str,
+        environment_id: str,
+        programmatic: bool = True,
+        include_credentials: bool = False,
+        justification: str = None,
+        otp: str = None,
+        wait_time: int = 60,
+        max_wait_time: int = 600,
+        progress_func: Callable = None,
+        iteration_num: int = 1,
+    ) -> dict:
+        params = {'accessType': 'PROGRAMMATIC' if programmatic else 'CONSOLE'}
 
-        params = {
-            'accessType': 'PROGRAMMATIC' if programmatic else 'CONSOLE'
-        }
-
-        data = {
-            'justification': justification
-        }
+        data = {'justification': justification}
 
         transaction = None
 
@@ -330,8 +342,8 @@ class MyAccess:
                     if p['checkedIn'] is None:  # still currently checked out so we can move on
                         transaction = p
                         break
-                    else:  # we are in the middle of a profile being checked in so cannot check it out yet
-                        loop = True
+                    # we are in the middle of a profile being checked in so cannot check it out yet
+                    loop = True
             if loop:
                 if progress_func:
                     progress_func('pending profile checkin')
@@ -349,9 +361,7 @@ class MyAccess:
 
             try:
                 transaction = self.britive.post(
-                    f'{self.base_url}/{profile_id}/environments/{environment_id}',
-                    params=params,
-                    json=data
+                    f'{self.base_url}/{profile_id}/environments/{environment_id}', params=params, json=data
                 )
             except exceptions.ForbiddenRequest as e:
                 if 'PE-0028' in str(e):  # Check for stepup totp
@@ -359,7 +369,7 @@ class MyAccess:
             except exceptions.InvalidRequest as e:
                 if 'MA-0009' in str(e):  # old approval process that coupled approval and checkout
                     raise exceptions.ApprovalRequiredButNoJustificationProvided()
-                elif 'MA-0010' in str(e):  # new approval process that de-couples approval from checkout
+                if 'MA-0010' in str(e):  # new approval process that de-couples approval from checkout
                     # if the caller has not provided a justification we know for sure the call will fail
                     # so raise the exception
                     if not justification:
@@ -373,19 +383,17 @@ class MyAccess:
                         wait_time=wait_time,
                         max_wait_time=max_wait_time,
                         block_until_disposition=True,
-                        progress_func=progress_func
+                        progress_func=progress_func,
                     )
 
                     # handle the response based on the value of status
                     if status == 'approved':
                         transaction = self.britive.post(
-                            f'{self.base_url}/{profile_id}/environments/{environment_id}',
-                            params=params,
-                            json=data
+                            f'{self.base_url}/{profile_id}/environments/{environment_id}', params=params, json=data
                         )
                     else:
                         raise approval_exceptions[status]
-                elif 'e1001 - user has already checked out profile for this environment' in str(e).lower():
+                if 'e1001 - user has already checked out profile for this environment' in str(e).lower():
                     # this is a rare race condition...explained below
                     # if 2 or more calls from the same user to checkout a profile occur at the same time +/- 1/2 seconds
                     # both calls will get the list of checked out profiles and notice that the profile is not currently
@@ -407,10 +415,9 @@ class MyAccess:
                         wait_time=wait_time,
                         max_wait_time=max_wait_time,
                         progress_func=progress_func,
-                        iteration_num=iteration_num+1
+                        iteration_num=iteration_num + 1,
                     )
-                else:
-                    raise e.lower()
+                raise e
 
         transaction_id = transaction['transactionId']
 
@@ -421,8 +428,8 @@ class MyAccess:
             while True:
                 try:
                     transaction = self.get_checked_out_profile(transaction_id=transaction_id)
-                except exceptions.TransactionNotFound:
-                    raise exceptions.ApprovalWorkflowRejected()
+                except exceptions.TransactionNotFound as e:
+                    raise exceptions.ApprovalWorkflowRejected() from e
                 if transaction['status'] == 'checkOutInApproval':  # we have an approval workflow occurring
                     if time.time() >= quit_time:
                         raise exceptions.ApprovalWorkflowTimedOut()
@@ -430,8 +437,8 @@ class MyAccess:
                         progress_func('awaiting approval')
                     time.sleep(wait_time)
                     continue
-                else:  # status == checkedOut
-                    break
+                # status == checkedOut
+                break
 
         # inject credentials if asked
         if include_credentials:
@@ -441,7 +448,7 @@ class MyAccess:
                 transaction_id=transaction_id,
                 transaction=transaction,
                 return_transaction_details=True,
-                progress_func=progress_func
+                progress_func=progress_func,
             )
             transaction['credentials'] = credentials
 
@@ -449,9 +456,18 @@ class MyAccess:
             progress_func('complete')
         return transaction
 
-    def checkout(self, profile_id: str, environment_id: str, programmatic: bool = True,
-                 include_credentials: bool = False, justification: str = None, otp: str = None,
-                 wait_time: int = 60, max_wait_time: int = 600, progress_func: Callable = None) -> dict:
+    def checkout(
+        self,
+        profile_id: str,
+        environment_id: str,
+        programmatic: bool = True,
+        include_credentials: bool = False,
+        justification: str = None,
+        otp: str = None,
+        wait_time: int = 60,
+        max_wait_time: int = 600,
+        progress_func: Callable = None,
+    ) -> dict:
         """
         Checkout a profile.
 
@@ -494,12 +510,21 @@ class MyAccess:
             wait_time=wait_time,
             max_wait_time=max_wait_time,
             progress_func=progress_func,
-            otp=otp
+            otp=otp,
         )
 
-    def checkout_by_name(self, profile_name: str, environment_name: str, application_name: str = None,
-                         programmatic: bool = True, include_credentials: bool = False, justification: str = None,
-                         wait_time: int = 60, max_wait_time: int = 600, progress_func: Callable = None) -> dict:
+    def checkout_by_name(
+        self,
+        profile_name: str,
+        environment_name: str,
+        application_name: str = None,
+        programmatic: bool = True,
+        include_credentials: bool = False,
+        justification: str = None,
+        wait_time: int = 60,
+        max_wait_time: int = 600,
+        progress_func: Callable = None,
+    ) -> dict:
         """
         Checkout a profile by supplying the names of entities vs. the IDs of those entities.
 
@@ -539,11 +564,16 @@ class MyAccess:
             justification=justification,
             wait_time=wait_time,
             max_wait_time=max_wait_time,
-            progress_func=progress_func
+            progress_func=progress_func,
         )
 
-    def credentials(self, transaction_id: str, transaction: dict = None, return_transaction_details: bool = False,
-                    progress_func: Callable = None) -> any:
+    def credentials(
+        self,
+        transaction_id: str,
+        transaction: dict = None,
+        return_transaction_details: bool = False,
+        progress_func: Callable = None,
+    ) -> any:
         """
         Return credentials of a checked out profile given the transaction ID.
 
@@ -569,8 +599,8 @@ class MyAccess:
                         progress_func('credential creation')
                     time.sleep(1)
                     continue
-                else:  # status == checkedOut
-                    break
+                # status == checkedOut
+                break
 
         # step 2: make the proper API call
         url_part = 'url' if transaction['accessType'] == 'CONSOLE' else 'tokens'
@@ -578,8 +608,7 @@ class MyAccess:
 
         if return_transaction_details:
             return creds, transaction
-        else:
-            return creds
+        return creds
 
     def checkin(self, transaction_id: str) -> dict:
         """
@@ -589,9 +618,7 @@ class MyAccess:
         :return: Details of the checked in profile.
         """
 
-        params = {
-            'type': 'API'
-        }
+        params = {'type': 'API'}
         return self.britive.put(f'{self.base_url}/{transaction_id}', params=params)
 
     def checkin_by_name(self, profile_name: str, environment_name: str, application_name: str = None) -> dict:
@@ -613,7 +640,7 @@ class MyAccess:
                 transaction_id = profile['transactionId']
                 break
         if not transaction_id:
-            raise ValueError(f'no checked out profile found for the given profile_name and environment_name')
+            raise ValueError('no checked out profile found for the given profile_name and environment_name')
 
         return self.checkin(transaction_id=transaction_id)
 
@@ -644,8 +671,9 @@ class MyAccess:
 
         return self.britive.post(f'{self.britive.base_url}/auth/validate')['authenticationResult']
 
-    def _get_profile_and_environment_ids_given_names(self, profile_name: str, environment_name: str,
-                                                     application_name: str = None) -> dict:
+    def _get_profile_and_environment_ids_given_names(
+        self, profile_name: str, environment_name: str, application_name: str = None
+    ) -> dict:
         ids = None
         profile_found = False
         environment_found = False
@@ -677,10 +705,7 @@ class MyAccess:
                                     f'the environment belongs to.'
                                 )
                             # set the IDs the first time
-                            ids = {
-                                'profile_id': prof_id,
-                                'environment_id': env_id
-                            }
+                            ids = {'profile_id': prof_id, 'environment_id': env_id}
 
         # do some error checking
         if not profile_found:
@@ -692,4 +717,3 @@ class MyAccess:
         # if we get here we found both the profile and environment and they are unique so
         # we can use the `ids` dict with confidence
         return ids
-

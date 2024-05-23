@@ -1,5 +1,5 @@
-from .cache import *  # will also import some globals like `britive`
 import pyotp
+from .cache import *  # will also import some globals like `britive`
 
 user_keys = {
     'adminRoles',
@@ -173,7 +173,7 @@ def test_minimized_user_details(cached_user):
     assert len(details) == 1
 
 
-def test_stepup_mfa(cached_user):
+def test_stepup_mfa():
     challenge = britive.users.enable_mfa.enable()
     totp = pyotp.TOTP(challenge.get('additionalDetails').get('key'))
     totp = totp.now()
