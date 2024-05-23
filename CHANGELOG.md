@@ -2,6 +2,28 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.25.0rc3 [2024-05-23]
+
+__What's New:__
+
+* `britive.step_up.authenticate` - allow users to use MFA/TOTP step-up authentication with `britive.my_access.checkout`
+
+__Enhancements:__
+
+* None
+
+__Bug Fixes:__
+
+* None
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v2.25.0rc2 [2024-05-10]
 
 __What's New:__
