@@ -10,6 +10,14 @@ class ApiTokenNotFound(Exception):
 class ApprovalRequiredButNoJustificationProvided(Exception):
     pass
 
+class StepUpAuthRequiredButNotProvided(Exception):
+    pass
+
+class StepUpAuthFailed(Exception):
+    pass
+
+class StepUpAuthOTPNotProvided(Exception):
+    pass
 
 class ApprovalWorkflowRejected(Exception):
     pass

@@ -597,7 +597,8 @@ class ProfilePolicies:
               days_schedule: dict = None, approval_notification_medium: Union[str, list] = None,
               time_to_approve: int = 5, access_validity_time: int = 120, approver_users: list = None,
               approver_tags: list = None, access_type: str = 'Allow', identifier_type: str = 'name',
-              condition_as_dict: bool = False) -> dict:
+              condition_as_dict: bool = False, stepup_auth: bool = False,
+              always_prompt_stepup_auth: bool = False) -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -658,6 +659,8 @@ class ProfilePolicies:
             a policy was as a stringifed json object. As of 2.22.0 the condition block can also be built as a raw
             python dictionary. This parameter will default to `False` to support backwards compatibility. Setting to
             `True` will result in the policy condition being returned/built as a python dictionary.
+        :param stepup_auth: Indicates if step-up authentication is required to checkout profile
+        :param always_prompt_stepup_auth: Indicates if previous successful verification should be remembered
         :return: A dict which can be provided as a profile policy to `create` and `update`.
         """
 
@@ -682,7 +685,9 @@ class ProfilePolicies:
             approver_tags=approver_tags,
             access_type=access_type,
             identifier_type=identifier_type,
-            condition_as_dict=condition_as_dict
+            condition_as_dict=condition_as_dict,
+            stepup_auth=stepup_auth,
+            always_prompt_stepup_auth=always_prompt_stepup_auth
         )
 
         # clean up the generic policy response and customize for profiles
