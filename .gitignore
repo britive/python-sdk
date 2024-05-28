@@ -4,7 +4,7 @@
 .out
 .idea/
 .tox/
-test.py
+t_.py
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/pycharm+all,pycharm,macos,windows,python,visualstudiocode,virtualenv,venv

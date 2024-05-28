@@ -159,17 +159,17 @@ def test_static_secret_templates_delete(cached_static_secret_template):
         cleanup('static-secret-templates')
 
 
-def test_passwordPolicies_delete(cached_PasswordPolicies):
+def test_password_policies_delete(cached_password_policies):
     try:
-        response = britive.secrets_manager.password_policies.delete(cached_PasswordPolicies['id'])
+        response = britive.secrets_manager.password_policies.delete(cached_password_policies['id'])
         assert response is None
     finally:
         cleanup('password-policies')
 
 
-def test_pinPolicy_delete(cached_PinPolicies):
+def test_pin_policy_delete(cached_pin_policies):
     try:
-        response = britive.secrets_manager.password_policies.delete(cached_PinPolicies['id'])
+        response = britive.secrets_manager.password_policies.delete(cached_pin_policies['id'])
         assert response is None
     finally:
         cleanup('pin-policies')

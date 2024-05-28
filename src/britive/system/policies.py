@@ -61,7 +61,7 @@ class SystemPolicies:
         """
 
         return self.britive.post(self.base_url, json=policy)
-    
+
     def update(self, policy_identifier: str, policy: dict, identifier_type: str = 'name') -> None:
         """
         Update a system level policy.
@@ -164,7 +164,8 @@ class SystemPolicies:
               from_time: str = None, to_time: str = None, date_schedule: dict = None, days_schedule: dict = None,
               approval_notification_medium: Union[str, list] = None, time_to_approve: int = 5,
               access_validity_time: int = 120, approver_users: list = None, approver_tags: list = None,
-              access_type: str = 'Allow', identifier_type: str = 'name', condition_as_dict: bool = False) -> dict:
+              access_type: str = 'Allow', identifier_type: str = 'name', condition_as_dict: bool = False,
+              stepup_auth: bool = False, always_prompt_stepup_auth: bool = False) -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -230,6 +231,8 @@ class SystemPolicies:
             a policy was as a stringifed json object. As of 2.22.0 the condition block can also be built as a raw
             python dictionary. This parameter will default to `False` to support backwards compatibility. Setting to
             `True` will result in the policy condition being returned/built as a python dictionary.
+        :param stepup_auth: Indicates if step-up authentication is required to access the resource.
+        :param always_prompt_stepup_auth: Indicates if previous successful verification should be remembered
         :return: A dict which can be provided as a policy to `create` and `update`.
         """
 
@@ -300,6 +303,16 @@ class SystemPolicies:
 
             condition['approval'] = approval_condition
 
+        if stepup_auth:
+            if always_prompt_stepup_auth:
+                prompt = 'true'
+            else:
+                prompt = 'false'
+            step_up_condition = {'factor': 'TOTP', 'alwaysPrompt': prompt}
+            condition['stepUpCondition'] = step_up_condition
+        # else:
+        #     condition = {}
+
         # put it all together
         policy = {
             'name': name,
@@ -329,7 +342,7 @@ class SystemPolicies:
             policy['permissions'] = [{identifier_type: p} for p in permissions]
         if roles:
             policy['roles'] = [{identifier_type: r} for r in roles]
-        if condition:
-            policy['condition'] = condition if condition_as_dict else json.dumps(condition, default=str)
+
+        policy['condition'] = condition if condition_as_dict else json.dumps(condition, default=str)
 
         return policy
