@@ -1,4 +1,3 @@
-
 class AccessDenied(Exception):
     pass
 
@@ -8,6 +7,18 @@ class ApiTokenNotFound(Exception):
 
 
 class ApprovalRequiredButNoJustificationProvided(Exception):
+    pass
+
+
+class StepUpAuthRequiredButNotProvided(Exception):
+    pass
+
+
+class StepUpAuthFailed(Exception):
+    pass
+
+
+class StepUpAuthOTPNotProvided(Exception):
     pass
 
 
@@ -57,6 +68,7 @@ class NotExecutingInGithubEnvironment(Exception):
 
 class NotExecutingInSpaceliftEnvironment(Exception):
     pass
+
 
 class NotExecutingInGitlabEnvironment(Exception):
     pass
@@ -146,5 +158,5 @@ allowed_exceptions = {
     404: NotFound,
     405: MethodNotAllowed,
     500: InternalServerError,
-    503: ServiceUnavailable
+    503: ServiceUnavailable,
 }

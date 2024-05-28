@@ -97,9 +97,9 @@ class MySecrets:
             except exceptions.ForbiddenRequest as e:
                 if 'PE-0011' in str(e) and not justification:
                     if first:
-                        raise exceptions.ApprovalRequiredButNoJustificationProvided()
+                        raise exceptions.ApprovalRequiredButNoJustificationProvided() from e
                     else:
-                        raise exceptions.ApprovalWorkflowRejected()
+                        raise exceptions.ApprovalWorkflowRejected() from e
                 if 'PE-0002' in str(e):
                     raise exceptions.AccessDenied()
                 if 'PE-0010' in str(e):  # approval to view the secret is pending...
