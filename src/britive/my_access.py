@@ -416,6 +416,7 @@ class MyAccess:
                         max_wait_time=max_wait_time,
                         progress_func=progress_func,
                         iteration_num=iteration_num + 1,
+                        otp=otp,
                     )
                 raise e
 
@@ -521,6 +522,7 @@ class MyAccess:
         programmatic: bool = True,
         include_credentials: bool = False,
         justification: str = None,
+        otp: str = None,
         wait_time: int = 60,
         max_wait_time: int = 600,
         progress_func: Callable = None,
@@ -565,6 +567,7 @@ class MyAccess:
             wait_time=wait_time,
             max_wait_time=max_wait_time,
             progress_func=progress_func,
+            otp=otp,
         )
 
     def credentials(
