@@ -2,6 +2,29 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.25.0rc4 [2024-06-07]
+
+__What's New:__
+
+* None
+
+__Enhancements:__
+
+* None
+
+__Bug Fixes:__
+
+* Adding missing `otp` arguments to `my_access`.
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* Added `*_CA_BUNDLE` examples to the docs.
+* Add `PYBRITIVE_CA_BUNDLE` to `requests` session if set, introduced in [pybritive (v1.8.0rc2)](https://github.com/britive/python-cli)
+
 ## v2.25.0rc3 [2024-05-23]
 
 __What's New:__

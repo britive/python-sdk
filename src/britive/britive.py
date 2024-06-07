@@ -135,6 +135,11 @@ class Britive:
         self.retry_backoff_factor = 1
         self.retry_response_status = [429, 500, 502, 503, 504]
 
+        # if PYBRITIVE_CA_BUNDLE set, in pybritive most likely, use it
+        britive_ca_bundle = os.getenv('PYBRITIVE_CA_BUNDLE')
+        if britive_ca_bundle:
+            self.session.verify = britive_ca_bundle
+
         # allow the disabling of TLS/SSL verification for testing in development (mostly local development)
         if os.getenv('BRITIVE_NO_VERIFY_SSL') and '.dev.' in self.tenant:
             # turn off ssl verification

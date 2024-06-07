@@ -135,6 +135,28 @@ Setting custom TLS certificates functionality of `requests` can also be used.
 > _Example:_
 > _`/path/to/certfile`_
 
+### Platform Examples
+
+#### linux/macos
+
+```sh
+export REQUESTS_CA_BUNDLE="/usr/local/corp-proxy/cacert.pem"
+```
+
+#### windows
+
+__powershell:__
+
+```pwsh
+$env:REQUESTS_CA_BUNDLE = "C:\Users\User\AppData\Local\corp-proxy\cacert.pem"
+```
+
+__cmd:__
+
+```bat
+set REQUESTS_CA_BUNDLE="C:\Users\User\AppData\Local\corp-proxy\cacert.pem"
+```
+
 ## Examples
 
 ### Importing
