@@ -5,6 +5,7 @@
 .idea/
 .tox/
 t_.py
+test.py
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/pycharm+all,pycharm,macos,windows,python,visualstudiocode,virtualenv,venv
