@@ -37,6 +37,7 @@ from .task_services import TaskServices
 from .tasks import Tasks
 from .users import Users
 from .workload import Workload
+from .my_resources import MyResources
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
 BRITIVE_TOKEN_ENV_NAME = 'BRITIVE_API_TOKEN'
@@ -202,6 +203,7 @@ class Britive:
         self.system = System(self)
         self.settings = Settings(self)
         self.step_up = StepUpAuth(self)
+        self.my_resources = MyResources(self)
 
     @staticmethod
     def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:

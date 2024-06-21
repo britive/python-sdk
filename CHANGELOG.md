@@ -2,6 +2,28 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.25.0rc5 [2024-06-21]
+
+__What's New:__
+
+* `britive.my_resources` - allow users to list, checkout, and checkin their Cloud PAM Anywhere resources.
+
+__Enhancements:__
+
+* None
+
+__Bug Fixes:__
+
+* missing `otp` dependency for `tox` testing.
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v2.25.0rc4 [2024-06-07]
 
 __What's New:__
