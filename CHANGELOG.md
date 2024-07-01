@@ -2,6 +2,35 @@
 
 All changes to the package starting with v2.8.1 will be logged here.
 
+## v2.25.0 [2024-07-01]
+
+> _NOTE: This will be the last [minor](https://semver.org/#summary) version before 3.0.0_
+
+__What's New:__
+
+* `britive.my_resources` - allow users to list, checkout, and checkin their Cloud PAM Anywhere resources.
+* `britive.step_up.authenticate` - allow users to use MFA/TOTP step-up authentication with `britive.my_access.checkout`
+
+__Enhancements:__
+
+* Addition of `gitlab` federation provider
+* Addition of `include_tags` on `users.list` and `service_identities.list`
+
+__Bug Fixes:__
+
+* Adding missing `otp` arguments to `my_access`.
+* missing `otp` dependency for `tox` testing.
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* Added `*_CA_BUNDLE` examples to the docs.
+* Add `PYBRITIVE_CA_BUNDLE` to `requests` session if set, introduced in [pybritive (v1.8.0rc2)](https://github.com/britive/python-cli)
+
+
 ## v2.25.0rc5 [2024-06-21]
 
 __What's New:__
