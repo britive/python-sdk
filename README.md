@@ -126,9 +126,10 @@ As such, any functionality of `requests` can be used, including setting an HTTP 
 
 Setting custom TLS certificates functionality of `requests` can also be used.
 
-* Certificate bundles will be set via environment variables.
+* Certificate bundles can be set via environment variables.
   * `REQUESTS_CA_BUNDLE`
   * `CURL_CA_BUNDLE` _(used as a fallback)_
+  * `PYBRITIVE_CA_BUNDLE` _(specific to the Britive Python SDK)_
 
 > _The values of these environment variables must be a path to a directory of certificates or a specific certificate._
 >
