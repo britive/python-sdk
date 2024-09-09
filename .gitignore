@@ -1,8 +1,8 @@
 # custom - manual entries
-
+*.sublime-*
+.idea/
 .in
 .out
-.idea/
 .tox/
 t_.py
 test.py
