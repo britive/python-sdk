@@ -473,13 +473,30 @@ class Policies:
         params = {'consumer': 'secretmanager', 'resource': path}
         return self.britive.delete(f'{self.base_url}/{policy_id}', params=params)
 
-    def build(self, name: str, access_level: str = None, description: str = '', draft: bool = False,
-              active: bool = True, read_only: bool = False, users: list = None, tags: list = None, tokens: list = None,
-              service_identities: list = None, ips: list = None, from_time: str = None, to_time: str = None,
-              date_schedule: dict = None, days_schedule: dict = None,
-              approval_notification_medium: Union[str, list] = None, time_to_approve: int = 5,
-              access_validity_time: int = 120, approver_users: list = None, approver_tags: list = None,
-              access_type: str = 'Allow', identifier_type: str = 'name', condition_as_dict: bool = False) -> dict:
+    def build(  # noqa: PLR0913
+        self,
+        name: str,
+        access_level: str = None,
+        description: str = '',
+        draft: bool = False,
+        active: bool = True,
+        read_only: bool = False,
+        users: list = None,
+        tags: list = None,
+        tokens: list = None,
+        service_identities: list = None,
+        ips: list = None,
+        date_schedule: dict = None,
+        days_schedule: dict = None,
+        approval_notification_medium: Union[str, list] = None,
+        time_to_approve: int = 5,
+        access_validity_time: int = 120,
+        approver_users: list = None,
+        approver_tags: list = None,
+        access_type: str = 'Allow',
+        identifier_type: str = 'name',
+        condition_as_dict: bool = False,
+    ) -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -496,16 +513,6 @@ class Policies:
         :param service_identities: Optional list of service identity names or ids to which this policy applies.
         :param ips: Optional list of IP addresses for which this policy applies. Provide in CIDR notation
             or dotted decimal format for individual (/32) IP addresses.
-        :param from_time: The start date/time of when the policy is in effect. If a date is provided
-            (`YYYY-MM-DD HH:MM:SS`) this will represent the start date/time of 1 contiguous time range. If just a
-            time is provided (`HH:MM:SS`) this will represent the daily recurring start time. If this parameter is
-            provided then `to_time` must also be provided. This parameter is deprecated as of v2.19.0. The presence of
-            `date_schedule` and/or `days_schedule` will override this field.
-        :param to_time: The end date/time of when the policy is in effect. If a date is provided
-            (`YYYY-MM-DD HH:MM:SS`) this will represent the end date/time of 1 contiguous time range. If just a
-            time is provided (`HH:MM:SS`) this will represent the daily recurring end time. If this parameter is
-            provided then `from_time` must also be provided. This parameter is deprecated as of v2.19.0. The presence of
-            `date_schedule` and/or `days_schedule` will override this field.
         :param date_schedule: A dict in the format
             {
                 'fromDate': '2022-10-29 10:30:00',
@@ -557,8 +564,6 @@ class Policies:
             tokens=tokens,
             service_identities=service_identities,
             ips=ips,
-            from_time=from_time,
-            to_time=to_time,
             date_schedule=date_schedule,
             days_schedule=days_schedule,
             approval_notification_medium=approval_notification_medium,
