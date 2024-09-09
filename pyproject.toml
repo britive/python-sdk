@@ -35,7 +35,7 @@ Homepage = "https://www.britive.com"
 Documentation = "https://docs.britive.com/v1/docs/en/overview-britive-apis"
 Repository = "https://github.com/britive/python-sdk.git"
 Issues = "https://github.com/britive/python-sdk/issues"
-Changelog = "https://github.com/britive/python-sdk/CHANGELOG.md"
+Changelog = "https://github.com/britive/python-sdk/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
