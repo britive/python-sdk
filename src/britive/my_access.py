@@ -1,6 +1,7 @@
 import sys
 import time
-from typing import Callable
+from typing import Any, Callable
+
 from . import exceptions
 
 approval_exceptions = {
@@ -24,11 +25,11 @@ class MyAccess:
     administrator may not have access to any profiles.
     """
 
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/access'
 
-    def list_profiles(self):
+    def list_profiles(self) -> list:
         """
         List the profiles for which the user has access.
 
@@ -110,7 +111,7 @@ class MyAccess:
         max_wait_time: int = 600,
         block_until_disposition: bool = False,
         progress_func: Callable = None,
-    ) -> any:
+    ) -> Any:
         """
         Requests approval to checkout a profile at a later time, using names of entities instead of IDs.
 
@@ -156,7 +157,7 @@ class MyAccess:
         max_wait_time: int = 600,
         block_until_disposition: bool = False,
         progress_func: Callable = None,
-    ) -> any:
+    ) -> Any:
         """
         Requests approval to checkout a profile at a later time.
 
@@ -369,15 +370,15 @@ class MyAccess:
                 )
             except exceptions.ForbiddenRequest as e:
                 if 'PE-0028' in str(e):  # Check for stepup totp
-                    raise exceptions.StepUpAuthRequiredButNotProvided()
+                    raise exceptions.StepUpAuthRequiredButNotProvided() from e
             except exceptions.InvalidRequest as e:
                 if 'MA-0009' in str(e):  # old approval process that coupled approval and checkout
-                    raise exceptions.ApprovalRequiredButNoJustificationProvided()
+                    raise exceptions.ApprovalRequiredButNoJustificationProvided() from e
                 if 'MA-0010' in str(e):  # new approval process that de-couples approval from checkout
                     # if the caller has not provided a justification we know for sure the call will fail
                     # so raise the exception
                     if not justification:
-                        raise exceptions.ApprovalRequiredButNoJustificationProvided()
+                        raise exceptions.ApprovalRequiredButNoJustificationProvided() from e
 
                     # request approval
                     status = self.request_approval(
@@ -396,7 +397,7 @@ class MyAccess:
                             f'{self.base_url}/{profile_id}/environments/{environment_id}', params=params, json=data
                         )
                     else:
-                        raise approval_exceptions[status]
+                        raise approval_exceptions[status] from e
                 if 'e1001 - user has already checked out profile for this environment' in str(e).lower():
                     # this is a rare race condition...explained below
                     # if 2 or more calls from the same user to checkout a profile occur at the same time +/- 1/2 seconds
@@ -580,7 +581,7 @@ class MyAccess:
         transaction: dict = None,
         return_transaction_details: bool = False,
         progress_func: Callable = None,
-    ) -> any:
+    ) -> Any:
         """
         Return credentials of a checked out profile given the transaction ID.
 

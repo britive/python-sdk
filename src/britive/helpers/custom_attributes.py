@@ -1,10 +1,12 @@
+from typing import Any
+
 
 class CustomAttributes:
-    def __init__(self, principal):
+    def __init__(self, principal) -> None:
         self.britive = principal.britive
         self.base_url: str = principal.britive.base_url + '/users/{id}/custom-attributes'  # will .format(id=...) later
 
-    def get(self, principal_id: str, as_dict: bool = False) -> any:
+    def get(self, principal_id: str, as_dict: bool = False) -> Any:
         """
         Retrieve the current custom attributes associated with the specified Service Identity or User.
 
@@ -16,7 +18,7 @@ class CustomAttributes:
             attrs = {}
             for attribute in response:
                 current_attr_id = attribute['attributeId']
-                if current_attr_id in attrs.keys():  # need to handle the multi-value attributes
+                if current_attr_id in attrs:  # need to handle the multi-value attributes
                     is_list = isinstance(attrs[attribute['attributeId']], list)
 
                     if not is_list:  # make it a list
@@ -56,7 +58,7 @@ class CustomAttributes:
             custom_attributes=custom_attributes
         )
 
-    def _build_list(self, operation: str, custom_attributes: dict):
+    def _build_list(self, operation: str, custom_attributes: dict) -> list:
         # first get list of existing custom identity attributes and build some helpers
         existing_attrs = [attr for attr in self.britive.identity_attributes.list() if not attr['builtIn']]
         existing_attr_ids = [attr['id'] for attr in existing_attrs]
@@ -68,13 +70,13 @@ class CustomAttributes:
             # obtain the custom attribute id
             custom_attribute_id = id_or_name
             if custom_attribute_id not in existing_attr_ids:
-                custom_attribute_id = attrs_by_name.get(custom_attribute_id, None)
+                custom_attribute_id = attrs_by_name.get(custom_attribute_id)
             if not custom_attribute_id:
                 raise ValueError(f'custom identity attribute name {id_or_name} not found.')
 
             # and create the list dict entry for each value
-            value = value if isinstance(value, list) else [value]  # handle multivalued attributes
-            for v in value:
+            multi_value = value if isinstance(value, list) else [value]  # handle multivalued attributes
+            for v in multi_value:
                 attrs_list.append(
                     {
                         'op': operation,

@@ -1,10 +1,10 @@
 
 class IdentityAttributes:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/users/attributes'
 
-    def list(self):
+    def list(self) -> list:
         """
         Return a list of identity attributes.
 

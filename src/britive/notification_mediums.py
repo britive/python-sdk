@@ -1,5 +1,5 @@
 class NotificationMediums:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = (
             f'{self.britive.base_url}/v1/notification-service/notificationmediums'
@@ -19,7 +19,7 @@ class NotificationMediums:
         notification_medium_type: str,
         name: str,
         description: str = 'Default notification medium description',
-        connection_parameters: dict = {}
+        connection_parameters: dict = None
     ) -> dict:
         """
         Create a new notification medium.
@@ -34,6 +34,8 @@ class NotificationMediums:
                     Webhook URL : for teams, the URL of the teams webhook
         :return: Details of the newly created notification medium.
         """
+        if connection_parameters is None:
+            connection_parameters = {}
 
         params = {
             'name': name,

@@ -7,7 +7,7 @@ This package aims to wrap the Britive API for usage in Python development. For t
 the developer/end user experience. Some APIs may also be combined into one Python method with a parameter if and where
 it makes more sense to present the API that way.
 
-This package supports Python versions `>= 3.7`.
+This package supports Python versions `>= 3.8`.
 
 ## Installation
 

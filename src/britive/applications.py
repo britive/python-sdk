@@ -15,7 +15,7 @@ valid_user_account_mappings = {
 
 
 class Applications:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
 
@@ -81,7 +81,7 @@ class Applications:
         :return:
         """
 
-        if user_account_mapping and user_account_mapping not in valid_user_account_mappings.keys():
+        if user_account_mapping and user_account_mapping not in valid_user_account_mappings:
             raise ValueError('invalid user_account_mapping value')
 
         data = {

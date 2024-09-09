@@ -1,8 +1,9 @@
 from __future__ import annotations
+
 import json
 from typing import Union
-from . import exceptions
 
+from . import exceptions
 
 creation_defaults = {
     'expirationDuration': 3600000,
@@ -22,7 +23,7 @@ update_fields_to_keep.remove('status')
 
 
 class Profiles:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
         self.permissions = ProfilePermissions(britive)
@@ -262,7 +263,7 @@ class Profiles:
 
 
 class ProfilePermissions:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/paps'
         self.constraints = ProfilePermissionConstraints(britive)
@@ -333,7 +334,7 @@ class ProfilePermissions:
 
 
 class ProfilePermissionConstraints:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/paps'
 
@@ -453,7 +454,7 @@ class ProfilePermissionConstraints:
 
 
 class ProfileSessionAttributes:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/paps'
 
@@ -582,11 +583,11 @@ class ProfileSessionAttributes:
 
 
 class ProfilePolicies:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/paps'
 
-    def build(
+    def build(  # noqa: PLR0913
         self,
         name: str,
         description: str = '',
@@ -599,7 +600,7 @@ class ProfilePolicies:
         ips: list = None,
         date_schedule: dict = None,
         days_schedule: dict = None,
-        approval_notification_medium: Union[str, list] = None,
+        approval_notification_medium: Union[str, list] = None,  # noqa: UP007
         time_to_approve: int = 5,
         access_validity_time: int = 120,
         approver_users: list = None,

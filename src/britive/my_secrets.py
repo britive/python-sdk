@@ -1,5 +1,6 @@
-from datetime import datetime, timezone, timedelta
 import time
+from datetime import datetime, timedelta, timezone
+
 from . import exceptions
 
 
@@ -16,17 +17,17 @@ class MySecrets:
     administrator may not have access to any secrets.
     """
 
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/v1/secretmanager'
 
-    def __get_vault_id(self):
+    def __get_vault_id(self) -> str:
         # only 1 vault is allowed per tenant, so we can reliably grab the ID of that vault
         try:
             return self.britive.get(f'{self.base_url}/vault')['id']
         except KeyError as e:
             if 'id' in str(e):
-                raise exceptions.NoSecretsVaultFound()
+                raise exceptions.NoSecretsVaultFound() from e
 
     def list(self, path: str = '/', search: str = None) -> list:
         """
@@ -101,7 +102,7 @@ class MySecrets:
                     else:
                         raise exceptions.ApprovalWorkflowRejected() from e
                 if 'PE-0002' in str(e):
-                    raise exceptions.AccessDenied()
+                    raise exceptions.AccessDenied() from e
                 if 'PE-0010' in str(e):  # approval to view the secret is pending...
                     first = False
                     time.sleep(wait_time)
@@ -131,7 +132,6 @@ class MySecrets:
         """
 
         vault_id = self.__get_vault_id()
-        quit_time = datetime.now(timezone.utc) + timedelta(seconds=max_wait_time)
         params = {
             'path': path
         }
@@ -160,6 +160,6 @@ class MySecrets:
                     params=params
                 )
             if 'PE-0002' in str(e):
-                raise exceptions.AccessDenied()
+                raise exceptions.AccessDenied() from e
             else:
                 raise e

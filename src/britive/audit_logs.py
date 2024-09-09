@@ -1,8 +1,9 @@
 import datetime
+from typing import Any
 
 
 class AuditLogs:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/logs'
 
@@ -25,7 +26,7 @@ class AuditLogs:
         return self.britive.get(f'{self.base_url}/operators')
 
     def query(self, from_time: datetime = None, to_time: datetime = None, filter_expression: str = None,
-              csv: bool = False) -> any:
+              csv: bool = False) -> Any:
         """
         Retrieve audit log events.
 

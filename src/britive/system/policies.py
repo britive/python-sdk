@@ -3,12 +3,12 @@ from typing import Union
 
 
 class SystemPolicies:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/v1/policy-admin/policies'
 
     @staticmethod
-    def _validate_identifier_type(identifier_type):
+    def _validate_identifier_type(identifier_type) -> None:
         if identifier_type not in ['id', 'name']:
             raise ValueError(f'identifier_type of {identifier_type} is invalid. Only `name` and `id` are allowed.')
 
@@ -26,8 +26,13 @@ class SystemPolicies:
             params['filter'] = filter_expression
         return self.britive.get(self.base_url, params=params)
 
-    def get(self, policy_identifier: str, identifier_type: str = 'name', verbose: bool = False,
-            condition_as_dict: bool = False) -> dict:
+    def get(
+        self,
+        policy_identifier: str,
+        identifier_type: str = 'name',
+        verbose: bool = False,
+        condition_as_dict: bool = False,
+    ) -> dict:
         """
         Get details of the specified system policy.
 
@@ -45,10 +50,7 @@ class SystemPolicies:
 
         self._validate_identifier_type(identifier_type)
 
-        params = {
-            'compactResponse': not verbose,
-            'conditionJson': condition_as_dict
-        }
+        params = {'compactResponse': not verbose, 'conditionJson': condition_as_dict}
 
         return self.britive.get(f'{self.base_url}/{policy_identifier}', params=params)
 
@@ -244,17 +246,15 @@ class SystemPolicies:
         # handle approval logic
         if approval_notification_medium:
             if not approver_users and not approver_tags:
-                raise ValueError('when approval is required either approver_tags or approver_users or both '
-                                 'must be provided')
+                raise ValueError(
+                    'when approval is required either approver_tags or approver_users or both must be provided'
+                )
             approval_condition = {
                 'notificationMedium': approval_notification_medium,
                 'timeToApprove': time_to_approve,
                 'validFor': access_validity_time,
                 'isValidForInDays': False,  # the SDK will only support minutes
-                'approvers': {
-                    'userIds': approver_users,
-                    'tags': approver_tags
-                }
+                'approvers': {'userIds': approver_users, 'tags': approver_tags},
             }
 
             if not approver_users:
@@ -265,10 +265,7 @@ class SystemPolicies:
             condition['approval'] = approval_condition
 
         if stepup_auth:
-            if always_prompt_stepup_auth:
-                prompt = 'true'
-            else:
-                prompt = 'false'
+            prompt = 'true' if always_prompt_stepup_auth else 'false'
             step_up_condition = {'factor': 'TOTP', 'alwaysPrompt': prompt}
             condition['stepUpCondition'] = step_up_condition
         # else:
@@ -286,8 +283,8 @@ class SystemPolicies:
                 'users': [{identifier_type: u} for u in users] if users else None,
                 'tags': [{identifier_type: t} for t in tags] if tags else None,
                 'serviceIdentities': [{identifier_type: s} for s in service_identities] if service_identities else None,
-                'tokens': [{identifier_type: t} for t in tokens] if tokens else None
-            }
+                'tokens': [{identifier_type: t} for t in tokens] if tokens else None,
+            },
         }
 
         if not users:

@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "setuptools>=42",
+    "setuptools",
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
@@ -11,12 +11,19 @@ authors = [{name = "Britive Inc.", email = "support@britive.com"}]
 description = "A pure Python SDK for the Britive API"
 readme = "README.md"
 classifiers = [
-    "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent"
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet",
+    "Topic :: Security",
 ]
 license = {file = "LICENSE"}
-requires-python = ">= 3.7"
+requires-python = ">=3.8"
 dependencies = [
     "requests>=2.31.0"
 ]
@@ -60,3 +67,30 @@ passenv = BRITIVE_TENANT,BRITIVE_API_TOKEN,BRITIVE_TEST_ENV_ACCOUNT_ID,BRITIVE_T
 [tool.pymarkdown]
 plugins.md013.line_length = 120
 plugins.md013.code_block_line_length = 120
+
+[tool.ruff]
+include = ["pyproject.toml", "src/**/*.py"]
+line-length = 120
+# target-version = "py38"
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint]
+select = [
+    "E", # pycodestyle
+    "F", # Pyflakes
+    "I", # isort
+    "PL", #pylint
+    "SIM", # flake8-simplify
+]
+
+[tool.ruff.lint.pylint]
+allow-magic-value-types = ["int", "str"]
+max-args = 10
+max-branches = 30
+max-returns = 8
+max-statements = 72

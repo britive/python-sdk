@@ -1,12 +1,10 @@
 from .helpers.custom_attributes import CustomAttributes
-from .exceptions import NotFound
-
 
 valid_statues = ['active', 'inactive']
 
 
 class ServiceIdentities:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/users'
         self.custom_attributes = CustomAttributes(self)
@@ -102,13 +100,13 @@ class ServiceIdentities:
         required_fields = ['name']
 
         kwargs['type'] = 'ServiceIdentity'
-        if 'status' not in kwargs.keys():
+        if 'status' not in kwargs:
             kwargs['status'] = 'active'
 
         if kwargs['status'] not in valid_statues:
             raise ValueError(f'invalid status {kwargs["status"]}')
 
-        if not all(x in kwargs.keys() for x in required_fields):
+        if not all(x in kwargs for x in required_fields):
             raise ValueError('Not all required keyword arguments were provided.')
 
         response = self.britive.post(self.base_url, json=kwargs)
@@ -125,7 +123,7 @@ class ServiceIdentities:
         :return: A dict containing the newly updated service identity details
         """
 
-        if 'name' not in kwargs.keys():
+        if 'name' not in kwargs:
             existing = self.get(service_identity_id)
             kwargs['name'] = existing['name']
 
