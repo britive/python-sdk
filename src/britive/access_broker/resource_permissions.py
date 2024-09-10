@@ -13,11 +13,12 @@ class ResourcePermissions:
 
         return self.britive.get(f'{self.base_url}/resource-types/{resource_type_id}/permissions')
 
-    def create(self, resource_type_id, **kwargs) -> dict:
+    def create(self, resource_type_id, file : bytes = None, **kwargs) -> dict:
         """
         Create a new permission for a resource type.
 
         :param resource_type_id: ID of the resource type.
+        :param file: File to upload.
         :param kwargs: Valid fields are...
             name
             description
@@ -33,10 +34,37 @@ class ResourcePermissions:
             variables - List of variables
         :return: Created permission.
         """
+        if not file:
+            params = {
+                'resourceTypeId' : resource_type_id,
+                'isDraft' : False,
+                **kwargs
+            }
+            return self.britive.post(f'{self.base_url}/permissions', json=params)
+        else:
+            params = {
+                'resourceTypeId' : resource_type_id,
+                'isDraft' : False,
+                **kwargs
+            }
+            return self.britive.post(f'{self.base_url}/permissions', json=params, files = {'file': file})
 
-        params = {
-            'resourceTypeId' : resource_type_id,
-            'isDraft' : False,
-        }
+        
+    
+    def get(self, permission_id) -> dict:
+        """
+        Retrieve a permission by ID.
 
-        return self.britive.post(f'{self.base_url}/permissions', json=params)
+        :param permission_id: ID of the permission.
+        :return: Permission.
+        """
+        return self.britive.get(f'{self.base_url}/permissions/{permission_id}')
+    
+    def delete(self, permission_id) -> dict:
+        """
+        Delete a permission.
+
+        :param permission_id: ID of the permission.
+        :return: None
+        """
+        return self.britive.delete(f'{self.base_url}/permissions/{permission_id}')
