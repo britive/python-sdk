@@ -1,4 +1,5 @@
 import random
+import requests
 class ResourcePermissions:
     def __init__(self, britive):
         self.britive = britive
@@ -79,25 +80,32 @@ class ResourcePermissions:
         """
         return self.britive.get(f'{self.base_url}/permissions/get-urls/{permission_id}')
     
-    def create(self, resource_type_id, name, description = '', checkin_file : bytes = None, checkout_file : bytes = None) -> dict:
-        random_id = ''
-        for i in range(100):
-            random_id = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=20))
-            try:
-                self.get(random_id)
-            except Exception as e:
-                break
-        if random_id == '':
-            raise Exception('Failed to generate random id')
+    def create(self, resource_type_id, name, description = '', checkin_file : bytes = None, checkout_file : bytes = None, variables = []) -> dict:
         params = {
             'resourceTypeId': resource_type_id,
             'name': name,
             'description': description,
-            'permissionId': random_id,
-            'description': description
+            'isDraft': True,
         }
-        draft = self.britive.post(f'{self.base_url}/permissions', json=params)
-        print(draft)
+        permissionId = self.britive.post(f'{self.base_url}/permissions', json=params)['permissionId']
+        urls = self.get_urls(permissionId)
+        requests.put(urls['checkinURL'], files={'file': checkin_file})
+        requests.put(urls['checkoutURL'], files={'file': checkout_file})
+        params = {
+            'checkinFileName' : permissionId + '_checkin',
+            'checkoutFileName' : permissionId + '_checkout',
+            'checkinTimeLimit' : 60,
+            'checkoutTimeLimit' : 60,
+            'createdBy' : 'Python-SDK',
+            'description' : description,
+            'inlineFileExists' : True,
+            'isDraft' : False,
+            'name' : name,
+            'resourceTypeId' : resource_type_id,
+            'updatedBy' : 'Python-SDK',
+            'variables' : variables,
+        }
+        return self.britive.put(f'{self.base_url}/permissions/{permissionId}', json=params)
         
 
         
