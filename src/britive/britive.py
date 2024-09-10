@@ -468,6 +468,7 @@ class Britive:
             response = self.__request_with_exponential_backoff_and_retry(
                 method=method, url=url, params=params, data=data, json=json
             )
+            #print(response.content)
             if self.__response_has_no_content(response):  # handle no content responses
                 return None
 
