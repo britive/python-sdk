@@ -7,7 +7,176 @@ from .cache import *  # will also import some globals like `britive`
 from britive import exceptions
 
 
+
+# 310-system_permissions
+def test_system_level_permission_delete(cached_system_level_permission):
+    try:
+        response = britive.system.permissions.delete(cached_system_level_permission['id'])
+        assert response is None
+    finally:
+        cleanup('permission-system-level')
+
+
+# 300-system_roles
+def test_system_level_role_delete(cached_system_level_role):
+    try:
+        response = britive.system.roles.delete(cached_system_level_role['id'])
+        assert response is None
+    finally:
+        cleanup('role-system-level')
+
+
+# 270-system_policies
+def test_system_level_policy_delete_delete(cached_system_level_policy):
+    try:
+        response = britive.system.policies.delete(cached_system_level_policy['id'])
+        assert response is None
+    finally:
+        cleanup('policy-system-level')
+
+
+def test_system_level_policy_condition_as_default_json_str_delete(
+    cached_system_level_policy_condition_as_default_json_str,
+):
+    try:
+        response = britive.system.policies.delete(cached_system_level_policy_condition_as_default_json_str['id'])
+        assert response is None
+    finally:
+        cleanup('policy-system-level-condition-default-as-json-str')
+
+
+def test_system_level_policy_condition_as_dictionary_delete(cached_system_level_policy_condition_as_dictionary):
+    try:
+        response = britive.system.policies.delete(cached_system_level_policy_condition_as_dictionary['id'])
+        assert response is None
+    finally:
+        cleanup('policy-system-level-condition-as-dict')
+
+
+# 260-notification-mediums
+def test_notification_medium_delete(cached_notification_medium):
+    try:
+        response = britive.notification_mediums.delete(cached_notification_medium['id'])
+        assert response is None
+    finally:
+        cleanup('notification-medium')
+
+
+# 240-secrets_manager
+def test_folder_delete(cached_folder, cached_vault):
+    try:
+        response = britive.secrets_manager.folders.delete(path=cached_folder['path'], vault_id=cached_vault['id'])
+        assert response is None
+    finally:
+        cleanup('folder')
+
+
+def test_secret_delete(cached_secret, cached_vault):
+    try:
+        response = britive.secrets_manager.secrets.delete(path=cached_secret['path'], vault_id=cached_vault['id'])
+        assert response is None
+    finally:
+        cleanup('secret')
+
+
+def test_static_secret_templates_delete(cached_static_secret_template):
+    try:
+        response = britive.secrets_manager.static_secret_templates.delete(cached_static_secret_template['id'])
+        assert response is None
+    finally:
+        cleanup('static-secret-templates')
+
+
+def test_password_policies_delete(cached_password_policies):
+    try:
+        response = britive.secrets_manager.password_policies.delete(cached_password_policies['id'])
+        assert response is None
+    finally:
+        cleanup('password-policies')
+
+
+def test_pin_policy_delete(cached_pin_policies):
+    try:
+        response = britive.secrets_manager.password_policies.delete(cached_pin_policies['id'])
+        assert response is None
+    finally:
+        cleanup('pin-policies')
+
+
+def test_policy_delete(cached_policy):
+    try:
+        response = britive.secrets_manager.policies.delete(cached_policy['id'])
+        assert response is None
+    finally:
+        cleanup('policy')
+
+
+def test_vault_delete(cached_vault):
+    try:
+        response = britive.secrets_manager.vaults.delete(cached_vault['id'])
+        assert response is None
+    finally:
+        cleanup('vault')
+
+
+# 215-workload
+def test_workload_identity_provider_aws_delete(cached_workload_identity_provider_aws):
+    try:
+        response = britive.workload.identity_providers.delete(cached_workload_identity_provider_aws['id'])
+        assert response is None
+    finally:
+        cleanup('workload-identity-provider-aws')
+
+
+def test_workload_identity_provider_oidc_delete(cached_workload_identity_provider_oidc):
+    try:
+        response = britive.workload.identity_providers.delete(cached_workload_identity_provider_oidc['id'])
+        assert response is None
+    finally:
+        cleanup('workload-identity-provider-oidc')
+
+
 # 130-profiles
+def test_profile_approval_policy_delete(cached_profile, cached_profile_approval_policy):
+    try:
+        response = britive.profiles.policies.delete(
+            profile_id=cached_profile['papId'], policy_id=cached_profile_approval_policy['id']
+        )
+        assert response is None
+    finally:
+        cleanup('profile-approval-policy')
+
+
+def test_profile_policy_condition_as_dict_delete(cached_profile, cached_profile_policy_condition_as_dict):
+    try:
+        response = britive.profiles.policies.delete(
+            profile_id=cached_profile['papId'], policy_id=cached_profile_policy_condition_as_dict['id']
+        )
+        assert response is None
+    finally:
+        cleanup('profile-policy-dict')
+
+
+def test_profile_policy_condition_as_json_str_delete(cached_profile, cached_profile_policy_condition_as_json_str):
+    try:
+        response = britive.profiles.policies.delete(
+            profile_id=cached_profile['papId'], policy_id=cached_profile_policy_condition_as_json_str['id']
+        )
+        assert response is None
+    finally:
+        cleanup('profile-policy-str')
+
+
+def test_profile_policy_delete(cached_profile, cached_profile_policy):
+    try:
+        response = britive.profiles.policies.delete(
+            profile_id=cached_profile['papId'], policy_id=cached_profile_policy['id']
+        )
+        assert response is None
+    finally:
+        cleanup('profile-policy')
+
+
 def test_profile_delete(cached_profile):
     try:
         response = britive.profiles.delete(
@@ -21,7 +190,6 @@ def test_profile_delete(cached_profile):
         assert cached_profile['papId'] not in [p['papId'] for p in profiles]
     finally:
         cleanup('profile')
-        cleanup('profile-approval-policy')
         cleanup('dynamic-session-attribute')
         cleanup('static-session-attribute')
 
@@ -128,73 +296,3 @@ def test_identity_attribute_delete(cached_identity_attribute):
         assert response is None
     finally:
         cleanup('identity-attribute')
-
-
-def test_folder_delete(cached_folder, cached_vault):
-    try:
-        response = britive.secrets_manager.folders.delete(
-            path=cached_folder['path'], vault_id=cached_vault['id'])
-        assert response is None
-    finally:
-        cleanup('folder')
-
-
-def test_secret_delete(cached_secret, cached_vault):
-    try:
-        response = britive.secrets_manager.secrets.delete(
-            path=cached_secret['path'],
-            vault_id=cached_vault['id']
-            )
-        assert response is None
-    finally:
-        cleanup('secret')
-
-
-def test_static_secret_templates_delete(cached_static_secret_template):
-    try:
-        response = britive.secrets_manager.static_secret_templates.delete(
-            cached_static_secret_template['id'])
-        assert response is None
-    finally:
-        cleanup('static-secret-templates')
-
-
-def test_password_policies_delete(cached_password_policies):
-    try:
-        response = britive.secrets_manager.password_policies.delete(cached_password_policies['id'])
-        assert response is None
-    finally:
-        cleanup('password-policies')
-
-
-def test_pin_policy_delete(cached_pin_policies):
-    try:
-        response = britive.secrets_manager.password_policies.delete(cached_pin_policies['id'])
-        assert response is None
-    finally:
-        cleanup('pin-policies')
-
-
-def test_policy_delete(cached_policy):
-    try:
-        response = britive.secrets_manager.policies.delete(cached_policy['id'])
-        assert response is None
-    finally:
-        cleanup('policy')
-
-
-def test_vault_delete(cached_vault):
-    try:
-        response = britive.secrets_manager.vaults.delete(cached_vault['id'])
-        assert response is None
-    finally:
-        cleanup('vault')
-
-
-def test_notification_medium_delete(cached_notification_medium):
-    try:
-        response = britive.notification_mediums.delete(cached_notification_medium['id'])
-        assert response is None
-    finally:
-        cleanup('notification-medium')
-        
