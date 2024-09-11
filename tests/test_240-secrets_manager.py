@@ -1,4 +1,5 @@
-import time
+from time import sleep
+
 import britive.exceptions
 from britive import policies
 from .cache import *  # will also import some globals like `britive`
@@ -60,9 +61,8 @@ def test_password_policies_update(cached_password_policies):
 
 
 def test_generate_password(cached_password_policies):
-    time.sleep(5)  # sleep for 5 seconds as I think the password policy update takes a bit to settle down
-    password = britive.secrets_manager.password_policies.generate_password(
-        cached_password_policies['id'])
+    sleep(5)  # sleep for 5 seconds as I think the password policy update takes a bit to settle down
+    password = britive.secrets_manager.password_policies.generate_password(cached_password_policies['id'])
     assert isinstance(password, str)
 
 
@@ -166,10 +166,10 @@ def test_rotate_keys(cached_vault):
             britive.my_secrets.list()
             break
         except exceptions.NoSecretsVaultFound:
-            time.sleep(3)
+            sleep(3)
             tries += 1
         except exceptions.NotFound:
-            time.sleep(3)
+            sleep(3)
             tries += 1
 
 

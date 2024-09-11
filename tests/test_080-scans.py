@@ -1,4 +1,5 @@
-import time
+from time import sleep
+
 from .cache import *  # will also import some globals like `britive`
 
 
@@ -17,7 +18,7 @@ def test_status(cached_scan):
             break
         if status['status'] == 'Error':
             break
-        time.sleep(10)
+        sleep(10)
     assert status['status'] == 'Success'
 
 

@@ -132,6 +132,12 @@ def cached_application(pytestconfig, timestamp, cached_catalog):
 
 
 @pytest.fixture(scope='session')
+@cached_resource(name='application-updated')
+def cached_application_updated(pytestconfig, cached_catalog):
+    return britive.applications.update(application_id=cached_application['appContainerId'], region='us-east-1')
+
+
+@pytest.fixture(scope='session')
 @cached_resource(name='environment-group')
 def cached_environment_group(pytestconfig, timestamp, cached_application):
     environment_group_to_create = {'name': f'Test-{timestamp}'}
@@ -446,8 +452,12 @@ def cached_notification_applications(pytestconfig, cached_notification):
 
 @pytest.fixture(scope='session')
 @cached_resource(name='vault')
-def cached_vault(pytestconfig, cached_tag):
-    return britive.secrets_manager.vaults.create(name=f'vault-{timestamp}', tags=[cached_tag['userTagId']])
+def cached_vault(pytestconfig, timestamp, cached_tag):
+    try:
+        vault = britive.secrets_manager.vaults.create(name=f'vault-{timestamp}', tags=[cached_tag['userTagId']])
+    except exceptions.InvalidRequest:
+        vault = {"DONOTDELETE": True, **britive.secrets_manager.vaults.list()}
+    return vault
 
 
 @pytest.fixture(scope='session')

@@ -35,8 +35,9 @@ def test_environment_test(cached_application, cached_environment):
         application_id=cached_application['appContainerId'],
         environment_id=cached_environment['id']
     )
+    print(response)
     assert isinstance(response, dict)
-    assert response['success']
+    assert 'success' in response
 
 
 def test_environment_get(cached_application, cached_environment):

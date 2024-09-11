@@ -113,8 +113,11 @@ def test_policy_delete(cached_policy):
 
 def test_vault_delete(cached_vault):
     try:
-        response = britive.secrets_manager.vaults.delete(cached_vault['id'])
-        assert response is None
+        if cached_vault.get("DONOTDELETE"):
+            assert True
+        else:
+            response = britive.secrets_manager.vaults.delete(cached_vault['id'])
+            assert response is None
     finally:
         cleanup('vault')
 

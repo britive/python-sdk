@@ -1,5 +1,9 @@
 import datetime
-from .cache import *  # will also import some globals like `britive`
+from time import sleep
+
+import pytest
+
+from .cache import britive  # will also import some globals like `britive`
 
 
 def test_get():
@@ -96,5 +100,6 @@ def test_banner_off():
     banner = britive.settings.banner.set(display_banner=False, message='dont care', message_type='INFO')
     assert 'status' in banner
     assert banner['status'] == 'OFF'
-    banner = britive.banner()
-    assert banner is None
+    sleep(5)
+    banner_check = britive.banner()
+    assert banner_check is None
