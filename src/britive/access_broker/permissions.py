@@ -1,25 +1,20 @@
+import random
 import requests
 class ResourcePermissions:
     def __init__(self, britive):
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/resource-manager'
-
     def list(self, resource_type_id) -> list:
         """
         Retrieve all permissions for a resource type.
-
         :param resource_type_id: ID of the resource type.
         :return: List of permissions.
         """
-
         return self.britive.get(f'{self.base_url}/resource-types/{resource_type_id}/permissions')
-
     
-
     def update(self, permission_id, file : bytes = None, **kwargs) -> dict:     
         """
         Update a permission.
-
         :param permission_id: ID of the permission.
         :param file: File to upload.
         :param kwargs: Valid fields are...
@@ -47,7 +42,6 @@ class ResourcePermissions:
     def get(self, permission_id, version_id = None) -> dict:
         """
         Retrieve a permission by ID.
-
         :param permission_id: ID of the permission.
         :param version_id: ID of the version. Optional.
         :return: Permission.
@@ -60,7 +54,6 @@ class ResourcePermissions:
     def delete(self, permission_id, version_id = None) -> dict:
         """
         Delete a permission.
-
         :param permission_id: ID of the permission.
         :param version_id: Version of the permission. Optional.
         :return: None
@@ -73,7 +66,6 @@ class ResourcePermissions:
     def get_urls(self, permission_id) -> dict:
         """
         Retrieve URLs for a permission.
-
         :param permission_id: ID of the permission.
         :return: URLs.
         """
@@ -105,7 +97,4 @@ class ResourcePermissions:
             'variables' : variables,
         }
         return self.britive.put(f'{self.base_url}/permissions/{permissionId}', json=params)
-        
-
-        
         

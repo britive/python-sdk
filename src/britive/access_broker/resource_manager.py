@@ -1,9 +1,9 @@
-from .resource_permissions import ResourcePermissions
-from .resource_types import ResourceTypes
+from .permissions import ResourcePermissions
+from .types import ResourceTypes
 
 class ResourceManager:
 
     def __init__(self, britive):
         self.britive = britive
-        self.resource_permissions = ResourcePermissions(britive)
-        self.resource_types = ResourceTypes(britive)
+        self.permissions = ResourcePermissions(britive)
+        self.types = ResourceTypes(britive)
