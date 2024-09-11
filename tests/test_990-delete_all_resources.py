@@ -296,3 +296,7 @@ def test_identity_attribute_delete(cached_identity_attribute):
         assert response is None
     finally:
         cleanup('identity-attribute')
+
+# timestamp
+def test_timestamp_delete(timestamp):
+    cleanup('timestamp')
