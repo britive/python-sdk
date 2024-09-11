@@ -23,5 +23,3 @@ def test_query_json():
 def test_query_csv():
     csv = britive.audit_logs.query(csv=True)
     assert '"timestamp","actor.display_name"' in csv
-
-

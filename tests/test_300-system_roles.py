@@ -6,28 +6,28 @@ def test_list():
     assert isinstance(response, list)
     assert len(response) > 0
     assert isinstance(response[0], dict)
-    assert 'id' in response[0].keys()
-    assert 'name' in response[0].keys()
+    assert 'id' in response[0]
+    assert 'name' in response[0]
 
 
 def test_create(cached_system_level_role):
     assert isinstance(cached_system_level_role, dict)
-    assert 'id' in cached_system_level_role.keys()
-    assert 'name' in cached_system_level_role.keys()
+    assert 'id' in cached_system_level_role
+    assert 'name' in cached_system_level_role
     assert cached_system_level_role['name'].startswith('python-sdk')
 
 
 def test_get_id(cached_system_level_role):
     response = britive.system.roles.get(role_identifier=cached_system_level_role['id'], identifier_type='id')
-    assert 'id' in response.keys()
-    assert 'name' in response.keys()
+    assert 'id' in response
+    assert 'name' in response
     assert response['name'].startswith('python-sdk')
 
 
 def test_get_name(cached_system_level_role):
     response = britive.system.roles.get(role_identifier=cached_system_level_role['name'])
-    assert 'id' in response.keys()
-    assert 'name' in response.keys()
+    assert 'id' in response
+    assert 'name' in response
     assert response['name'].startswith('python-sdk')
 
 
@@ -40,21 +40,17 @@ def test_update_id(cached_system_level_role):
             permission_ids.append(permission['id'])
 
     role = britive.system.roles.build(
-        name=cached_system_level_role['name'],
-        permissions=permission_ids,
-        identifier_type='id'
+        name=cached_system_level_role['name'], permissions=permission_ids, identifier_type='id'
     )
     response = britive.system.roles.update(
-        role_identifier=cached_system_level_role['id'],
-        role=role,
-        identifier_type='id'
+        role_identifier=cached_system_level_role['id'], role=role, identifier_type='id'
     )
 
     assert response is None
 
     response = britive.system.roles.get(role_identifier=cached_system_level_role['id'], identifier_type='id')
-    assert 'id' in response.keys()
-    assert 'name' in response.keys()
+    assert 'id' in response
+    assert 'name' in response
     assert response['name'].startswith('python-sdk')
     assert len(response['permissions']) == 2
 
@@ -63,19 +59,17 @@ def test_update_name(cached_system_level_role):
     role = britive.system.roles.build(
         name=cached_system_level_role['name'],
         permissions=['NMAdminPermission', 'SMAdminPermission', 'ReportsViewPermission'],
-        identifier_type='name'
+        identifier_type='name',
     )
     response = britive.system.roles.update(
-        role_identifier=cached_system_level_role['name'],
-        role=role,
-        identifier_type='name'
+        role_identifier=cached_system_level_role['name'], role=role, identifier_type='name'
     )
 
     assert response is None
 
     response = britive.system.roles.get(role_identifier=cached_system_level_role['name'], identifier_type='name')
-    assert 'id' in response.keys()
-    assert 'name' in response.keys()
+    assert 'id' in response
+    assert 'name' in response
     assert response['name'].startswith('python-sdk')
     assert len(response['permissions']) == 3
 
@@ -88,4 +82,3 @@ def test_delete(cached_system_level_role):
             britive.system.roles.get(cached_system_level_role['id'])
     finally:
         cleanup('role-system-level')
-

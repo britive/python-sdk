@@ -10,11 +10,11 @@ def test_environment_update(cached_application, cached_environment):
     response = britive.environments.update(
         application_id=cached_application['appContainerId'],
         environment_id=cached_environment['id'],
-        accountId=account_id
+        accountId=account_id,
     )
     assert isinstance(response, dict)
-    assert 'catalogApplication' in response.keys()
-    assert 'propertyTypes' in response['catalogApplication'].keys()
+    assert 'catalogApplication' in response
+    assert 'propertyTypes' in response['catalogApplication']
     account_id_response = None
     for prop in response['catalogApplication']['propertyTypes']:
         if prop['name'] == 'accountId':
@@ -32,8 +32,7 @@ def test_environment_list_one(cached_application):
 
 def test_environment_test(cached_application, cached_environment):
     response = britive.environments.test(
-        application_id=cached_application['appContainerId'],
-        environment_id=cached_environment['id']
+        application_id=cached_application['appContainerId'], environment_id=cached_environment['id']
     )
     print(response)
     assert isinstance(response, dict)
@@ -42,14 +41,7 @@ def test_environment_test(cached_application, cached_environment):
 
 def test_environment_get(cached_application, cached_environment):
     env = britive.environments.get(
-        application_id=cached_application['appContainerId'],
-        environment_id=cached_environment['id']
+        application_id=cached_application['appContainerId'], environment_id=cached_environment['id']
     )
     assert isinstance(env, dict)
     assert env['environmentId'] == cached_environment['id']
-
-
-
-
-
-

@@ -27,7 +27,7 @@ def test_set_with_schedule():
         message_type='INFO',
         start_datetime=start_datetime,
         end_datetime=start_datetime + datetime.timedelta(days=1),
-        time_zone='UTC'
+        time_zone='UTC',
     )
     assert isinstance(banner, dict)
     for key in ['status', 'messageType', 'message', 'messageSchedule']:
@@ -43,7 +43,7 @@ def test_set_with_incorrect_schedule():
             display_banner=True,
             message_type='INFO',
             start_datetime=datetime.datetime(year=2024, month=1, day=1),
-            time_zone='UTC'
+            time_zone='UTC',
         )
 
     with pytest.raises(ValueError):
@@ -52,7 +52,7 @@ def test_set_with_incorrect_schedule():
             display_banner=True,
             message_type='INFO',
             end_datetime=datetime.datetime(year=2024, month=1, day=1),
-            time_zone='UTC'
+            time_zone='UTC',
         )
 
     with pytest.raises(ValueError):
@@ -61,7 +61,7 @@ def test_set_with_incorrect_schedule():
             display_banner=True,
             message_type='INFO',
             start_datetime=datetime.datetime(year=2024, month=1, day=1),
-            end_datetime=datetime.datetime(year=2024, month=1, day=1)
+            end_datetime=datetime.datetime(year=2024, month=1, day=1),
         )
 
     with pytest.raises(ValueError):
@@ -69,7 +69,7 @@ def test_set_with_incorrect_schedule():
             message='test',
             display_banner=True,
             message_type='INFO',
-            start_datetime=datetime.datetime(year=2024, month=1, day=1)
+            start_datetime=datetime.datetime(year=2024, month=1, day=1),
         )
 
     with pytest.raises(ValueError):
@@ -77,16 +77,11 @@ def test_set_with_incorrect_schedule():
             message='test',
             display_banner=True,
             message_type='INFO',
-            end_datetime=datetime.datetime(year=2024, month=1, day=1)
+            end_datetime=datetime.datetime(year=2024, month=1, day=1),
         )
 
     with pytest.raises(ValueError):
-        britive.settings.banner.set(
-            message='test',
-            display_banner=True,
-            message_type='INFO',
-            time_zone='UTC'
-        )
+        britive.settings.banner.set(message='test', display_banner=True, message_type='INFO', time_zone='UTC')
 
 
 def test_banner_end_user():

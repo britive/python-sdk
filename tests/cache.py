@@ -1,26 +1,21 @@
-import os
 import functools
+import os
 import random
 import string
 from time import time
 
 import pytest
 
+from britive import exceptions  # exceptions used in test files so including here for ease
+
 # don't worry about these invalid references - it will be fixed up if we are running local tests
 # vs running it through tox
 from britive.britive import Britive
-from britive import exceptions  # exceptions used in test files so including here for ease
-
 
 britive = Britive()  # source details from environment variables
 scan_skip = bool(os.getenv('BRITIVE_TEST_IGNORE_SCAN'))
 scan_skip_message = 'ignore scan requested'
-constraints = bool(
-    not (
-        os.getenv('BRITIVE_GCP_TEST_APP_ID')
-        and os.getenv('BRITIVE_TENANT') == 'engv2-ea'
-    )
-)
+constraints = bool(not (os.getenv('BRITIVE_GCP_TEST_APP_ID') and os.getenv('BRITIVE_TENANT') == 'engv2-ea'))
 constraints_skip = 'not using engv2-ea and/or BRITIVE_GCP_TEST_APP_ID not set'
 characters = list(string.ascii_letters + string.digits + '!@#$%^&*()')
 
@@ -39,7 +34,7 @@ def generate_random_password(length=30):
 
     # converting the list to string
     # printing the list
-    return "".join(password)
+    return ''.join(password)
 
 
 def cleanup(resource):
@@ -78,7 +73,7 @@ def cached_user(pytestconfig, timestamp):
         'firstName': 'TestPython',
         'lastName': timestamp,
         'password': generate_random_password(),
-        'status': 'active'
+        'status': 'active',
     }
     return britive.users.create(**user_to_create)
 
@@ -142,9 +137,8 @@ def cached_application_updated(pytestconfig, cached_catalog):
 def cached_environment_group(pytestconfig, timestamp, cached_application):
     environment_group_to_create = {'name': f'Test-{timestamp}'}
     return britive.environment_groups.create(
-            application_id=cached_application['appContainerId'],
-            name=environment_group_to_create['name']
-        )
+        application_id=cached_application['appContainerId'], name=environment_group_to_create['name']
+    )
 
 
 @pytest.fixture(scope='session')
@@ -152,26 +146,23 @@ def cached_environment_group(pytestconfig, timestamp, cached_application):
 def cached_environment(pytestconfig, timestamp, cached_application):
     environment_to_create = {'name': f'Sigma Labs Test-{timestamp}'}
     return britive.environments.create(
-            application_id=cached_application['appContainerId'],
-            name=environment_to_create['name']
-        )
+        application_id=cached_application['appContainerId'], name=environment_to_create['name']
+    )
 
 
 @pytest.fixture(scope='session')
 @cached_resource(name='scan')
 def cached_scan(pytestconfig, cached_application, cached_environment):
     return britive.scans.scan(
-            application_id=cached_application['appContainerId'],
-            environment_id=cached_environment['id']
-        )
+        application_id=cached_application['appContainerId'], environment_id=cached_environment['id']
+    )
 
 
 @pytest.fixture(scope='session')
 @cached_resource(name='account')
 def cached_account(pytestconfig, cached_application, cached_environment):
     accounts = britive.accounts.list(
-        application_id=cached_application['appContainerId'],
-        environment_id=cached_environment['id']
+        application_id=cached_application['appContainerId'], environment_id=cached_environment['id']
     )
 
     # lets just grab the first account which has permissions associated with it
@@ -220,44 +211,35 @@ def cached_profile_policy(pytestconfig, cached_profile, cached_tag):
         description=cached_tag['name'],
         tags=[cached_tag['name']],
         stepup_auth=True,
-        always_prompt_stepup_auth=False
+        always_prompt_stepup_auth=False,
     )
-    return britive.profiles.policies.create(
-        profile_id=cached_profile['papId'],
-        policy=policy
-    )
+    return britive.profiles.policies.create(profile_id=cached_profile['papId'], policy=policy)
 
 
 @pytest.fixture(scope='session')
 @cached_resource(name='profile-policy-str')
 def cached_profile_policy_condition_as_json_str(pytestconfig, cached_profile, cached_tag):
     policy = britive.profiles.policies.build(
-        name=cached_profile['papId'] + '_json',
+        name=f"{cached_profile['papId']}_json",
         description=cached_tag['name'],
         tags=[cached_tag['name']],
-        ips = ['12.12.12.12', '13.13.13.13'],
-        condition_as_dict=False
+        ips=['12.12.12.12', '13.13.13.13'],
+        condition_as_dict=False,
     )
-    return britive.profiles.policies.create(
-        profile_id=cached_profile['papId'],
-        policy=policy
-    )
+    return britive.profiles.policies.create(profile_id=cached_profile['papId'], policy=policy)
 
 
 @pytest.fixture(scope='session')
 @cached_resource(name='profile-policy-dict')
 def cached_profile_policy_condition_as_dict(pytestconfig, cached_profile, cached_tag):
     policy = britive.profiles.policies.build(
-        name=cached_profile['papId'] + '_dict',
+        name=f"{cached_profile['papId']}_dict",
         description=cached_tag['name'],
         tags=[cached_tag['name']],
         ips=['12.12.12.12', '13.13.13.13'],
-        condition_as_dict=True
+        condition_as_dict=True,
     )
-    return britive.profiles.policies.create(
-        profile_id=cached_profile['papId'],
-        policy=policy
-    )
+    return britive.profiles.policies.create(profile_id=cached_profile['papId'], policy=policy)
 
 
 @pytest.fixture(scope='session')
@@ -268,27 +250,22 @@ def cached_profile_approval_policy(pytestconfig, cached_profile, cached_service_
         description='',
         service_identities=[cached_service_identity['username']],
         approval_notification_medium='Email',
-        approver_users=[britive.my_access.whoami()['username']]
+        approver_users=[britive.my_access.whoami()['username']],
     )
-    return britive.profiles.policies.create(
-        profile_id=cached_profile['papId'],
-        policy=policy
-    )
+    return britive.profiles.policies.create(profile_id=cached_profile['papId'], policy=policy)
+
 
 @pytest.fixture(scope='session')
 @cached_resource(name='static-session-attribute')
 def cached_static_session_attribute(pytestconfig, cached_profile):
     return britive.profiles.session_attributes.add_static(
-            profile_id=cached_profile['papId'],
-            tag_name='test-static',
-            tag_value='test'
-        )
+        profile_id=cached_profile['papId'], tag_name='test-static', tag_value='test'
+    )
 
 
 @pytest.fixture(scope='session')
 @cached_resource(name='dynamic-session-attribute')
 def cached_dynamic_session_attribute(pytestconfig, cached_profile):
-
     attributes = britive.identity_attributes.list()
     email_id = None
     for attribute in attributes:
@@ -297,10 +274,8 @@ def cached_dynamic_session_attribute(pytestconfig, cached_profile):
             break
 
     return britive.profiles.session_attributes.add_dynamic(
-            profile_id=cached_profile['papId'],
-            identity_attribute_id=email_id,
-            tag_name='test-dynamic'
-        )
+        profile_id=cached_profile['papId'], identity_attribute_id=email_id, tag_name='test-dynamic'
+    )
 
 
 @pytest.fixture(scope='session')
@@ -313,23 +288,17 @@ def cached_task_service(pytestconfig, cached_application):
 @cached_resource(name='task')
 def cached_task(pytestconfig, cached_task_service, cached_application, cached_environment):
     return britive.tasks.create(
-            task_service_id=cached_task_service['taskServiceId'],
-            name='test',
-            frequency_type='Monthly',
-            start_time='01:00',
-            frequency_interval='31',
-            properties={
-                'appId': cached_application['appContainerId'],
-                'orgScan': False,
-                'scope': [
-                    {
-                        'type': 'Environment',
-                        'value': cached_environment['id']
-                    }
-
-                ]
-            }
-        )
+        task_service_id=cached_task_service['taskServiceId'],
+        name='test',
+        frequency_type='Monthly',
+        start_time='01:00',
+        frequency_interval='31',
+        properties={
+            'appId': cached_application['appContainerId'],
+            'orgScan': False,
+            'scope': [{'type': 'Environment', 'value': cached_environment['id']}],
+        },
+    )
 
 
 @pytest.fixture(scope='session')
@@ -360,8 +329,7 @@ def cached_identity_provider(pytestconfig, timestamp):
 @cached_resource(name='scim-token')
 def cached_scim_token(pytestconfig, cached_identity_provider):
     return britive.identity_providers.scim_tokens.create(
-        identity_provider_id=cached_identity_provider['id'],
-        token_expiration_days=60
+        identity_provider_id=cached_identity_provider['id'], token_expiration_days=60
     )
 
 
@@ -377,10 +345,7 @@ def cached_checked_out_profile(pytestconfig, cached_profile, cached_environment,
         users=[calling_user_details['username']],
         description=cached_tag['name'],
     )
-    britive.profiles.policies.create(
-        profile_id=cached_profile['papId'],
-        policy=policy
-    )
+    britive.profiles.policies.create(profile_id=cached_profile['papId'], policy=policy)
 
     # add a permission (just take the first in the list)
     permissions = britive.profiles.permissions.list_available(profile_id=cached_profile['papId'])
@@ -391,33 +356,29 @@ def cached_checked_out_profile(pytestconfig, cached_profile, cached_environment,
         britive.profiles.permissions.add(
             profile_id=cached_profile['papId'],
             permission_type=permissions[0]['type'],
-            permission_name=permissions[0]['name']
+            permission_name=permissions[0]['name'],
         )
 
     # and now checkout the profile
     return britive.my_access.checkout(
-            profile_id=cached_profile['papId'],
-            environment_id=cached_environment['id'],
-            include_credentials=True
-        )
+        profile_id=cached_profile['papId'], environment_id=cached_environment['id'], include_credentials=True
+    )
 
 
 @pytest.fixture(scope='session')
 @cached_resource(name='checked-out-profile-by-name')
-def cached_checked_out_profile_by_name(pytestconfig, cached_profile, cached_environment,
-                                       cached_application):
-
+def cached_checked_out_profile_by_name(pytestconfig, cached_profile, cached_environment, cached_application):
     # note that cached_checked_out_profile has to be run first so all the permissions and user entitlements
     # are set properly. We are just re-checking out the profile using names instead of IDs here.
     # and now checkout the profile
 
     account_id = os.environ['BRITIVE_TEST_ENV_ACCOUNT_ID']
     return britive.my_access.checkout_by_name(
-            profile_name=cached_profile['name'],
-            environment_name=f'{account_id} ({cached_environment["name"]})',
-            application_name=cached_application['catalogAppDisplayName'],
-            include_credentials=True
-        )
+        profile_name=cached_profile['name'],
+        environment_name=f'{account_id} ({cached_environment["name"]})',
+        application_name=cached_application['catalogAppDisplayName'],
+        include_credentials=True,
+    )
 
 
 @pytest.fixture(scope='session')
@@ -616,9 +577,7 @@ def cached_gcp_profile_big_query(pytestconfig, timestamp):
     )
 
     britive.profiles.permissions.add(
-        profile_id=response['papId'],
-        permission_name='BigQuery Admin',
-        permission_type='role'
+        profile_id=response['papId'], permission_name='BigQuery Admin', permission_type='role'
     )
 
     return response
@@ -634,9 +593,7 @@ def cached_gcp_profile_storage(pytestconfig, timestamp):
     )
 
     britive.profiles.permissions.add(
-        profile_id=response['papId'],
-        permission_name='Storage Admin',
-        permission_type='role'
+        profile_id=response['papId'], permission_name='Storage Admin', permission_type='role'
     )
 
     return response

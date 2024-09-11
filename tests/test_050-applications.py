@@ -3,7 +3,7 @@ from .cache import *  # will also import some globals like `britive`
 
 def test_catalog(cached_catalog):
     assert isinstance(cached_catalog, dict)
-    assert 'AWS Standalone-1.0' in cached_catalog.keys()
+    assert 'AWS Standalone-1.0' in cached_catalog
     assert isinstance(cached_catalog['AWS Standalone-1.0'], dict)
 
 
@@ -48,8 +48,8 @@ def test_get(cached_application):
 def test_test_failure(cached_application):
     response = britive.applications.test(application_id=cached_application['appContainerId'])
     assert isinstance(response, dict)
-    assert 'success' in response.keys()
-    assert 'message' in response.keys()
+    assert 'success' in response
+    assert 'message' in response
     assert not response['success']
 
 
@@ -62,7 +62,7 @@ def test_update(cached_application):
         application_id=cached_application['appContainerId'],
         showAwsAccountNumber=True,
         identityProvider=idp,
-        roleName=role
+        roleName=role,
     )
     show = None
     for prop in app['catalogApplication']['propertyTypes']:
@@ -78,4 +78,3 @@ def test_set_user_account_mapping(cached_application):
     assert isinstance(app['userAccountMappings'], list)
     assert len(app['userAccountMappings']) == 1
     assert app['userAccountMappings'][0]['name'] == 'email'
-

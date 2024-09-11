@@ -31,10 +31,7 @@ def test_enable(cached_security_policy):
 
 
 def test_update(cached_security_policy):
-    response = britive.security_policies.update(
-        security_policy_id=cached_security_policy['id'],
-        ips=['2.2.2.2']
-    )
+    response = britive.security_policies.update(security_policy_id=cached_security_policy['id'], ips=['2.2.2.2'])
     assert response is None
 
     policy = britive.security_policies.get(security_policy_id=cached_security_policy['id'])

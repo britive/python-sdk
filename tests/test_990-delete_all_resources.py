@@ -1,11 +1,9 @@
 # note that the order of deletes could matter here so we will delete resources
 # in the opposite order of creation.
 
-from distutils.command.clean import clean
-from typing import final
-from .cache import *  # will also import some globals like `britive`
 from britive import exceptions
 
+from .cache import *  # will also import some globals like `britive`
 
 
 # 310-system_permissions
@@ -183,8 +181,7 @@ def test_profile_policy_delete(cached_profile, cached_profile_policy):
 def test_profile_delete(cached_profile):
     try:
         response = britive.profiles.delete(
-            application_id=cached_profile['appContainerId'],
-            profile_id=cached_profile['papId']
+            application_id=cached_profile['appContainerId'], profile_id=cached_profile['papId']
         )
 
         profiles = britive.profiles.list(application_id=cached_profile['appContainerId'])
@@ -201,8 +198,7 @@ def test_profile_delete(cached_profile):
 def test_environment_delete(cached_application, cached_environment):
     try:
         response = britive.environments.delete(
-            application_id=cached_application['appContainerId'],
-            environment_id=cached_environment['id']
+            application_id=cached_application['appContainerId'], environment_id=cached_environment['id']
         )
         assert response is None
     finally:
@@ -219,7 +215,7 @@ def test_environment_group_delete(cached_application, cached_environment_group):
             if group['parentId'] != '':  # cannot delete root groups - error A-0003 is thrown when attempting
                 response = britive.environment_groups.delete(
                     application_id=cached_application['appContainerId'],
-                    environment_group_id=cached_environment_group['id']
+                    environment_group_id=cached_environment_group['id'],
                 )
                 assert response is None
             else:
