@@ -1,7 +1,7 @@
 from .resource_permissions import ResourcePermissions
 from .resource_types import ResourceTypes
 
-class AccessBroker:
+class ResourceManager:
 
     def __init__(self, britive):
         self.britive = britive

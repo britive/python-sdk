@@ -1,4 +1,3 @@
-import random
 import requests
 class ResourcePermissions:
     def __init__(self, britive):
