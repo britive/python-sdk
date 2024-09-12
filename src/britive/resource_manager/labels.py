@@ -21,7 +21,7 @@ class ResourceLabels:
         Retrieve all labels.
         :return: List of labels.
         """
-        return self.britive.get(self.base_url)['data']
+        return self.britive.get(self.base_url)
     def update(self, label_id, name=None, description=None, values=None):
         """
         Update a label.
