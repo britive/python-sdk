@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 
@@ -50,8 +50,8 @@ class AuditLogs:
         :raises: ValueError - If from_time is greater than to_time.
         """
 
-        to_time = to_time or datetime.datetime.utcnow()
-        from_time = from_time or to_time - datetime.timedelta(days=7)
+        to_time = to_time or datetime.now(timezone.utc)
+        from_time = from_time or to_time - timedelta(days=7)
 
         if from_time > to_time:
             raise ValueError('from_time must occur before to_time.')
