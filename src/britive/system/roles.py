@@ -9,14 +9,19 @@ class SystemRoles:
         if identifier_type not in ['id', 'name']:
             raise ValueError(f'identifier_type of {identifier_type} is invalid. Only `name` and `id` are allowed.')
 
-    def list(self) -> list:
+    def list(self, filter_expression: str = '') -> list:
         """
         List system level roles.
 
+        :param filter_expression: Filter based on `name`. Valid operators are `eq`, `sw`, and
+            `co`. Example: name co security
         :returns: List of roles.
         """
 
-        return self.britive.get(self.base_url)
+        params = {}
+        if filter_expression:
+            params['filter'] = filter_expression
+        return self.britive.get(self.base_url, params=params)
 
     def get(self, role_identifier: str, identifier_type: str = 'name', verbose: bool = False) -> dict:
         """

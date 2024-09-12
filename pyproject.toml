@@ -4,3 +4,59 @@ requires = [
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "britive"
+authors = [{name = "Britive Inc.", email = "support@britive.com"}]
+description = "A pure Python SDK for the Britive API"
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+license = {file = "LICENSE"}
+requires-python = ">= 3.7"
+dependencies = [
+    "requests>=2.31.0"
+]
+dynamic = ["version"]
+keywords = ["britive", "cpam", "identity", "jit"]
+
+[project.urls]
+Homepage = "https://www.britive.com"
+Documentation = "https://docs.britive.com/v1/docs/en/overview-britive-apis"
+Repository = "https://github.com/britive/python-sdk.git"
+Issues = "https://github.com/britive/python-sdk/issues"
+Changelog = "https://github.com/britive/python-sdk/CHANGELOG.md"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.dynamic]
+version = {attr = "britive.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py311
+isolated_build = True
+
+[testenv]
+# install pytest in the virtualenv where commands will be executed
+deps =
+    pytest
+    requests>=2.31.0
+    pyotp
+commands =
+    # NOTE: you can run any command line tool here - not just tests
+    pytest -v
+passenv = BRITIVE_TENANT,BRITIVE_API_TOKEN,BRITIVE_TEST_ENV_ACCOUNT_ID,BRITIVE_TEST_IGNORE_SCAN,BRITIVE_GCP_TEST_APP_ID
+"""
+
+[tool.pymarkdown]
+plugins.md013.line_length = 120
+plugins.md013.code_block_line_length = 120

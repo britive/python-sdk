@@ -4,6 +4,7 @@
 .out
 .idea/
 .tox/
+t_.py
 test.py
 
 

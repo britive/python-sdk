@@ -1,24 +1,32 @@
+import pyotp
 from .cache import *  # will also import some globals like `britive`
 
-user_keys = [
-    'userId',
-    'status',
-    'external',
-    'mappedAccounts',
-    'identityProvider',
-    'name',
-    'firstName',
-    'lastName',
-    'username',
+user_keys = {
+    'adminRoles',
+    'created',
     'email',
+    'external',
+    'externalId',
+    'firstName',
+    'identityProvider',
+    'lastLogin',
+    'lastName',
+    'mappedAccounts',
+    'mobile',
+    'modified',
+    'name',
+    'phone',
+    'status',
     'type',
-    'adminRoles'
-]
+    'userId',
+    'userTags',
+    'username'
+}
 
 
 def test_create(cached_user):
     assert isinstance(cached_user, dict)
-    assert set(user_keys).issubset(cached_user.keys())
+    assert user_keys.issubset(cached_user)
 
 
 def test_list(cached_user):
@@ -26,14 +34,14 @@ def test_list(cached_user):
     assert isinstance(response, list)
     assert len(response) > 0
     assert isinstance(response[0], dict)
-    assert set(user_keys).issubset(response[0].keys())
+    assert user_keys.issubset(response[0])
     assert cached_user['userId'] in [x['userId'] for x in response]
 
 
 def test_get(cached_user):
     user = britive.users.get(cached_user['userId'])
     assert isinstance(user, dict)
-    assert set(user_keys).issubset(user.keys())
+    assert user_keys.issubset(user)
     assert user['userId'] == cached_user['userId']
 
 
@@ -41,7 +49,7 @@ def test_get_by_name_co(cached_user):
     users = britive.users.get_by_name(cached_user['lastName'])
     assert isinstance(users, list)
     assert isinstance(users[0], dict)
-    assert set(user_keys).issubset(users[0].keys())
+    assert user_keys.issubset(users[0])
 
 
 def test_search(cached_user):
@@ -49,7 +57,7 @@ def test_search(cached_user):
     assert isinstance(users, list)
     assert len(users) > 0
     assert isinstance(users[0], dict)
-    assert set(user_keys).issubset(users[0].keys())
+    assert user_keys.issubset(users[0])
 
 
 def test_get_by_status():
@@ -57,7 +65,7 @@ def test_get_by_status():
     assert isinstance(users, list)
     assert len(users) > 0
     assert isinstance(users[0], dict)
-    assert set(user_keys).issubset(users[0].keys())
+    assert user_keys.issubset(users[0])
 
 
 def test_update(cached_user):
@@ -129,7 +137,7 @@ def test_get_custom_identity_attributes_dict(cached_user, cached_identity_attrib
         as_dict=True
     )
     assert isinstance(response, dict)
-    assert cached_identity_attribute['id'] in response.keys()
+    assert cached_identity_attribute['id'] in response
     assert response[cached_identity_attribute['id']].startswith('test-attr-value')
 
 
@@ -165,5 +173,8 @@ def test_minimized_user_details(cached_user):
     assert len(details) == 1
 
 
-
-
+def test_stepup_mfa():
+    challenge = britive.users.enable_mfa.enable()
+    totp = pyotp.TOTP(challenge.get('additionalDetails').get('key'))
+    totp = totp.now()
+    assert len(str(totp)) == 6

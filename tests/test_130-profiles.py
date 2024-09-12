@@ -1,5 +1,5 @@
 import os
-
+import json
 from .cache import *  # will also import some globals like `britive`
 
 
@@ -148,8 +148,60 @@ def test_session_attributes_remove(cached_profile, cached_static_session_attribu
 
 
 def test_policies_create(cached_profile_policy):
+    print(cached_profile_policy)
     assert isinstance(cached_profile_policy, dict)
     assert cached_profile_policy['members']['tags']
+
+
+def test_list_include_policies(cached_profile):
+    profiles = britive.profiles.list(application_id=cached_profile['appContainerId'], include_policies=True)
+    assert isinstance(profiles, list)
+    assert len(profiles) > 0
+    assert isinstance(profiles[0], dict)
+    assert profiles[0]['profileName'].startswith('test')
+    assert 'policies' in profiles[0]
+
+
+def test_disable_mfa(cached_profile, cached_tag, cached_profile_policy):
+    profile_policy = britive.profiles.policies.build(
+        name=cached_profile['papId'],
+        description=cached_tag['name'],
+        active=False,
+        stepup_auth=False,
+        always_prompt_stepup_auth=False
+    )
+    response = britive.profiles.policies.update(
+        profile_id=cached_profile['papId']
+        , policy_id=cached_profile_policy['id']
+        , policy=profile_policy
+    )
+    response = britive.profiles.policies.get(
+        profile_id=cached_profile['papId']
+        , policy_id=cached_profile_policy['id']
+    )
+    assert isinstance(json.loads(response.get('condition')), dict)
+    assert json.loads(response.get('condition')).get('stepUpCondition', '') == ''
+
+
+def test_enable_mfa(cached_profile, cached_tag, cached_profile_policy):
+    profile_policy = britive.profiles.policies.build(
+        name=cached_profile['papId'],
+        description=cached_tag['name'],
+        active=False,
+        stepup_auth=True,
+        always_prompt_stepup_auth=False
+    )
+    response = britive.profiles.policies.update(
+        profile_id=cached_profile['papId']
+        , policy_id=cached_profile_policy['id']
+        , policy=profile_policy
+    )
+    response = britive.profiles.policies.get(
+        profile_id=cached_profile['papId']
+        , policy_id=cached_profile_policy['id']
+    )
+    assert isinstance(json.loads(response.get('condition')), dict)
+    assert json.loads(response.get('condition')).get('stepUpCondition').get('factor') == 'TOTP'
 
 
 def test_policies_create_with_approval_single_notification_medium(cached_profile_approval_policy):

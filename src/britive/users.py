@@ -13,13 +13,15 @@ class Users:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/users'
         self.custom_attributes = CustomAttributes(self)
+        self.enable_mfa = EnableMFA(britive)
 
-    def list(self, filter_expression: str = None) -> list:
+    def list(self, filter_expression: str = None, include_tags: bool = False) -> list:
         """
         Provide an optionally filtered list of all users.
 
         :param filter_expression: filter list of users based on name, status, or role. The supported operators
              are 'eq' and 'co'. Example: 'name co "Smith"'
+        :param include_tags: if this is set to true, tags/group memberships are returned.
         :return: List of user records
         """
 
@@ -30,6 +32,8 @@ class Users:
         }
         if filter_expression:
             params['filter'] = filter_expression
+        if include_tags:
+            params['includeTags'] = 'true'
 
         return self.britive.get(self.base_url, params)
 
@@ -118,13 +122,13 @@ class Users:
         else:
             required_fields.append('password')
 
-        if 'status' not in kwargs.keys():
+        if 'status' not in kwargs:
             kwargs['status'] = 'active'
 
         if kwargs['status'] not in valid_statues:
             raise ValueError(f'invalid status {kwargs["status"]}')
 
-        if not all(x in kwargs.keys() for x in required_fields):
+        if not all(x in kwargs for x in required_fields):
             raise ValueError('Not all required keyword arguments were provided.')
 
         response = self.britive.post(self.base_url, json=kwargs)
@@ -145,10 +149,10 @@ class Users:
         # add some required elements to the kwargs passed in by the caller
         kwargs['type'] = 'User'
 
-        if 'username' not in kwargs.keys():
+        if 'username' not in kwargs:
             kwargs['username'] = user['username']
 
-        if 'email' not in kwargs.keys():
+        if 'email' not in kwargs:
             kwargs['email'] = user['email']
 
         self.britive.patch(f'{self.base_url}/{user_id}', json=kwargs)
@@ -257,7 +261,7 @@ class Users:
 
         return self.britive.patch(f'{self.base_url}/{user_id}/resetmfa')
 
-    def minimized_user_details(self, user_id: str = None, user_ids: list = []) -> list:
+    def minimized_user_details(self, user_id: str = None, user_ids: list = None) -> list:
         """
         Retrieve a small set of user fields given a user id.
 
@@ -273,3 +277,19 @@ class Users:
             return []
 
         return self.britive.post(f'{self.base_url}/minimized-user-details', json=user_ids)
+
+
+class EnableMFA:
+    def __init__(self, britive):
+        self.britive = britive
+        self.base_url = f'{self.britive.base_url}/mfa/register/TOTP'
+
+    def enable(self) -> dict:
+        """
+        Enable MFA for user
+
+        :return: Challenge details
+        """
+
+        data = {'action': 'GENERATE_SECRET'}
+        return self.britive.post(self.base_url, json=data)

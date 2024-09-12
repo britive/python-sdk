@@ -30,45 +30,45 @@ def test_create_folder(cached_folder):
     assert isinstance(cached_folder, dict)
 
 
-def test_PasswordPolicies_create(cached_PasswordPolicies):
-    assert isinstance(cached_PasswordPolicies, dict)
+def test_password_policies_create(cached_password_policies):
+    assert isinstance(cached_password_policies, dict)
 
 
-def test_PinPolicies_create(cached_PinPolicies):
-    assert isinstance(cached_PinPolicies, dict)
+def test_pin_policies_create(cached_pin_policies):
+    assert isinstance(cached_pin_policies, dict)
 
 
-def test_PasswordPolicies_get(cached_PasswordPolicies):
-    pwdpolicy = britive.secrets_manager.password_policies.get(cached_PasswordPolicies['id'])
+def test_password_policies_get(cached_password_policies):
+    pwdpolicy = britive.secrets_manager.password_policies.get(cached_password_policies['id'])
     assert isinstance(pwdpolicy, dict)
-    assert pwdpolicy['id'] == cached_PasswordPolicies['id']
+    assert pwdpolicy['id'] == cached_password_policies['id']
 
 
-def test_PasswordPolicies_list():
+def test_password_policies_list():
     response = britive.secrets_manager.password_policies.list()
     assert isinstance(response, list)
     assert len(response) > 0
     assert isinstance(response[0], dict)
 
 
-def test_PasswordPolicies_update(cached_PasswordPolicies):
+def test_password_policies_update(cached_password_policies):
     r = str(random.randint(0, 1000000))
     new_name = f"pytestpolicy-{r}"
-    britive.secrets_manager.password_policies.update(cached_PasswordPolicies['id'], name=new_name)
+    britive.secrets_manager.password_policies.update(cached_password_policies['id'], name=new_name)
     assert britive.secrets_manager.password_policies.get(
-        cached_PasswordPolicies['id'])['name'] == new_name
+        cached_password_policies['id'])['name'] == new_name
 
 
-def test_generate_password(cached_PasswordPolicies):
+def test_generate_password(cached_password_policies):
     time.sleep(5)  # sleep for 5 seconds as I think the password policy update takes a bit to settle down
     password = britive.secrets_manager.password_policies.generate_password(
-        cached_PasswordPolicies['id'])
+        cached_password_policies['id'])
     assert isinstance(password, str)
 
 
-def test_validate_password(cached_PasswordPolicies):
+def test_validate_password(cached_password_policies):
     response = britive.secrets_manager.password_policies.validate(
-        cached_PasswordPolicies['id'],
+        cached_password_policies['id'],
         'testpassword')
     assert response['isPasswordOrPinValid'] is False
 
@@ -117,6 +117,25 @@ def test_secret_update(cached_secret, cached_vault):
         {'Note': 'updated test note'}
     )
     assert update is None
+
+def test_secret_rename(cached_secret, cached_vault):
+    name = cached_secret['name']
+    rename = britive.secrets_manager.secrets.rename(
+        cached_vault['id']
+        , cached_secret['path']
+        , 'testSecretRename')
+    assert rename is None
+
+    new_path_list = cached_secret['path'].split('/')
+    new_path_list.pop()
+    new_path_list.append('testSecretRename')
+    new_path = '/'.join(new_path_list)
+
+    rollback = britive.secrets_manager.secrets.rename(
+        cached_vault['id']
+        , new_path
+        , name)
+    assert rollback is None
 
 
 def test_policies_create(cached_policy):

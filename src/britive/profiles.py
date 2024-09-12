@@ -1,6 +1,7 @@
+from __future__ import annotations
 import json
-from . import exceptions
 from typing import Union
+from . import exceptions
 
 
 creation_defaults = {
@@ -12,7 +13,7 @@ creation_defaults = {
     'status': 'active',
     'destinationUrl': '',
     'useDefaultAppUrl': True,
-    'description': ''
+    'description': '',
 }
 
 update_fields_to_keep: list = list(creation_defaults)
@@ -67,7 +68,13 @@ class Profiles:
 
         return self.britive.post(f'{self.base_url}/{application_id}/paps', json=data)
 
-    def list(self, application_id: str, filter_expression: str = None, environment_association: str = None) -> list:
+    def list(
+        self,
+        application_id: str,
+        filter_expression: str = None,
+        environment_association: str = None,
+        include_policies: bool = False,
+    ) -> list:
         """
         Return an optionally filtered list of profiles associated with the specified application.
 
@@ -76,6 +83,8 @@ class Profiles:
             `co`. Example: name co "Dev Account"
         :param environment_association: Only list profiles with associations to the specified environment. Cannot be
             used in conjunction with `filter_expression`. Example: `environment_association="109876543210"`
+        :param include_policies: Defaults to False. If set to True will include all policies on each profile and all
+            members on each policy. Cannot be used in conjunction with `filter_expression`.
         :return: List of profiles.
         """
 
@@ -87,8 +96,11 @@ class Profiles:
         params = {
             'page': 0,
             'size': 100,
-            'view': 'summary'  # this is required - omitting it results in a 400 not authorized error
+            'view': 'summary',  # this is required - omitting it results in a 400 not authorized error
         }
+
+        if include_policies:
+            params['view'] = 'includePolicies'
 
         if filter_expression:
             params['filter'] = filter_expression
@@ -116,13 +128,11 @@ class Profiles:
             for profile in self.list(application_id=application_id):
                 if profile['papId'] == profile_id:
                     return profile
-
             raise exceptions.ProfileNotFound()
-        else:
-            params = {}
-            if summary:
-                params['view'] = 'summary'
-            return self.britive.get(f'{self.britive.base_url}/paps/{profile_id}', params=params)
+        params = {}
+        if summary:
+            params['view'] = 'summary'
+        return self.britive.get(f'{self.britive.base_url}/paps/{profile_id}', params=params)
 
     def update(self, application_id: str, profile_id: str, **kwargs) -> dict:
         """
@@ -155,10 +165,7 @@ class Profiles:
         :return: List of available resource scopes.
         """
 
-        params = {
-            'page': 0,
-            'size': 100
-        }
+        params = {'page': 0, 'size': 100}
 
         if filter_expression:
             params['filter'] = filter_expression
@@ -275,13 +282,7 @@ class ProfilePermissions:
         :return: Details of the permission added.
         """
 
-        data = {
-            'op': 'add',
-            'permission': {
-                'name': permission_name,
-                'type': permission_type
-            }
-        }
+        data = {'op': 'add', 'permission': {'name': permission_name, 'type': permission_type}}
 
         return self.britive.post(f'{self.base_url}/{profile_id}/permissions', json=data)
 
@@ -295,10 +296,7 @@ class ProfilePermissions:
         :return: List of permissions assigned to the profile.
         """
 
-        params = {
-            'page': 0,
-            'size': 100
-        }
+        params = {'page': 0, 'size': 100}
 
         if filter_expression:
             params['filter'] = filter_expression
@@ -316,11 +314,7 @@ class ProfilePermissions:
         :return: List of permissions that are available to be assigned to the profile.
         """
 
-        params = {
-            'page': 0,
-            'size': 100,
-            'query': 'available'
-        }
+        params = {'page': 0, 'size': 100, 'query': 'available'}
         return self.britive.get(f'{self.base_url}/{profile_id}/permissions', params=params)
 
     def remove(self, profile_id: str, permission_type: str, permission_name: str) -> dict:
@@ -333,13 +327,7 @@ class ProfilePermissions:
         :return: Details of the permission removed.
         """
 
-        data = {
-            'op': 'remove',
-            'permission': {
-                'name': permission_name,
-                'type': permission_type
-            }
-        }
+        data = {'op': 'remove', 'permission': {'name': permission_name, 'type': permission_type}}
 
         return self.britive.post(f'{self.base_url}/{profile_id}/permissions', json=data)
 
@@ -359,8 +347,10 @@ class ProfilePermissionConstraints:
         :returns: List of supported constraint types.
         """
 
-        url = f'{self.base_url}/{profile_id}/permissions/{permission_name}/' \
-              f'{permission_type}/supported-constraint-types'
+        url = (
+            f'{self.base_url}/{profile_id}/permissions/{permission_name}/'
+            f'{permission_type}/supported-constraint-types'
+        )
         return self.britive.get(url)
 
     def get(self, profile_id: str, permission_name: str, constraint_type: str, permission_type: str = 'role') -> list:
@@ -374,12 +364,15 @@ class ProfilePermissionConstraints:
         :returns: List of constraints for the given constraint type.
         """
 
-        url = f'{self.base_url}/{profile_id}/permissions/{permission_name}/' \
-              f'{permission_type}/constraints/{constraint_type}'
+        url = (
+            f'{self.base_url}/{profile_id}/permissions/{permission_name}/'
+            f'{permission_type}/constraints/{constraint_type}'
+        )
         return self.britive.get(url).get('result')
 
-    def lint_condition(self, profile_id: str, permission_name: str, expression: str,
-                       permission_type: str = 'role') -> dict:
+    def lint_condition(
+        self, profile_id: str, permission_name: str, expression: str, permission_type: str = 'role'
+    ) -> dict:
         """
         Lint the provided condition expression.
 
@@ -390,21 +383,22 @@ class ProfilePermissionConstraints:
         :returns: Results of the lint operation.
         """
 
-        url = f'{self.base_url}/{profile_id}/permissions/{permission_name}/' \
-              f'{permission_type}/constraints/condition'
+        url = f'{self.base_url}/{profile_id}/permissions/{permission_name}/' f'{permission_type}/constraints/condition'
 
-        params = {
-            'operation': 'validate'
-        }
+        params = {'operation': 'validate'}
 
-        data = {
-            'expression': expression
-        }
+        data = {'expression': expression}
 
         return self.britive.put(url, params=params, json=data)
 
-    def add(self, profile_id: str, permission_name: str, constraint_type: str, constraint: dict,
-            permission_type: str = 'role') -> None:
+    def add(
+        self,
+        profile_id: str,
+        permission_name: str,
+        constraint_type: str,
+        constraint: dict,
+        permission_type: str = 'role',
+    ) -> None:
         """
         Adds the given constraint.
 
@@ -418,17 +412,23 @@ class ProfilePermissionConstraints:
         :returns: None.
         """
 
-        url = f'{self.base_url}/{profile_id}/permissions/{permission_name}/' \
-              f'{permission_type}/constraints/{constraint_type}'
+        url = (
+            f'{self.base_url}/{profile_id}/permissions/{permission_name}/'
+            f'{permission_type}/constraints/{constraint_type}'
+        )
 
-        params = {
-            'operation': 'add'
-        }
+        params = {'operation': 'add'}
 
         return self.britive.put(url, params=params, json=constraint)
 
-    def remove(self, profile_id: str, permission_name: str, constraint_type: str, constraint: dict = None,
-               permission_type: str = 'role') -> None:
+    def remove(
+        self,
+        profile_id: str,
+        permission_name: str,
+        constraint_type: str,
+        constraint: dict = None,
+        permission_type: str = 'role',
+    ) -> None:
         """
         Removes the given constraint.
 
@@ -441,11 +441,11 @@ class ProfilePermissionConstraints:
         :returns: None.
         """
 
-        url = f'{self.base_url}/{profile_id}/permissions/{permission_name}/' \
-              f'{permission_type}/constraints/{constraint_type}'
-        params = {
-            'operation': 'remove'
-        }
+        url = (
+            f'{self.base_url}/{profile_id}/permissions/{permission_name}/'
+            f'{permission_type}/constraints/{constraint_type}'
+        )
+        params = {'operation': 'remove'}
         if constraint is None:
             constraint = {}
 
@@ -474,13 +474,12 @@ class ProfileSessionAttributes:
             'transitive': transitive,
             'attributeSchemaId': None,
             'mappingName': tag_name,
-            'attributeValue': tag_value
+            'attributeValue': tag_value,
         }
 
         return self.britive.post(f'{self.base_url}/{profile_id}/session-attributes', json=data)
 
-    def add_dynamic(self, profile_id: str, identity_attribute_id: str, tag_name: str,
-                    transitive: bool = False) -> dict:
+    def add_dynamic(self, profile_id: str, identity_attribute_id: str, tag_name: str, transitive: bool = False) -> dict:
         """
         AWS ONLY - Add a dynamic session attribute to the profile.
 
@@ -501,13 +500,14 @@ class ProfileSessionAttributes:
             'transitive': transitive,
             'attributeSchemaId': identity_attribute_id,
             'mappingName': tag_name,
-            'attributeValue': None
+            'attributeValue': None,
         }
 
         return self.britive.post(f'{self.base_url}/{profile_id}/session-attributes', json=data)
 
-    def update_static(self, profile_id: str, attribute_id, tag_name: str, tag_value: str,
-                      transitive: bool = False) -> None:
+    def update_static(
+        self, profile_id: str, attribute_id, tag_name: str, tag_value: str, transitive: bool = False
+    ) -> None:
         """
         AWS ONLY - Update the static session attribute to the profile.
 
@@ -526,13 +526,14 @@ class ProfileSessionAttributes:
             'attributeSchemaId': None,
             'mappingName': tag_name,
             'attributeValue': tag_value,
-            'id': attribute_id
+            'id': attribute_id,
         }
 
         return self.britive.put(f'{self.base_url}/{profile_id}/session-attributes', json=data)
 
-    def update_dynamic(self, profile_id: str, attribute_id: str, identity_attribute_id: str, tag_name: str,
-                       transitive: bool = False) -> dict:
+    def update_dynamic(
+        self, profile_id: str, attribute_id: str, identity_attribute_id: str, tag_name: str, transitive: bool = False
+    ) -> dict:
         """
         AWS ONLY - Update the dynamic session attribute to the profile.
 
@@ -553,7 +554,7 @@ class ProfileSessionAttributes:
             'attributeSchemaId': identity_attribute_id,
             'mappingName': tag_name,
             'attributeValue': None,
-            'id': attribute_id
+            'id': attribute_id,
         }
 
         return self.britive.put(f'{self.base_url}/{profile_id}/session-attributes', json=data)
@@ -585,13 +586,32 @@ class ProfilePolicies:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/paps'
 
-    def build(self, name: str, description: str = '', draft: bool = False, active: bool = True,
-              read_only: bool = False, users: list = None, tags: list = None, service_identities: list = None,
-              ips: list = None, from_time: str = None, to_time: str = None, date_schedule: dict = None,
-              days_schedule: dict = None, approval_notification_medium: Union[str, list] = None,
-              time_to_approve: int = 5, access_validity_time: int = 120, approver_users: list = None,
-              approver_tags: list = None, access_type: str = 'Allow', identifier_type: str = 'name',
-              condition_as_dict: bool = False) -> dict:
+    def build(
+        self,
+        name: str,
+        description: str = '',
+        draft: bool = False,
+        active: bool = True,
+        read_only: bool = False,
+        users: list = None,
+        tags: list = None,
+        service_identities: list = None,
+        ips: list = None,
+        from_time: str = None,
+        to_time: str = None,
+        date_schedule: dict = None,
+        days_schedule: dict = None,
+        approval_notification_medium: Union[str, list] = None,
+        time_to_approve: int = 5,
+        access_validity_time: int = 120,
+        approver_users: list = None,
+        approver_tags: list = None,
+        access_type: str = 'Allow',
+        identifier_type: str = 'name',
+        condition_as_dict: bool = False,
+        stepup_auth: bool = False,
+        always_prompt_stepup_auth: bool = False,
+    ) -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -652,6 +672,8 @@ class ProfilePolicies:
             a policy was as a stringifed json object. As of 2.22.0 the condition block can also be built as a raw
             python dictionary. This parameter will default to `False` to support backwards compatibility. Setting to
             `True` will result in the policy condition being returned/built as a python dictionary.
+        :param stepup_auth: Indicates if step-up authentication is required to checkout profile
+        :param always_prompt_stepup_auth: Indicates if previous successful verification should be remembered
         :return: A dict which can be provided as a profile policy to `create` and `update`.
         """
 
@@ -676,7 +698,9 @@ class ProfilePolicies:
             approver_tags=approver_tags,
             access_type=access_type,
             identifier_type=identifier_type,
-            condition_as_dict=condition_as_dict
+            condition_as_dict=condition_as_dict,
+            stepup_auth=stepup_auth,
+            always_prompt_stepup_auth=always_prompt_stepup_auth,
         )
 
         # clean up the generic policy response and customize for profiles
@@ -716,9 +740,7 @@ class ProfilePolicies:
         :return: Details of the policy.
         """
 
-        params = {
-            'conditionJson': condition_as_dict
-        }
+        params = {'conditionJson': condition_as_dict}
 
         policy = self.britive.get(f'{self.base_url}/{profile_id}/policies/{policy_id}', params=params)
 
