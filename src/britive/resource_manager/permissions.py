@@ -32,11 +32,15 @@ class ResourcePermissions:
             variables - List of variables
         :return: Updated permission.
         """
-        if not file:
-            return self.britive.put(f'{self.base_url}/permissions/{permission_id}', json=kwargs)
-        else:
-            return self.britive.put(f'{self.base_url}/permissions/{permission_id}', json=kwargs, files = {'file': file})
-        
+        if file:
+            urls = self.get_urls(permission_id)
+            requests.put(urls['checkinURL'], files={'file': file})
+            kwargs['checkinFileName'] = permission_id + '_checkin'
+            kwargs['checkoutFileName'] = permission_id + '_checkout'
+            kwargs['inlineFileExists'] = True
+            kwargs['checkinURL'] = urls['checkinURL']
+            kwargs['checkoutURL'] = urls['checkoutURL']
+        return self.britive.put(f'{self.base_url}/permissions/{permission_id}', json=kwargs)
         
     
     def get(self, permission_id, version_id = None) -> dict:
@@ -72,6 +76,18 @@ class ResourcePermissions:
         return self.britive.get(f'{self.base_url}/permissions/get-urls/{permission_id}')
     
     def create(self, resource_type_id, name, description = '', checkin_file : bytes = None, checkout_file : bytes = None, variables = []) -> dict:
+        """
+        Create a new permission.
+        :param resource_type_id: ID of the resource type.
+        :param name: Name of the permission.
+        :param description: Description of the permission.
+        :param checkin_file: Checkin file.
+        :param checkout_file: Checkout file.
+        :param variables: List of variables.
+        :return: Created permission.
+        """
+
+        
         params = {
             'resourceTypeId': resource_type_id,
             'name': name,
