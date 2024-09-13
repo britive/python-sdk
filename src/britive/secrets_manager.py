@@ -138,14 +138,19 @@ class PasswordPolicies:
 
         return self.britive.get(f'{self.base_url}/{password_policy_id}')
 
-    def list(self) -> list:
+    def list(self, filter_str: str = None) -> list:
         """
         Provide a list of all password policies
 
+        :param filter_str: filter to apply to the listing
         :return: List of all password policies
         """
 
-        return self.britive.get(self.base_url)
+        params = {}
+        if filter_str:
+            params['filter'] = filter_str
+
+        return self.britive.get(self.base_url, params=params)
 
     def create(
         self,
