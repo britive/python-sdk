@@ -51,6 +51,41 @@ def test_system_level_policy_condition_as_dictionary_delete(cached_system_level_
         cleanup('policy-system-level-condition-as-dict')
 
 
+# 265-access-buildersettings
+def test_access_builder_associations_delete(cached_application, cached_access_builder_associations):
+    try:
+        response = britive.access_builder.associations.delete(
+            application_id=cached_application['appContainerId'],
+            association_id=cached_access_builder_associations['associationApproversSummary'][0]['id'],
+        )
+        assert response is None
+    finally:
+        cleanup('access-builder-associations')
+
+
+def test_access_builder_approvers_groups_delete(cached_application, cached_access_builder_approvers_groups):
+    try:
+        response = britive.access_builder.approvers_groups.delete(
+            application_id=cached_application['appContainerId'],
+            group_id=cached_access_builder_approvers_groups.get('id'),
+        )
+        assert response is None
+    finally:
+        cleanup('access-builder-approvers-groups')
+
+
+def test_add_notification_to_access_builder_delete(cached_application, cached_add_notification_to_access_builder):
+    try:
+        response = britive.access_builder.notifications.update(
+            cached_application['appContainerId'], notification_mediums=[]
+        )
+        assert response is None
+    except exceptions.InvalidRequest as e:
+        assert "Access builder setting does not exist" in str(e)
+    finally:
+        cleanup('access-builder-approvers-groups')
+
+
 # 260-notification-mediums
 def test_notification_medium_delete(cached_notification_medium):
     try:
@@ -296,96 +331,7 @@ def test_identity_attribute_delete(cached_identity_attribute):
     finally:
         cleanup('identity-attribute')
 
+
 # timestamp
 def test_timestamp_delete(timestamp):
     cleanup('timestamp')
-
-
-def test_folder_delete(cached_folder, cached_vault):
-    try:
-        response = britive.secrets_manager.folders.delete(
-            path=cached_folder['path'], vault_id=cached_vault['id'])
-        assert response is None
-    finally:
-        cleanup('folder')
-
-
-def test_secret_delete(cached_secret, cached_vault):
-    try:
-        response = britive.secrets_manager.secrets.delete(
-            path=cached_secret['path'],
-            vault_id=cached_vault['id']
-        )
-        assert response is None
-    finally:
-        cleanup('secret')
-
-
-def test_static_secret_templates_delete(cached_static_secret_template):
-    try:
-        response = britive.secrets_manager.static_secret_templates.delete(
-            cached_static_secret_template['id'])
-        assert response is None
-    finally:
-        cleanup('static-secret-templates')
-
-
-def test_passwordPolicies_delete(cached_PasswordPolicies):
-    try:
-        response = britive.secrets_manager.password_policies.delete(cached_PasswordPolicies['id'])
-        assert response is None
-    finally:
-        cleanup('password-policies')
-
-
-def test_pinPolicy_delete(cached_PinPolicies):
-    try:
-        response = britive.secrets_manager.password_policies.delete(cached_PinPolicies['id'])
-        assert response is None
-    finally:
-        cleanup('pin-policies')
-
-
-def test_policy_delete(cached_policy):
-    try:
-        response = britive.secrets_manager.policies.delete(cached_policy['id'])
-        assert response is None
-    finally:
-        cleanup('policy')
-
-
-def test_vault_delete(cached_vault):
-    try:
-        response = britive.secrets_manager.vaults.delete(cached_vault['id'])
-        assert response is None
-    finally:
-        cleanup('vault')
-
-
-def test_notification_medium_delete(cached_notification_medium):
-    try:
-        response = britive.notification_mediums.delete(cached_notification_medium['id'])
-        assert response is None
-    finally:
-        cleanup('notification-medium')
-
-
-# 265-accessbuildersettings
-def test_access_builder_association_delete(cached_application, cached_access_builder_associations):
-    try:
-        response = britive.access_builder.associations.delete(application_id=cached_application['appContainerId']
-                                                              , association_id=cached_access_builder_associations['id'])
-        assert response is None
-    finally:
-        cleanup('accessbuilder_Associations')
-
-
-# 265-accessbuildersettings
-def test_approver_group_delete(cached_application, cached_accesbuilder_settings):
-    try:
-        response = britive.access_builder.approvers_groups.delete(application_id=cached_application['appContainerId']
-                                                                  , approver_group_id=cached_accesbuilder_settings.get(
-                'id'))
-        assert response is None
-    finally:
-        cleanup('accessbuilder_update')

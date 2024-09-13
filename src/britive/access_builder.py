@@ -1,270 +1,273 @@
-import json
-
-enable_defaults = {
-    'approvalTimeOut': '00:06:00',
-    'profileExpirationTimeout': 360
-}
-
 class AccessBuilderSettings:
     def __init__(self, britive):
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
 
-        self.approvers_groups = AccessBuilderApproverGroups(britive)
-        self.associations = AccessBuilderAssociation(britive)
+        self.approvers_groups = AccessBuilderApproversGroups(britive)
+        self.associations = AccessBuilderAssociations(britive)
         self.notifications = AccessBuilderNotifications(britive)
         self.requesters = AccessBuilderRequesters(britive)
 
     def get(self, application_id: str) -> dict:
         """
-        Get Access Request settings for application
+        Get Access Request settings for an application
 
-        :param application_id: The ID of the application to fetch access request settings.
-        :return: dictionary of access request settings.
+        :param application_id: The ID of the application to fetch Access Request settings.
+        :return: dictionary of Access Request settings.
         """
+
         return self.britive.get(f'{self.base_url}/{application_id}/access-request-settings')
 
-    def enable(self, application_id: str, **kwargs) -> None:
+    def enable(self, application_id: str, approval_timeout: str = '00:06:00', expiration_timeout: int = 360) -> None:
         """
-        Enable access requests for application. At least 1 Association and 1 Notification medium is required
-            before enabling access requests for the application.
+        Enable Access Requests for an application - at least 1 Association and 1 Notification Medium is required before
+        enabling Access Requests for the application.
 
-        :param application_id: The ID of the application to enable access requests
-        :param kwargs: in json format with values for the keys approvalTimeOut and
-            profileExpirationTimeout.
-            approvalTimeOut:str time in format 'DD:HH:MM'
-            profileExpirationTimeout:int time in minutes
+        :param application_id: The ID of the application to enable Access Requests
+        :param approval_timeout: The time, in 'DD:HH:MM' format, for the approval timeout, default is '00:06:00'
+        :param expiration_timeout: The time, in minutes, for the profile expiration timeout, default is 360
         :return: None
         """
 
-        data = {**enable_defaults, **kwargs, 'allowAccessRequest': True}
-        return self.britive.patch(f'{self.base_url}/{application_id}/access-request-settings'
-                                  , json=data)
+        data = {
+            'approvalTimeOut': approval_timeout,
+            'profileExpirationTimeout': expiration_timeout,
+            'allowAccessRequest': True,
+        }
+        return self.britive.patch(f'{self.base_url}/{application_id}/access-request-settings', json=data)
 
     def disable(self, application_id: str) -> None:
         """
-        disable access requests for application.
+        Disable Access Requests for application.
 
-        :param application_id: The ID of the application to disable access requests
+        :param application_id: The ID of the application to disable Access Requests
         :return: None
         """
-        data = {'allowAccessRequest': False}
-        return self.britive.patch(f'{self.base_url}/{application_id}/access-request-settings'
-                                  , json=data)
+
+        return self.britive.patch(
+            f'{self.base_url}/{application_id}/access-request-settings', json={'allowAccessRequest': False}
+        )
 
 
-class AccessBuilderApproverGroups:
+class AccessBuilderApproversGroups:
     def __init__(self, britive):
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
 
     def list(self, application_id: str) -> list:
         """
-        List approver groups created for an application.
+        List Approvers Groups created for an application.
 
-        :param application_id: The ID of the application to list approver groups
-        :return: List of approver groups and their details
+        :param application_id: The ID of the application to list Approvers Groups
+        :return: List of Approvers Groups and their details
         """
+
         return self.britive.get(f'{self.base_url}/{application_id}/approvers-groups')
 
-    def list_approver_group_members(self, application_id: str, approver_group_id: str) -> dict:
+    def list_approvers_group_members(self, application_id: str, group_id: str) -> dict:
         """
-        List approver group members
+        List Approvers Group members
 
-        :param application_id: The ID of the application to which the approver group is attached
-        :param approver_group_id: The ID of the approver group to list members of
-        :return: list of users and user tags that are members of the approver group
+        :param application_id: The ID of the application to which the Approvers Group is attached
+        :param group_id: The ID of the Approvers Group to list members of
+        :return: list of users and user tags that are members of the Approvers Group
         """
 
-        return self.britive.get(f'{self.base_url}/{application_id}/approvers-groups/{approver_group_id}')
+        return self.britive.get(f'{self.base_url}/{application_id}/approvers-groups/{group_id}')
 
-    def create(self, application_id: str, name: str, condition: str
-               , member_list: list = None) -> dict:
+    def create(self, application_id: str, name: str, condition: str, member_list: list = None) -> dict:
         """
-        Create approver group for access requests
+        Create Approvers Group for Access Requests
 
-        :param application_id: The ID of application to which the approver group will be attached
-        :param name: Name of the approver group
+        :param application_id: The ID of application to which the Approvers Group will be attached
+        :param name: Name of the Approvers Group
         :param condition: One of [Any, Or]
         :param member_list: List of users and/or user tags
-            [{'id': user ID, 'memberType': 'User', ..... other user attributes}
-            , {'id': tag ID, 'memberType': 'Tag', ....... other tag attributes}]
-        :return: Dictionary of approver group details
+            Example: [
+                {'id': user ID, 'memberType': 'User', ... other user attributes},
+                {'id': tag ID, 'memberType': 'Tag', ... other tag attributes}
+            ]
+        :return: Dictionary of Approvers Group details
         """
 
-        data = {'name': name,
-                'condition': condition,
-                'members': member_list}
+        if member_list is None:
+            member_list = []
 
-        return self.britive.post(f'{self.base_url}/{application_id}/approvers-groups'
-                                 , json=data)
+        data = {'name': name, 'condition': condition, 'members': member_list}
 
-    def update(self, application_id: str, approver_group_id: str
-               , name: str, condition: str, member_list: list = []) -> dict:
+        return self.britive.post(f'{self.base_url}/{application_id}/approvers-groups', json=data)
+
+    def update(self, application_id: str, group_id: str, name: str, condition: str, member_list: list = []) -> dict:
         """
+        Updates Approvers Group for given id
 
         :param application_id: The ID of the application
-        :param name: Name of the approver group
+        :param group_id: Approvers Group ID to which the member list will be updated
+        :param name: Name of the group
         :param condition: One of [Any, Or]
         :param member_list: This should be the final list of users and/or user tags you want attached to the group.
             Note: This list will overwrite what is already attached to the group.
-                [{'id': user ID, 'memberType': 'User', ..... other user attributes}
-                , {'id': tag ID, 'memberType': 'Tag', ....... other tag attributes}]
-        :param approver_group_id: Approver group ID to which the member list will be updated
-        :return: dictionary of approver group members
+            Example: [
+                {'id': user ID, 'memberType': 'User', ... other user attributes},
+                {'id': tag ID, 'memberType': 'Tag', ... other tag attributes}
+            ]
+        :return: dictionary of Approvers Group members
         """
 
-        data = {'name': name,
-                'condition': condition,
-                'members': member_list}
+        data = {'name': name, 'condition': condition, 'members': member_list}
 
-        return self.britive.patch(f'{self.base_url}/{application_id}/approvers-groups/{approver_group_id}'
-                                  , json=data)
+        return self.britive.patch(f'{self.base_url}/{application_id}/approvers-groups/{group_id}', json=data)
 
-    def delete(self, application_id: str, approver_group_id: str) -> None:
+    def delete(self, application_id: str, group_id: str) -> None:
         """
-        Delete approver group
+        Delete Approvers Group
 
-        :param application_id: The ID of the application to which the approver group is attached
-        :param approver_group_id: Id of the approver group that needs to e deleted
+        :param application_id: The ID of the application to which the Approvers Group is attached
+        :param group_id: Id of the Approvers Group that needs to e deleted
         :return: None
         """
 
-        return self.britive.delete(f'{self.base_url}/{application_id}/approvers-groups/{approver_group_id}')
+        return self.britive.delete(f'{self.base_url}/{application_id}/approvers-groups/{group_id}')
 
 
-class AccessBuilderAssociation:
-
+class AccessBuilderAssociations:
     def __init__(self, britive):
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
 
     def list(self, application_id: str) -> dict:
         """
-        List associations and approvers attached to the application ID
+        List Associations and Approvers Groups combination configured for an application
 
-        :param application_id: The ID of the application for which to list the associations
-        :return: dictionary of associations and approvers
+        :param application_id: The ID of the application for which to list the Associations
+        :return: dictionary of Associations and Approvers
         """
+
         return self.britive.get(f'{self.base_url}/{application_id}/association-approvers')
 
-    def create(self, application_id: str, name: str
-               , associations: list = None, approvers_groups: list = None) -> None:
+    def create(self, application_id: str, name: str, associations: list = None, approvers_groups: list = None) -> None:
         """
-        Create association approvers
+        Create Association Approvers
 
-        :param application_id: The ID of application for which we are creating the association approvers
+        :param application_id: The ID of application for which we are creating the Association Approvers
         :param name: Association name
         :param associations: list of associations
-            [   {'type': (1 for environment group, 0 for environment)
-                        , 'id': nativeID of the environment or environment group}
-                , {'type': ......, 'id':}
-                , {'type': ......, 'id':}
+            Example: [
+                {'type': (1 for environment group, 0 for environment),'id': ID of the environment or environment group},
+                {'type': ..., 'id': ...},
             ]
-        :param approvers_groups: list of approver group IDs
-            [ {'id': approver group ID}
-                , {'id': approver group ID}
-                ,
+        :param approvers_groups: list of Approvers Group IDs
+            Example: [
+                {'id': Approvers Group ID},
+                {'id': Approvers Group ID},
             ]
         :return: None
         """
-        data = {'name': name
-            , 'associations': associations
-            , 'approversGroups': approvers_groups
-                }
 
-        return self.britive.post(f'{self.base_url}/{application_id}/association-approvers'
-                                 , json=data)
+        data = {'name': name, 'associations': associations, 'approversGroups': approvers_groups}
+
+        return self.britive.post(f'{self.base_url}/{application_id}/association-approvers', json=data)
 
     def get(self, application_id: str, association_id: str) -> dict:
         """
-        :param application_id: The ID of application for which the association is attached to
-        :param association_id: The ID of the association
+        Get configured association and approvers by id to an application
+
+        :param application_id: The ID of application for which the Association is attached to
+        :param association_id: The ID of the Association
         :return:
         """
         return self.britive.get(f'{self.base_url}/{application_id}/association-approvers/{association_id}')
 
-    def update(self, application_id: str, association_id: str
-               , associations: list = [], approvers_groups: list = []) -> None:
+    def update(
+        self, application_id: str, association_id: str, associations: list = None, approvers_groups: list = None
+    ) -> None:
         """
-        Update assocations or approvers
+        Update Associations or Approvers Groups
 
-        :param application_id: The ID of application for which we are updating the association approvers
+        :param application_id: The ID of application for which we are updating the Association or Approvers Groups
         :param association_id: The ID of the Association to update
         :param associations: Leave blank if you do not want to update associations.
             list of associations you want to keep after the update
-            [   {'type': (1 for environment group, 0 for environment)
-                        , 'id': nativeID of the environment or environment group}
-                , {'type': ......, 'id':}
-                , {'type': ......, 'id':}
+            Example: [
+                {'type': (1 for environment group, 0 for environment),'id': ID of the environment or environment group},
+                {'type': ..., 'id': ...},
             ]
         :param approvers_groups: Leave blank if you do not want to update approvers_groups.
             list of approvers_groups you want to keep after the update
-            [ {'id': approver group ID}
-                , {'id': approver group ID}
-                ,
+            Example: [
+                {'id': Approvers Group ID},
+                {'id': Approvers Group ID},
             ]
         :return: None
         """
 
         data = {}
 
-        if len(associations) > 0:
+        if associations:
             data['associations'] = associations
 
-        if len(approvers_groups) > 0:
+        if approvers_groups:
             data['approversGroups'] = approvers_groups
 
-        return self.britive.patch(f'{self.base_url}/{application_id}/association-approvers/{association_id}'
-                                  , json=data)
+        return self.britive.patch(f'{self.base_url}/{application_id}/association-approvers/{association_id}', json=data)
 
     def delete(self, application_id: str, association_id: str) -> None:
         """
-        Delete the association approver group ID
+        Delete the Association Approvers Group ID
 
-        :param application_id: The ID of application for which the association approvers need to be deleted
-        :param association_id: The ID of the association of environments and approver groups
+        :param application_id: The ID of application for which the Association Approvers need to be deleted
+        :param association_id: The ID of the Association of environments and Approvers Groups
         :return: None
         """
+
         return self.britive.delete(f'{self.base_url}/{application_id}/association-approvers/{association_id}')
 
 
 class AccessBuilderNotifications:
-
     def __init__(self, britive):
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
 
     def list(self, application_id: str) -> list:
         """
-        List Notification mediums attached to the access requests
+        List Access Requests Notification Mediums for an application
 
         :param application_id: The ID of application for which the notification mediums are attached to
         :return: List of notification mediums and their properties
         """
+
         settings = self.britive.get(f'{self.base_url}/{application_id}/access-request-settings')
         return settings.get('notificationMediums')
 
-    def update(self, application_id: str, notification_medium: list) -> None:
+    def update(self, application_id: str, notification_mediums: list) -> None:
         """
-        :param application_id:
-        :param notification_medium: List of notification medium object formatted as below. This has to be the full list
-            of mediums.
-            notification medium object format:
-                {'id': notification_medium.get('id')
-                    , 'name': notification_medium.get('name')
-                    , 'description': notification_medium.get('description')
-                    , 'application': notification_medium.get('type')
-                    , 'channels': notification_medium.get('channels', [])
-                    , 'connectionParameters' : notification_medium.get('connectionParameters', {})}
+        Update Access Requests Notification Mediums for an application
 
+        :param application_id:
+        :param notification_mediums: List of Notification Medium objects - this has to be the full list of mediums.
+            Example: [
+                {
+                    'id': notification_medium.get('id'),
+                    'name': notification_medium.get('name'),
+                    'description': notification_medium.get('description'),
+                    'application': notification_medium.get('type'),
+                    'channels': notification_medium.get('channels', []),
+                },
+                {
+                    'id': ... ,
+                    'name': ... ,
+                    'description': ... ,
+                    'application': ... ,
+                    'channels': ... ,
+                },
+                ...
+            ]
         :return: None
         """
 
-        data = {'notificationMediums': notification_medium}
+        data = {'notificationMediums': notification_mediums}
 
-        return self.britive.patch(f'{self.base_url}/{application_id}/access-request-settings'
-                                  , json=data)
+        return self.britive.patch(f'{self.base_url}/{application_id}/access-request-settings', json=data)
 
 
 class AccessBuilderRequesters:
@@ -274,28 +277,42 @@ class AccessBuilderRequesters:
 
     def list(self, application_id: str) -> list:
         """
-        List users, tags who can use access builder
+        List users, tags who can use Access Builder for an applciation
 
         :param application_id: The ID of application for which the requesters need to be listed
         :return: List of members who can use access builder
         """
+
         settings = self.britive.get(f'{self.base_url}/{application_id}/access-request-settings')
-        return settings.get('memberRules')
+
+        return settings.get('memberRules', [])
 
     def update(self, application_id: str, user_tag_members: list) -> None:
         """
+        Update who can use Access Builder for an application
 
         :param application_id:
         :param user_tag_members: This should be the final list of users and/or user tags you want attached to the group.
-            Note: 1) This list will overwrite what is already attached to the application.
-                  2) condition key value should be one of 'Include' or 'Exclude'
-                [{'id': user ID, 'memberType': 'User'
-                        , 'condition': (should be one of 'Include' or 'Exclude'),  ..... other user attributes}
-                , {'id': tag ID, 'memberType': 'Tag', 'condition': '',  ....... other tag attributes}]
+            Note:
+                1) This list will overwrite what is already attached to the application.
+                2) condition key value should be either 'Include' or 'Exclude'
+            Example: [
+                {
+                    'id': user ID,
+                    'memberType': 'User',
+                    'condition': 'Include' | 'Exclude',
+                    ... other user attributes
+                },
+                {
+                    'id': tag ID,
+                    'memberType': 'Tag',
+                    'condition': '',
+                    ... other tag attributes
+                },
+            ]
         :return: None
         """
 
         data = {'memberRules': user_tag_members}
 
-        return self.britive.patch(f'{self.base_url}/{application_id}/access-request-settings'
-                                  , json=data)
+        return self.britive.patch(f'{self.base_url}/{application_id}/access-request-settings', json=data)

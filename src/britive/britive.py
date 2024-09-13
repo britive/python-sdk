@@ -1,11 +1,11 @@
 import json as native_json
 import os
-# import pkg_resources
 import socket
 import time
 
 import requests
 
+from .access_builder import AccessBuilderSettings
 from .accounts import Accounts
 from .api_tokens import ApiTokens
 from .applications import Applications
@@ -47,7 +47,6 @@ from .task_services import TaskServices
 from .tasks import Tasks
 from .users import Users
 from .workload import Workload
-from .access_builder import AccessBuilderSettings
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
 BRITIVE_TOKEN_ENV_NAME = 'BRITIVE_API_TOKEN'
