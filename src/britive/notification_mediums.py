@@ -1,25 +1,29 @@
 class NotificationMediums:
     def __init__(self, britive) -> None:
         self.britive = britive
-        self.base_url = (
-            f'{self.britive.base_url}/v1/notification-service/notificationmediums'
-        )
+        self.base_url = f'{self.britive.base_url}/v1/notification-service/notificationmediums'
 
-    def list(self) -> dict:
+    def list(self, filter_expression: str = None) -> dict:
         """
         List all notification mediums.
 
+        :param filter_expression: Filter based on `name`. Example: `name co britive`.
         :return: List of all notification mediums
         """
 
-        return self.britive.get(self.base_url)['result']
+        params = {}
+
+        if filter_expression:
+            params['filter'] = filter_expression
+
+        return self.britive.get(self.base_url, params=params)['result']
 
     def create(
         self,
         notification_medium_type: str,
         name: str,
         description: str = 'Default notification medium description',
-        connection_parameters: dict = None
+        connection_parameters: dict = None,
     ) -> dict:
         """
         Create a new notification medium.
@@ -71,9 +75,7 @@ class NotificationMediums:
         :return: Details of the updated notification medium.
         """
 
-        return self.britive.patch(
-            f'{self.base_url}/{notification_medium_id}', json=parameters
-        )
+        return self.britive.patch(f'{self.base_url}/{notification_medium_id}', json=parameters)
 
     def delete(self, notification_medium_id: str) -> None:
         """
