@@ -417,7 +417,7 @@ def cached_vault(pytestconfig, timestamp, cached_tag):
     try:
         vault = britive.secrets_manager.vaults.create(name=f'vault-{timestamp}', tags=[cached_tag['userTagId']])
     except exceptions.InvalidRequest:
-        vault = {"DONOTDELETE": True, **britive.secrets_manager.vaults.list()}
+        vault = {'DONOTDELETE': True, **britive.secrets_manager.vaults.list()}
     return vault
 
 

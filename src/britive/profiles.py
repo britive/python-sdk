@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import json
 from typing import Union
 
@@ -600,7 +598,7 @@ class ProfilePolicies:
         ips: list = None,
         date_schedule: dict = None,
         days_schedule: dict = None,
-        approval_notification_medium: Union[str, list] = None,  # noqa: UP007
+        approval_notification_medium: Union[str, list] = None,
         time_to_approve: int = 5,
         access_validity_time: int = 120,
         approver_users: list = None,

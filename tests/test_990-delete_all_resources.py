@@ -1,5 +1,6 @@
 # note that the order of deletes could matter here so we will delete resources
 # in the opposite order of creation.
+from time import sleep
 
 from britive import exceptions
 
@@ -146,7 +147,7 @@ def test_policy_delete(cached_policy):
 
 def test_vault_delete(cached_vault):
     try:
-        if cached_vault.get("DONOTDELETE"):
+        if cached_vault.get('DONOTDELETE'):
             assert True
         else:
             response = britive.secrets_manager.vaults.delete(cached_vault['id'])
@@ -266,7 +267,12 @@ def test_environment_group_delete(cached_application, cached_environment_group):
 # 050-applications
 def test_application_delete(cached_application):
     try:
-        response = britive.applications.delete(application_id=cached_application['appContainerId'])
+        while True:
+            try:
+                response = britive.applications.delete(application_id=cached_application['appContainerId'])
+                break
+            except exceptions.InvalidRequest:
+                sleep(5)
         assert response is None
     finally:
         cleanup('application')
