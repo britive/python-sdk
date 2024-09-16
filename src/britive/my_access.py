@@ -492,6 +492,7 @@ class MyAccess:
             contains the response from `credentials()`. Setting this parameter to `True` will result in a synchronous
             call vs. setting to `False` will allow for an async call.
         :param justification: Optional justification if checking out the profile requires approval.
+        :param otp: Optional time based one-time passcode use for step up authentication.
         :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
             was approved.
         :param max_wait_time: The maximum number of seconds to wait for an approval before throwing
@@ -550,6 +551,7 @@ class MyAccess:
             contains the response from `credentials()`. Setting this parameter to `True` will result in a synchronous
             call vs. setting to `False` will allow for an async call.
         :param justification: Optional justification if checking out the profile requires approval.
+        :param otp: Optional time based one-time passcode use for step up authentication.
         :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
             was approved.
         :param max_wait_time: The maximum number of seconds to wait for an approval before throwing
