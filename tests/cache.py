@@ -477,8 +477,18 @@ def cached_policy(pytestconfig, timestamp):
 def cached_notification_medium(pytestconfig, timestamp):
     return britive.notification_mediums.create(
         notification_medium_type='teams',
-        name=f'pytest-nm-{timestamp}',
-        connection_parameters={'Webhook URL': 'https://www.google.com/'},
+        name=f'pytest-nm-teams-{timestamp}',
+        url='https://teams.microsoft.com',
+    )
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='notification-medium-webhook')
+def cached_notification_medium_webhook(pytestconfig, timestamp):
+    return britive.notification_mediums.create(
+        notification_medium_type='webhook',
+        name=f'pytest-nm-webhook-{timestamp}',
+        url='https://www.britive.com',
     )
 
 
@@ -586,7 +596,6 @@ def cached_add_notification_to_access_builder(pytestconfig, cached_application, 
         'description': cached_notification_medium['description'],
         'application': cached_notification_medium['type'],
         'channels': cached_notification_medium.get('channels', []),
-        'connectionParameters': cached_notification_medium.get('connectionParameters', {}),
     }
 
     britive.access_builder.notifications.update(
@@ -724,6 +733,18 @@ def cached_gcp_profile_storage(pytestconfig, timestamp):
 
     britive.profiles.permissions.add(
         profile_id=response['papId'], permission_name='Storage Admin', permission_type='role'
+    )
+
+    return response
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='audit-logs-webhook')
+def cached_audit_logs_webhook_create(pytestconfig, timestamp, cached_notification_medium_webhook):
+    response = britive.audit_logs.webhooks.create_or_update(
+        notification_medium_id=cached_notification_medium_webhook['id'],
+        jmespath_filter="contains('event.eventType', 'checkout')",
+        description=f'python-sdk-aws-audit-log-webhook-{timestamp}',
     )
 
     return response

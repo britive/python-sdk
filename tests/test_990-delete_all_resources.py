@@ -25,6 +25,15 @@ def test_system_level_role_delete(cached_system_level_role):
         cleanup('role-system-level')
 
 
+# 275-audit_logs_webhooks
+def test_audit_logs_webhook_delete(cached_notification_medium_webhook):
+    try:
+        response = britive.audit_logs.webhooks.delete(notification_medium_id=cached_notification_medium_webhook['id'])
+        assert response is None
+    finally:
+        cleanup('audit-logs-webhook')
+
+
 # 270-system_policies
 def test_system_level_policy_delete_delete(cached_system_level_policy):
     try:
@@ -82,7 +91,7 @@ def test_add_notification_to_access_builder_delete(cached_application, cached_ad
         )
         assert response is None
     except exceptions.InvalidRequest as e:
-        assert "Access builder setting does not exist" in str(e)
+        assert 'Access builder setting does not exist' in str(e)
     finally:
         cleanup('access-builder-approvers-groups')
 
@@ -94,6 +103,14 @@ def test_notification_medium_delete(cached_notification_medium):
         assert response is None
     finally:
         cleanup('notification-medium')
+
+
+def test_notification_medium_webhook_delete(cached_notification_medium_webhook):
+    try:
+        response = britive.notification_mediums.delete(cached_notification_medium_webhook['id'])
+        assert response is None
+    finally:
+        cleanup('notification-medium-webhook')
 
 
 # 240-secrets_manager

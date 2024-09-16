@@ -22,24 +22,28 @@ class NotificationMediums:
         self,
         notification_medium_type: str,
         name: str,
-        description: str = 'Default notification medium description',
-        connection_parameters: dict = None,
+        url: str,
+        token: str = None,
+        description: str = None,
     ) -> dict:
         """
         Create a new notification medium.
 
-        :param notification_medium_type: the type of the notification medium
+        :param notification_medium_type: the type of the notification medium - [slack, teams, webhook]
         :param name: the name of the notification medium
+        :param url: the notification medium target URL
+        :param token: **slack only** the Auth Token for the Application BOT
         :param description: the description of the notification medium
-        :param connection_parameters: the connection parameters of the notification medium
-                valid connection parameters:
-                    URL : for slack, the URL
-                    token : for slack, Auth Token for the Application BOT
-                    Webhook URL : for teams, the URL of the teams webhook
         :return: Details of the newly created notification medium.
         """
-        if connection_parameters is None:
-            connection_parameters = {}
+
+        if description is None:
+            description = f'notification medium - {notification_medium_type}'
+
+        connection_parameters = {
+            **({"URL": url} if notification_medium_type != "teams" else {"Webhook URL": url}),
+            **({"token": token} if notification_medium_type == "slack" and token else {}),
+        }
 
         params = {
             'name': name,
