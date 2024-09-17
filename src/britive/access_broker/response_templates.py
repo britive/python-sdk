@@ -53,5 +53,18 @@ class ResponseTemplates:
         }
         return self.britive.put(f'{self.base_url}/{response_template_id}', json=params)
     
-
-        
+    def get(self, response_template_id):
+        """
+        Retrieve a response template by ID.
+        :param response_template_id: ID of the response template.
+        :return: Response template.
+        """
+        return self.britive.get(f'{self.base_url}/{response_template_id}')
+    
+    def delete(self, response_template_id):
+        """
+        Delete a response template.
+        :param response_template_id: ID of the response template.
+        :return: None
+        """
+        return self.britive.delete(f'{self.base_url}/{response_template_id}')
