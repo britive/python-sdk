@@ -205,7 +205,7 @@ class Britive:
         self.settings = Settings(self)
         self.step_up = StepUpAuth(self)
         self.my_resources = MyResources(self)
-        self.resource_manager = ResourceManager(self)
+        self.access_broker = AccessBroker(self)
 
     @staticmethod
     def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:

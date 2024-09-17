@@ -688,3 +688,12 @@ def cached_gcp_profile_storage(pytestconfig):
     )
 
     return response
+
+@pytest.fixture(scope='session')
+@cached_resource(name='response-template')
+def cached_response_template(pytestconfig):
+    r = str(random.randint(0, 1000000))
+    template_data = '''{
+        "name": "John Doe",
+        "role": "Admin"}'''
+    return britive.access_broker.response_templates.create(name="pytest-response-template-" + r, template_data=template_data)

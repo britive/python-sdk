@@ -3,7 +3,7 @@ class ResponseTemplates:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/resource-manager/response-templates'
     
-    def create(self, name, description = "", template_data = "", is_console_enabled = False, created_by = "", updated_by = ""):
+    def create(self,template_data, name, description = "", is_console_enabled = False, created_by = "", updated_by = ""):
         """
         Create a new response template.
         :param name: Name of the response template.
@@ -17,8 +17,8 @@ class ResponseTemplates:
         params = {
             'name': name,
             'description': description,
-            'templateData': template_data,
-            'isConsoleEnabled': is_console_enabled,
+            'template_data': template_data,
+            'is_console_enabled': is_console_enabled,
             'createdBy': created_by,
             'updatedBy': updated_by
         }
@@ -29,7 +29,7 @@ class ResponseTemplates:
         Retrieve all response templates.
         :return: List of response templates.
         """
-        return self.britive.get(self.base_url)
+        return self.britive.get(self.base_url)['data']
     
     def update(self, response_template_id, name = "", description = "", template_data = "", is_console_enabled = False, created_by = "", updated_by = ""):
         """
@@ -43,14 +43,20 @@ class ResponseTemplates:
         :param updated_by: Updated by.
         :return: Updated response template.
         """
-        params = {
-            'name': name,
-            'description': description,
-            'templateData': template_data,
-            'isConsoleEnabled': is_console_enabled,
-            'createdBy': created_by,
-            'updatedBy': updated_by
-        }
+        params = {}
+
+        if name:
+            params['name'] = name
+        if description:
+            params['description'] = description
+        if template_data:
+            params['template_data'] = template_data
+        if is_console_enabled:
+            params['is_console_enabled'] = is_console_enabled
+        if created_by:
+            params['createdBy'] = created_by
+        if updated_by:
+            params['updatedBy'] = updated_by
         return self.britive.put(f'{self.base_url}/{response_template_id}', json=params)
     
     def get(self, response_template_id):

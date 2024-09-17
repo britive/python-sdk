@@ -197,4 +197,10 @@ def test_notification_medium_delete(cached_notification_medium):
         assert response is None
     finally:
         cleanup('notification-medium')
-        
+
+def test_response_template_delete(cached_response_template):
+    try:
+        response = britive.access_broker.response_templates.delete(cached_response_template['templateId'])
+        assert response is None
+    finally:
+        cleanup('response-template')
