@@ -7,7 +7,7 @@ class Profile:
         self.base_url = f'{self.britive.base_url}/resource-manager/profiles'
         self.policies = Policies(britive)
         self.permissions = Permissions(britive)
-    def create(self, name, description, expiration_duration):
+    def create(self, name, description="", expiration_duration=900000):
         """
         Create a new profile.
         :param name: Name of the profile.
@@ -53,17 +53,7 @@ class Profile:
             params['description'] = description
         if expiration_duration:
             params['expirationDuration'] = expiration_duration
-        return self.britive.put(f'{self.base_url}/{profile_id}', json=params)
-    
-    def clone(self, profile_id, options = [], ignore_errors = False):
-        """
-        Clone a profile.
-        :param profile_id: ID of the profile.
-        :param options: List of options.
-        :param ignore_errors: Ignore errors.
-        :return: Cloned profile.
-        """
-        return self.britive.post(f'{self.base_url}/{profile_id}/clone?otions={options}&ignoreErrors={ignore_errors}')
+        return self.britive.patch(f'{self.base_url}/{profile_id}', json=params)
     
     def delete(self, profile_id):
         """

@@ -697,3 +697,9 @@ def cached_response_template(pytestconfig):
         "name": "John Doe",
         "role": "Admin"}'''
     return britive.access_broker.response_templates.create(name="pytest-response-template-" + r, template_data=template_data)
+
+@pytest.fixture(scope='session')
+@cached_resource(name='access-broker-profile')
+def cached_access_broker_profile(pytestconfig):
+    r = str(random.randint(0, 1000000))
+    return britive.access_broker.profiles.create(name=f'pytest-access-broker-profile-{r}')
