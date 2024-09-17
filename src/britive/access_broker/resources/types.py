@@ -1,5 +1,5 @@
 import requests
-class ResourceTypes:
+class Types:
     def __init__(self, britive):
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/resource-manager/resource-types'

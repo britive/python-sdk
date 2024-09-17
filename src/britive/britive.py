@@ -205,7 +205,7 @@ class Britive:
         self.settings = Settings(self)
         self.step_up = StepUpAuth(self)
         self.my_resources = MyResources(self)
-        self.access_broker = AccessBroker(self)
+        self.resource_manager = ResourceManager(self)
 
     @staticmethod
     def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:
@@ -462,6 +462,7 @@ class Britive:
             response = self.__request_with_exponential_backoff_and_retry(
                 method=method, url=url, params=params, data=data, json=json
             )
+            #print(response.content)
             if self.__response_has_no_content(response):  # handle no content responses
                 return None
 
