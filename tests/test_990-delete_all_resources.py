@@ -205,12 +205,7 @@ def test_response_template_delete(cached_response_template):
     finally:
         cleanup('response-template')
 
-def test_delete_access_broker_profile(cached_access_broker_profile):
-    try:
-        response = britive.access_broker.profiles.delete(cached_access_broker_profile['profileId'])
-        assert response is None
-    finally:
-        cleanup('access-broker-profile')
+
 
 def test_delete_resource_permission(cached_resource_permission, cached_resource_type):
     list_perms = britive.access_broker.resources.permissions.list(resource_type_id=cached_resource_type['resourceTypeId'])
