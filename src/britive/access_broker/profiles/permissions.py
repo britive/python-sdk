@@ -37,6 +37,7 @@ class Permissions:
 
         return self.britive.get(f'{self.base_url}/{profile_id}/available-permissions')
     
+    #not tested
     def update_permission_variables(self, profile_id, permission_id, variables=[]):
         """
         Update permission variables for a resource profile.
