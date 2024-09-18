@@ -48,7 +48,7 @@ class Policies:
         """
         return self.britive.get(f'{self.base_url}/{profile_id}/policies/{policy_id}')
     
-    def update(self, profile_id, policy_id, name, description, access_type, condition, is_active, is_draft, is_read_only, resource_label, members):
+    def update(self, profile_id, policy_id, name, description, access_type, condition, members, is_active = True, is_draft = False, is_read_only = False, resource_label = {}):
         """
         Update a policy.
         :param profile_id: ID of the profile.
@@ -72,9 +72,17 @@ class Policies:
             'isActive': is_active,
             'isDraft': is_draft,
             'isReadOnly': is_read_only,
-            'resourceLabel': resource_label,
+            'resourceLabels': resource_label,
             'members': members
         }
-        return self.britive.put(f'{self.base_url}/{profile_id}/policies/{policy_id}', json=params)
+        return self.britive.patch(f'{self.base_url}/{profile_id}/policies/{policy_id}', json=params)
     
+    def delete(self, profile_id, policy_id):
+        """
+        Delete a policy.
+        :param profile_id: ID of the profile.
+        :param policy_id: ID of the policy.
+        :return: None
+        """
+        return self.britive.delete(f'{self.base_url}/{profile_id}/policies/{policy_id}')
     

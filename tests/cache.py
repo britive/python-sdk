@@ -728,4 +728,21 @@ def cached_resource_permission(pytestconfig, cached_resource_type):
 @cached_resource(name='access-broker-profile-policy')
 def cached_access_broker_profile_policy(pytestconfig, cached_access_broker_profile):
     r = str(random.randint(0, 1000000))
-    return britive.access_broker.profiles.policies.create(profile_id=cached_access_broker_profile['profileId'], name=f'pytest-access-broker-profile-policy-{r}', access_type="Allow", members=[britive.my_access.whoami()['username']])
+    return britive.access_broker.profiles.policies.create(profile_id=cached_access_broker_profile['profileId'], name=f'pytest-access-broker-profile-policy-{r}', access_type="Allow", members={'users' : [{'id' : britive.my_access.whoami()['userId']}]})
+
+@pytest.fixture(scope='session')
+@cached_resource(name='access-broker-profile-permission')
+def cached_access_broker_profile_permission(pytestconfig, cached_access_broker_profile, cached_resource_type):
+    available_permissions = britive.access_broker.profiles.permissions.list_available_permissions(profile_id=cached_access_broker_profile['profileId'])
+    permission_id = available_permissions[0]['permissionId']
+    resource_type_name = available_permissions[0]['resourceTypeName']
+    resource_type_list = britive.access_broker.resources.types.list()
+    resource_type_id = None
+    for resource_type in resource_type_list:
+        if resource_type['name'] == resource_type_name:
+            resource_type_id = resource_type['resourceTypeId']
+    if resource_type_id is None:
+        assert False
+    
+    r = str(random.randint(0, 1000000))
+    return britive.access_broker.profiles.permissions.add_permissions(profile_id=cached_access_broker_profile['profileId'], permission_id=permission_id, resource_type_id=resource_type_id, version=1)

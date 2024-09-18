@@ -48,7 +48,7 @@ class Permissions:
         params = {
             'variables': variables
         }
-        return self.britive.put(f'{self.base_url}/{profile_id}/permissions/{permission_id}', json=params)
+        return self.britive.patch(f'{self.base_url}/{profile_id}/permissions/{permission_id}', json=params)
     
     def delete_permission(self, profile_id, permission_id):
         """
