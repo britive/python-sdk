@@ -63,18 +63,15 @@ class Profile:
         """
         return self.britive.delete(f'{self.base_url}/{profile_id}')
     
-    def add_association(self, profile_id, associations=[]):
+    def add_association(self, profile_id, associations={}):
         """
         Add associations to a resource profile.
         :param profile_id: ID of the profile.
         :param associations: List of associations.
         :return: Updated profile.
         """
-        associations_dict = {}
-        for i in range(len(associations)):
-            associations_dict[f'additionalProp{i}'] = associations[i]
         params = {
-            'associations': associations_dict
+            'associations': associations
         }
         return self.britive.post(f'{self.base_url}/{profile_id}/associations', json=params)
     
@@ -85,7 +82,6 @@ class Profile:
         :return: List of associations.
         """
         return self.britive.get(f'{self.base_url}/{profile_id}/associations')
-    
     def get_system_values(self, resource_type_id):
         """
         Retrieve system values for a resource type.

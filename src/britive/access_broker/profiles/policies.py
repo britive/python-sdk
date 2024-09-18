@@ -11,7 +11,7 @@ class Policies:
         """
         return self.britive.get(f'{self.base_url}/{profile_id}/policies')
 
-    def create(self, profile_id, name, description, access_type, condition = {}, is_active=True, is_draft = False, is_read_only = False, resource_label = {}, members = {}):
+    def create(self, profile_id, name, access_type, description = "", condition = {}, is_active=True, is_draft = False, is_read_only = False, resource_label = {}, members = {}):
         """
         Create a new policy.
         :param profile_id: ID of the profile.
@@ -34,7 +34,7 @@ class Policies:
             'isActive': is_active,
             'isDraft': is_draft,
             'isReadOnly': is_read_only,
-            'resourceLabel': resource_label,
+            'resourceLabels': resource_label,
             'members': members
         }
         return self.britive.post(f'{self.base_url}/{profile_id}/policies', json=params)

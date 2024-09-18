@@ -12,13 +12,14 @@ class Permissions:
         """
         return self.britive.get(f'{self.base_url}/resource-types/{resource_type_id}/permissions')
     
-    def update(self, permission_id, file : bytes = None, **kwargs) -> dict:     
+    def update(self, permission_id, resource_type_id, checkin_file : bytes = None, checkout_file : bytes = None, **kwargs) -> dict:     
         """
         Update a permission.
         :param permission_id: ID of the permission.
+        :param resource_type_id: ID of the resource type.
         :param file: File to upload.
         :param kwargs: Valid fields are...
-            name
+            name - required
             description
             createdBy
             updatedBy
@@ -32,14 +33,21 @@ class Permissions:
             variables - List of variables
         :return: Updated permission.
         """
-        if file:
+        kwargs['resourceTypeId'] = resource_type_id
+        if checkin_file and checkout_file:
             urls = self.get_urls(permission_id)
-            requests.put(urls['checkinURL'], files={'file': file})
+            requests.put(urls['checkinURL'], files={'file': checkin_file})
+            requests.put(urls['checkoutURL'], files={'file': checkout_file})
             kwargs['checkinFileName'] = permission_id + '_checkin'
             kwargs['checkoutFileName'] = permission_id + '_checkout'
             kwargs['inlineFileExists'] = True
             kwargs['checkinURL'] = urls['checkinURL']
             kwargs['checkoutURL'] = urls['checkoutURL']
+        if 'checkinTimeLimit' not in kwargs:
+            kwargs['checkinTimeLimit'] = 60
+        if 'checkoutTimeLimit' not in kwargs:
+            kwargs['checkoutTimeLimit'] = 60
+            
         return self.britive.put(f'{self.base_url}/permissions/{permission_id}', json=kwargs)
         
     

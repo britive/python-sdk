@@ -204,3 +204,39 @@ def test_response_template_delete(cached_response_template):
         assert response is None
     finally:
         cleanup('response-template')
+
+def test_delete_access_broker_profile(cached_access_broker_profile):
+    try:
+        response = britive.access_broker.profiles.delete(cached_access_broker_profile['profileId'])
+        assert response is None
+    finally:
+        cleanup('access-broker-profile')
+
+def test_delete_resource_permission(cached_resource_permission, cached_resource_type):
+    list_perms = britive.access_broker.resources.permissions.list(resource_type_id=cached_resource_type['resourceTypeId'])
+    __permission_id = None
+    for permission in list_perms:
+        if permission['name'] == cached_resource_permission['name']:
+            __permission_id = permission['permissionId']
+    if __permission_id is None:
+        assert False
+    try:
+        response = britive.access_broker.resources.permissions.delete(__permission_id)
+        assert response is None
+    finally:
+        cleanup('resource-permission')
+
+def test_delete_resource_type(cached_resource_type):
+    try:
+        response = britive.access_broker.resources.types.delete(cached_resource_type['resourceTypeId'])
+        assert response is None
+    finally:
+        cleanup('resource-type')
+
+def test_delete_resource_label(cached_resource_label):
+    try:
+        response = britive.access_broker.resources.labels.delete(cached_resource_label['keyId'])
+        assert response is None
+    finally:
+        cleanup('resource-label')
+

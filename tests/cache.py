@@ -703,3 +703,29 @@ def cached_response_template(pytestconfig):
 def cached_access_broker_profile(pytestconfig):
     r = str(random.randint(0, 1000000))
     return britive.access_broker.profiles.create(name=f'pytest-access-broker-profile-{r}')
+
+@pytest.fixture(scope='session')
+@cached_resource(name='resource-type')
+def cached_resource_type(pytestconfig):
+    r = str(random.randint(0, 1000000))
+    return britive.access_broker.resources.types.create(name=f'pytest-resource-type-{r}')
+
+@pytest.fixture(scope='session')
+@cached_resource(name='resource-label')
+def cached_resource_label(pytestconfig):
+    r = str(random.randint(0, 1000000))
+    return britive.access_broker.resources.labels.create(name=f'pytest-resource-label-{r}')
+
+@pytest.fixture(scope='session')
+@cached_resource(name='resource-permission')
+def cached_resource_permission(pytestconfig, cached_resource_type):
+    r = str(random.randint(0, 1000000))
+    checkin_file=bytes(f'checkin-testfile-{r}', 'utf-8')
+    checkout_file=bytes(f'checkout-testfile-{r}', 'utf-8')
+    return britive.access_broker.resources.permissions.create(resource_type_id=cached_resource_type['resourceTypeId'], name=f'pytest-resource-permission-{r}', checkin_file=checkin_file, checkout_file=checkout_file)
+
+@pytest.fixture(scope='session')
+@cached_resource(name='access-broker-profile-policy')
+def cached_access_broker_profile_policy(pytestconfig, cached_access_broker_profile):
+    r = str(random.randint(0, 1000000))
+    return britive.access_broker.profiles.policies.create(profile_id=cached_access_broker_profile['profileId'], name=f'pytest-access-broker-profile-policy-{r}', access_type="Allow", members=[britive.my_access.whoami()['username']])
