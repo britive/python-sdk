@@ -240,16 +240,16 @@ def test_delete_resource_label(cached_resource_label):
     finally:
         cleanup('resource-label')
 
-def test_delete_access_broker_profile_permission(cached_access_broker_profile_permission):
+def test_delete_access_broker_profile_permission(cached_access_broker_profile_permission, cached_access_broker_profile):
     try:
-        response = britive.access_broker.profiles.permissions(cached_access_broker_profile_permission['profilePermissionId'])
+        response = britive.access_broker.profiles.permissions.delete_permission(permission_id=cached_access_broker_profile_permission['permissionId'], profile_id=cached_access_broker_profile['profileId'])
         assert response is None
     finally:
         cleanup('access-broker-profile-permission')
 
-def test_delete_access_broker_profile_policy(cached_access_broker_profile_policy):
+def test_delete_access_broker_profile_policy(cached_access_broker_profile_policy, cached_access_broker_profile):
     try:
-        response = britive.access_broker.profiles.policies(cached_access_broker_profile_policy['profilePolicyId'])
+        response = britive.access_broker.profiles.policies.delete(policy_id=cached_access_broker_profile_policy['id'], profile_id=cached_access_broker_profile['profileId'])
         assert response is None
     finally:
         cleanup('access-broker-profile-policy')
@@ -260,10 +260,3 @@ def test_delete_access_broker_profile(cached_access_broker_profile):
         assert response is None
     finally:
         cleanup('access-broker-profile')
-
-def test_delete_access_broker_permission(cached_access_broker_profile_permission):
-    try:
-        response = britive.access_broker.profiles.permissions.delete_permission(cached_access_broker_profile_permission['permissionId'])
-        assert response is None
-    finally:
-        cleanup('access-broker-permission')
