@@ -1,5 +1,9 @@
 import datetime
-from .cache import *  # will also import some globals like `britive`
+from time import sleep
+
+import pytest
+
+from .cache import britive  # will also import some globals like `britive`
 
 
 def test_get():
@@ -23,7 +27,7 @@ def test_set_with_schedule():
         message_type='INFO',
         start_datetime=start_datetime,
         end_datetime=start_datetime + datetime.timedelta(days=1),
-        time_zone='UTC'
+        time_zone='UTC',
     )
     assert isinstance(banner, dict)
     for key in ['status', 'messageType', 'message', 'messageSchedule']:
@@ -39,7 +43,7 @@ def test_set_with_incorrect_schedule():
             display_banner=True,
             message_type='INFO',
             start_datetime=datetime.datetime(year=2024, month=1, day=1),
-            time_zone='UTC'
+            time_zone='UTC',
         )
 
     with pytest.raises(ValueError):
@@ -48,7 +52,7 @@ def test_set_with_incorrect_schedule():
             display_banner=True,
             message_type='INFO',
             end_datetime=datetime.datetime(year=2024, month=1, day=1),
-            time_zone='UTC'
+            time_zone='UTC',
         )
 
     with pytest.raises(ValueError):
@@ -57,7 +61,7 @@ def test_set_with_incorrect_schedule():
             display_banner=True,
             message_type='INFO',
             start_datetime=datetime.datetime(year=2024, month=1, day=1),
-            end_datetime=datetime.datetime(year=2024, month=1, day=1)
+            end_datetime=datetime.datetime(year=2024, month=1, day=1),
         )
 
     with pytest.raises(ValueError):
@@ -65,7 +69,7 @@ def test_set_with_incorrect_schedule():
             message='test',
             display_banner=True,
             message_type='INFO',
-            start_datetime=datetime.datetime(year=2024, month=1, day=1)
+            start_datetime=datetime.datetime(year=2024, month=1, day=1),
         )
 
     with pytest.raises(ValueError):
@@ -73,16 +77,11 @@ def test_set_with_incorrect_schedule():
             message='test',
             display_banner=True,
             message_type='INFO',
-            end_datetime=datetime.datetime(year=2024, month=1, day=1)
+            end_datetime=datetime.datetime(year=2024, month=1, day=1),
         )
 
     with pytest.raises(ValueError):
-        britive.settings.banner.set(
-            message='test',
-            display_banner=True,
-            message_type='INFO',
-            time_zone='UTC'
-        )
+        britive.settings.banner.set(message='test', display_banner=True, message_type='INFO', time_zone='UTC')
 
 
 def test_banner_end_user():
@@ -96,5 +95,6 @@ def test_banner_off():
     banner = britive.settings.banner.set(display_banner=False, message='dont care', message_type='INFO')
     assert 'status' in banner
     assert banner['status'] == 'OFF'
-    banner = britive.banner()
-    assert banner is None
+    sleep(5)
+    banner_check = britive.banner()
+    assert banner_check is None

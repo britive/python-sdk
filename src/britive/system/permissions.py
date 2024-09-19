@@ -1,11 +1,11 @@
 
 class SystemPermissions:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/v1/policy-admin/permissions'
 
     @staticmethod
-    def _validate_identifier_type(identifier_type):
+    def _validate_identifier_type(identifier_type) -> None:
         if identifier_type not in ['id', 'name']:
             raise ValueError(f'identifier_type of {identifier_type} is invalid. Only `name` and `id` are allowed.')
 
@@ -83,7 +83,7 @@ class SystemPermissions:
         return self.britive.delete(f'{self.base_url}/{permission_identifier}')
 
     @staticmethod
-    def build(name: str, consumer: str, actions: list, resources: list = [], description: str = '',
+    def build(name: str, consumer: str, actions: list, resources: list = None, description: str = '',
               read_only: bool = False, is_inline: bool = False) -> dict:
         """
         Build a permission document given the provided inputs.
@@ -99,6 +99,8 @@ class SystemPermissions:
             the permissions is unique/inline to an role/policy.
         :return: A dict which can be provided as a permission document to `create` and `update`.
         """
+        if resources is None:
+            resources = []
 
         # put it all together
         permission = {

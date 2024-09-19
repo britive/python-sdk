@@ -3,12 +3,12 @@ from typing import Union
 
 
 class SystemPolicies:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/v1/policy-admin/policies'
 
     @staticmethod
-    def _validate_identifier_type(identifier_type):
+    def _validate_identifier_type(identifier_type) -> None:
         if identifier_type not in ['id', 'name']:
             raise ValueError(f'identifier_type of {identifier_type} is invalid. Only `name` and `id` are allowed.')
 
@@ -26,8 +26,13 @@ class SystemPolicies:
             params['filter'] = filter_expression
         return self.britive.get(self.base_url, params=params)
 
-    def get(self, policy_identifier: str, identifier_type: str = 'name', verbose: bool = False,
-            condition_as_dict: bool = False) -> dict:
+    def get(
+        self,
+        policy_identifier: str,
+        identifier_type: str = 'name',
+        verbose: bool = False,
+        condition_as_dict: bool = False,
+    ) -> dict:
         """
         Get details of the specified system policy.
 
@@ -45,10 +50,7 @@ class SystemPolicies:
 
         self._validate_identifier_type(identifier_type)
 
-        params = {
-            'compactResponse': not verbose,
-            'conditionJson': condition_as_dict
-        }
+        params = {'compactResponse': not verbose, 'conditionJson': condition_as_dict}
 
         return self.britive.get(f'{self.base_url}/{policy_identifier}', params=params)
 
@@ -143,29 +145,35 @@ class SystemPolicies:
         :param resource: Optional resource for the statement. Defaults to `*`.
         :returns: The statement.
         """
-        return {
-            'action': action,
-            'resource': resource,
-            'consumer': consumer
-        }
+        return {'action': action, 'resource': resource, 'consumer': consumer}
 
     @staticmethod
-    def _time_of_access_type_from_deprecated_fields(from_time: str, to_time: str):
-        if len(from_time) == 8 and len(to_time) == 8:
-            return 'days'
-        if len(from_time) == 19 and len(to_time) == 19:
-            return 'date'
-        raise ValueError('from_time and to_time must both be valid times or datetimes. Cannot mix.')
-
-    @staticmethod
-    def build(name: str, description: str = '', draft: bool = False, active: bool = True,
-              read_only: bool = False, users: list = None, tags: list = None, tokens: list = None,
-              service_identities: list = None, permissions: list = None, roles: list = None, ips: list = None,
-              from_time: str = None, to_time: str = None, date_schedule: dict = None, days_schedule: dict = None,
-              approval_notification_medium: Union[str, list] = None, time_to_approve: int = 5,
-              access_validity_time: int = 120, approver_users: list = None, approver_tags: list = None,
-              access_type: str = 'Allow', identifier_type: str = 'name', condition_as_dict: bool = False,
-              stepup_auth: bool = False, always_prompt_stepup_auth: bool = False) -> dict:
+    def build(  # noqa: PLR0913
+        name: str,
+        description: str = '',
+        draft: bool = False,
+        active: bool = True,
+        read_only: bool = False,
+        users: list = None,
+        tags: list = None,
+        tokens: list = None,
+        service_identities: list = None,
+        permissions: list = None,
+        roles: list = None,
+        ips: list = None,
+        date_schedule: dict = None,
+        days_schedule: dict = None,
+        approval_notification_medium: Union[str, list] = None,
+        time_to_approve: int = 5,
+        access_validity_time: int = 120,
+        approver_users: list = None,
+        approver_tags: list = None,
+        access_type: str = 'Allow',
+        identifier_type: str = 'name',
+        condition_as_dict: bool = False,
+        stepup_auth: bool = False,
+        always_prompt_stepup_auth: bool = False,
+    ) -> dict:
         """
         Build a policy document given the provided inputs.
 
@@ -184,16 +192,6 @@ class SystemPolicies:
             or `permissions`.
         :param ips: Optional list of IP addresses for which this policy applies. Provide in CIDR notation
             or dotted decimal format for individual (/32) IP addresses.
-        :param from_time: The start date/time of when the policy is in effect. If a date is provided
-            (`YYYY-MM-DD HH:MM:SS`) this will represent the start date/time of 1 contiguous time range. If just a
-            time is provided (`HH:MM:SS`) this will represent the daily recurring start time. If this parameter is
-            provided then `to_time` must also be provided. This parameter is deprecated as of v2.19.0. The presence of
-            `date_schedule` and/or `days_schedule` will override this field.
-        :param to_time: The end date/time of when the policy is in effect. If a date is provided
-            (`YYYY-MM-DD HH:MM:SS`) this will represent the end date/time of 1 contiguous time range. If just a
-            time is provided (`HH:MM:SS`) this will represent the daily recurring end time. If this parameter is
-            provided then `from_time` must also be provided. This parameter is deprecated as of v2.19.0. The presence of
-            `date_schedule` and/or `days_schedule` will override this field.
         :param date_schedule: A dict in the format
             {
                 'fromDate': '2022-10-29 10:30:00',
@@ -242,58 +240,21 @@ class SystemPolicies:
         if ips:
             condition['ipAddress'] = ','.join(ips)
 
-        # handle from_time and to_time logic
-        # this logic is deprecated (and updated) in v2.19.0 and will be retired in v3.x.x
-        if from_time and not to_time:
-            raise ValueError('if from_time is provided then to_time must also be provided.')
-        if to_time and not from_time:
-            raise ValueError('if to_time is provided then from_time must also be provided.')
-        if from_time and to_time:
-            # we need to determine if we are dealing with dates or times
-            # as that will inform if we set days_schedule or date_schedule
-            time_of_access_type = SystemPolicies._time_of_access_type_from_deprecated_fields(from_time, to_time)
-            if time_of_access_type == 'days' and not days_schedule:  # dealing with times of day
-                days_schedule = {
-                    'fromTime': from_time,
-                    'toTime': to_time,
-                    'timezone': 'UTC',
-                    'days': [
-                        'MONDAY',
-                        'TUESDAY',
-                        'WEDNESDAY',
-                        'THURSDAY',
-                        'FRIDAY',
-                        'SATURDAY',
-                        'SUNDAY'
-                    ]
-                }
-            if time_of_access_type == 'date' and not date_schedule:  # dealing with date range
-                date_schedule = {
-                    'fromDate': from_time,
-                    'toDate': to_time,
-                    'timezone': 'UTC'
-                }
-
         if date_schedule or days_schedule:
-            condition['timeOfAccess'] = {
-                'dateSchedule': date_schedule,
-                'daysSchedule': days_schedule
-            }
+            condition['timeOfAccess'] = {'dateSchedule': date_schedule, 'daysSchedule': days_schedule}
 
         # handle approval logic
         if approval_notification_medium:
             if not approver_users and not approver_tags:
-                raise ValueError('when approval is required either approver_tags or approver_users or both '
-                                 'must be provided')
+                raise ValueError(
+                    'when approval is required either approver_tags or approver_users or both must be provided'
+                )
             approval_condition = {
                 'notificationMedium': approval_notification_medium,
                 'timeToApprove': time_to_approve,
                 'validFor': access_validity_time,
                 'isValidForInDays': False,  # the SDK will only support minutes
-                'approvers': {
-                    'userIds': approver_users,
-                    'tags': approver_tags
-                }
+                'approvers': {'userIds': approver_users, 'tags': approver_tags},
             }
 
             if not approver_users:
@@ -304,10 +265,7 @@ class SystemPolicies:
             condition['approval'] = approval_condition
 
         if stepup_auth:
-            if always_prompt_stepup_auth:
-                prompt = 'true'
-            else:
-                prompt = 'false'
+            prompt = 'true' if always_prompt_stepup_auth else 'false'
             step_up_condition = {'factor': 'TOTP', 'alwaysPrompt': prompt}
             condition['stepUpCondition'] = step_up_condition
         # else:
@@ -325,8 +283,8 @@ class SystemPolicies:
                 'users': [{identifier_type: u} for u in users] if users else None,
                 'tags': [{identifier_type: t} for t in tags] if tags else None,
                 'serviceIdentities': [{identifier_type: s} for s in service_identities] if service_identities else None,
-                'tokens': [{identifier_type: t} for t in tokens] if tokens else None
-            }
+                'tokens': [{identifier_type: t} for t in tokens] if tokens else None,
+            },
         }
 
         if not users:

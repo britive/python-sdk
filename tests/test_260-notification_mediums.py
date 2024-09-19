@@ -21,9 +21,6 @@ def test_get(cached_notification_medium):
 def test_update(cached_notification_medium):
     r = str(random.randint(0, 1000000))
     new_name = f'pytest-nm-{r}'
-    britive.notification_mediums.update(
-        cached_notification_medium['id'],
-        parameters={'name': new_name}
-    )
+    britive.notification_mediums.update(cached_notification_medium['id'], parameters={'name': new_name})
     response = britive.notification_mediums.get(cached_notification_medium['id'])
     assert response['name'] == new_name

@@ -1,39 +1,49 @@
 class NotificationMediums:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
-        self.base_url = (
-            f'{self.britive.base_url}/v1/notification-service/notificationmediums'
-        )
+        self.base_url = f'{self.britive.base_url}/v1/notification-service/notificationmediums'
 
-    def list(self) -> dict:
+    def list(self, filter_expression: str = None) -> dict:
         """
         List all notification mediums.
 
+        :param filter_expression: Filter based on `name`. Example: `name co britive`.
         :return: List of all notification mediums
         """
 
-        return self.britive.get(self.base_url)['result']
+        params = {}
+
+        if filter_expression:
+            params['filter'] = filter_expression
+
+        return self.britive.get(self.base_url, params=params)['result']
 
     def create(
         self,
         notification_medium_type: str,
         name: str,
-        description: str = 'Default notification medium description',
-        connection_parameters: dict = {}
+        url: str,
+        token: str = None,
+        description: str = None,
     ) -> dict:
         """
         Create a new notification medium.
 
-        :param notification_medium_type: the type of the notification medium
+        :param notification_medium_type: the type of the notification medium - [slack, teams, webhook]
         :param name: the name of the notification medium
+        :param url: the notification medium target URL
+        :param token: **slack only** the Auth Token for the Application BOT
         :param description: the description of the notification medium
-        :param connection_parameters: the connection parameters of the notification medium
-                valid connection parameters:
-                    URL : for slack, the URL
-                    token : for slack, Auth Token for the Application BOT
-                    Webhook URL : for teams, the URL of the teams webhook
         :return: Details of the newly created notification medium.
         """
+
+        if description is None:
+            description = f'notification medium - {notification_medium_type}'
+
+        connection_parameters = {
+            **({"URL": url} if notification_medium_type != "teams" else {"Webhook URL": url}),
+            **({"token": token} if notification_medium_type == "slack" and token else {}),
+        }
 
         params = {
             'name': name,
@@ -69,9 +79,7 @@ class NotificationMediums:
         :return: Details of the updated notification medium.
         """
 
-        return self.britive.patch(
-            f'{self.base_url}/{notification_medium_id}', json=parameters
-        )
+        return self.britive.patch(f'{self.base_url}/{notification_medium_id}', json=parameters)
 
     def delete(self, notification_medium_id: str) -> None:
         """

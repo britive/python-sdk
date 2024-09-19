@@ -1,10 +1,12 @@
+from typing import Any
+
 
 class Saml:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/saml'
 
-    def settings(self, as_list: bool = False) -> any:
+    def settings(self, as_list: bool = False) -> Any:
         """
         Retrieve the SAML settings for the tenant.
 
@@ -39,7 +41,7 @@ class Saml:
 
         return self.britive.get(f'{self.base_url}/metadata/{saml_id}')
 
-    def certificate(self):
+    def certificate(self) -> str:
         """
         Return the SAML certificate required in the SAML SSO configuration with a service provider.
 

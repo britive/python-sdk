@@ -1,9 +1,8 @@
-from . import exceptions
 from typing import Union
 
 
 class Workload:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/workload'
         self.identity_providers = self.IdentityProviders(self)
@@ -11,7 +10,7 @@ class Workload:
         self.scim_user = self.ScimUser(self)
 
     class IdentityProviders:
-        def __init__(self, workload):
+        def __init__(self, workload) -> None:
             self.britive = workload.britive
             self.base_url = f'{workload.base_url}/identity-providers'
 
@@ -39,7 +38,7 @@ class Workload:
 
             return self.britive.get(f'{self.base_url}/{workload_identity_provider_id}')
 
-        def _build_attributes_map_list(self, attributes_map: dict):
+        def _build_attributes_map_list(self, attributes_map: dict) -> list:
             # first get list of existing custom identity attributes and build some helpers
             existing_attrs = [attr for attr in self.britive.identity_attributes.list() if not attr['builtIn']]
             existing_attr_ids = [attr['id'] for attr in existing_attrs]
@@ -48,16 +47,11 @@ class Workload:
             # for each attributeMap key/value provided ensure we convert to ID and build the list
             attrs_list = []
             for idp_attr, custom_identity_attribute in attributes_map.items():
-                if custom_identity_attribute not in existing_attr_ids:
-                    custom_identity_attribute = attrs_by_name.get(custom_identity_attribute, None)
-                if not custom_identity_attribute:
+                if (check_custom_identity_attribute := custom_identity_attribute) not in existing_attr_ids and not (
+                    check_custom_identity_attribute := attrs_by_name.get(custom_identity_attribute)
+                ):
                     raise ValueError(f'custom identity attribute name {custom_identity_attribute} not found.')
-                attrs_list.append(
-                    {
-                        'idpAttr': idp_attr,
-                        'userAttr': custom_identity_attribute
-                    }
-                )
+                attrs_list.append({'idpAttr': idp_attr, 'userAttr': check_custom_identity_attribute})
             return attrs_list
 
         def create(self, **kwargs) -> dict:
@@ -80,13 +74,19 @@ class Workload:
             :returns: Details of the newly created workload identity provider.
             """
 
-            if 'attributesMap' in kwargs.keys():
+            if 'attributesMap' in kwargs:
                 kwargs['attributesMap'] = self._build_attributes_map_list(attributes_map=kwargs['attributesMap'])
 
             return self.britive.post(self.base_url, json=kwargs)
 
-        def create_aws(self, name: str, attributes_map: dict, description: str = None,
-                       validation_window: int = 30, max_duration: int = 5) -> dict:
+        def create_aws(
+            self,
+            name: str,
+            attributes_map: dict,
+            description: str = None,
+            validation_window: int = 30,
+            max_duration: int = 5,
+        ) -> dict:
             """
             Create an AWS workload identity provider.
 
@@ -105,7 +105,7 @@ class Workload:
                 'name': name,
                 'idpType': 'AWS',
                 'validationWindow': validation_window,
-                'maxDuration': max_duration
+                'maxDuration': max_duration,
             }
             if description:
                 params['description'] = description
@@ -114,8 +114,15 @@ class Workload:
 
             return self.create(**params)
 
-        def create_oidc(self, name: str, issuer_url: str, attributes_map: dict = None, description: str = None,
-                        validation_window: int = 30, allowed_audiences: list = None) -> dict:
+        def create_oidc(
+            self,
+            name: str,
+            issuer_url: str,
+            attributes_map: dict = None,
+            description: str = None,
+            validation_window: int = 30,
+            allowed_audiences: list = None,
+        ) -> dict:
             """
             Create an OIDC workload identity provider.
 
@@ -131,12 +138,7 @@ class Workload:
             :returns: Details of the newly created OIDC workload identity provider.
             """
 
-            params = {
-                'name': name,
-                'idpType': 'OIDC',
-                'validationWindow': validation_window,
-                'issuerUrl': issuer_url
-            }
+            params = {'name': name, 'idpType': 'OIDC', 'validationWindow': validation_window, 'issuerUrl': issuer_url}
             if description:
                 params['description'] = description
             if allowed_audiences:
@@ -169,7 +171,7 @@ class Workload:
 
             kwargs['id'] = workload_identity_provider_id
 
-            if 'attributesMap' in kwargs.keys():
+            if 'attributesMap' in kwargs:
                 kwargs['attributesMap'] = self._build_attributes_map_list(attributes_map=kwargs['attributesMap'])
 
             # since this is a PUT call and not a PATCH call we need to get the existing idp configuration
@@ -178,8 +180,15 @@ class Workload:
             existing = self.get(workload_identity_provider_id=workload_identity_provider_id)
             return self.britive.put(self.base_url, json={**existing, **kwargs})
 
-        def update_aws(self, workload_identity_provider_id: int, name: str = None, attributes_map: dict = None,
-                       description: str = None, validation_window: int = None, max_duration: int = None) -> dict:
+        def update_aws(
+            self,
+            workload_identity_provider_id: int,
+            name: str = None,
+            attributes_map: dict = None,
+            description: str = None,
+            validation_window: int = None,
+            max_duration: int = None,
+        ) -> dict:
             """
             Update an AWS workload identity provider.
 
@@ -197,9 +206,7 @@ class Workload:
             :returns: Details of the updated AWS workload identity provider.
             """
 
-            params = {
-                'idpType': 'AWS'
-            }
+            params = {'idpType': 'AWS'}
 
             if name:
                 params['name'] = name
@@ -214,9 +221,16 @@ class Workload:
 
             return self.update(workload_identity_provider_id=workload_identity_provider_id, **params)
 
-        def update_oidc(self, workload_identity_provider_id: int, name: str = None, issuer_url: str = None,
-                        attributes_map: dict = None, description: str = None, validation_window: int = None,
-                        allowed_audiences: list = None) -> dict:
+        def update_oidc(
+            self,
+            workload_identity_provider_id: int,
+            name: str = None,
+            issuer_url: str = None,
+            attributes_map: dict = None,
+            description: str = None,
+            validation_window: int = None,
+            allowed_audiences: list = None,
+        ) -> dict:
             """
             Update an OIDC workload identity provider.
 
@@ -235,9 +249,7 @@ class Workload:
             :returns: Details of the update OIDC workload identity provider.
             """
 
-            params = {
-                'idpType': 'OIDC'
-            }
+            params = {'idpType': 'OIDC'}
 
             if name:
                 params['name'] = name
@@ -263,8 +275,12 @@ class Workload:
             """
             return self.britive.delete(f'{self.base_url}/{workload_identity_provider_id}')
 
-        def generate_attribute_map(self, idp_attribute_name: str, custom_identity_attribute_name: str = None,
-                                   custom_identity_attribute_id: str = None) -> dict:
+        def generate_attribute_map(
+            self,
+            idp_attribute_name: str,
+            custom_identity_attribute_name: str = None,
+            custom_identity_attribute_id: str = None,
+        ) -> dict:
             """
             Generates a dictionary that can be appended to a list used for the `attributesMap`.
 
@@ -283,12 +299,14 @@ class Workload:
             """
 
             if custom_identity_attribute_id and custom_identity_attribute_name:
-                raise ValueError('only one of custom_identity_attribute_id and custom_identity_attribute_name '
-                                 'should be provided')
+                raise ValueError(
+                    'only one of custom_identity_attribute_id and custom_identity_attribute_name should be provided'
+                )
 
             if not custom_identity_attribute_id and not custom_identity_attribute_name:
-                raise ValueError('one of custom_identity_attribute_id or custom_identity_attribute_name '
-                                 'should be provided')
+                raise ValueError(
+                    'one of custom_identity_attribute_id or custom_identity_attribute_name should be provided'
+                )
 
             if custom_identity_attribute_name:
                 found = False
@@ -298,16 +316,14 @@ class Workload:
                         found = True
                         break
                 if not found:
-                    raise ValueError(f'custom_identity_attribute_name value of {custom_identity_attribute_name} '
-                                     f'not found.')
+                    raise ValueError(
+                        f'custom_identity_attribute_name value of {custom_identity_attribute_name} ' f'not found.'
+                    )
 
-            return {
-                'idpAttr': idp_attribute_name,
-                'userAttr': custom_identity_attribute_id
-            }
+            return {'idpAttr': idp_attribute_name, 'userAttr': custom_identity_attribute_id}
 
     class ServiceIdentities:
-        def __init__(self, workload):
+        def __init__(self, workload) -> None:
             self.britive = workload.britive
             self.base_url: str = workload.base_url + '/users/{id}/identity-provider'  # will .format(id=...) later
 
@@ -322,8 +338,9 @@ class Workload:
 
             return self.britive.get(self.base_url.format(id=service_identity_id))
 
-        def assign(self, service_identity_id: str, idp_id: str, federated_attributes: dict,
-                   token_duration: int = 300) -> dict:
+        def assign(
+            self, service_identity_id: str, idp_id: str, federated_attributes: dict, token_duration: int = 300
+        ) -> dict:
             """
             Associates an OIDC provider with the specified Service Identity.
 
@@ -341,30 +358,20 @@ class Workload:
             mapping_attributes = []
             converted_federated_attributes = {}
             converted_attributes = self.britive.service_identities.custom_attributes._build_list(
-                operation='add',
-                custom_attributes=federated_attributes
+                operation='add', custom_attributes=federated_attributes
             )
 
             for attr in converted_attributes:
                 custom_attr = attr['customUserAttribute']
                 attr_id = custom_attr['attributeId']
-                if attr_id not in converted_federated_attributes.keys():
+                if attr_id not in converted_federated_attributes:
                     converted_federated_attributes[attr_id] = []
                 converted_federated_attributes[attr_id].append(custom_attr['attributeValue'])
 
             for custom_attribute_id, values in converted_federated_attributes.items():
-                mapping_attributes.append(
-                    {
-                        'attrId': custom_attribute_id,
-                        'values': values
-                    }
-                )
+                mapping_attributes.append({'attrId': custom_attribute_id, 'values': values})
 
-            params = {
-                'idpId': idp_id,
-                'tokenDuration': token_duration,
-                'mappingAttributes': mapping_attributes
-            }
+            params = {'idpId': idp_id, 'tokenDuration': token_duration, 'mappingAttributes': mapping_attributes}
 
             return self.britive.post(self.base_url.format(id=service_identity_id), json=params)
 
@@ -380,7 +387,7 @@ class Workload:
             return self.britive.delete(self.base_url.format(id=service_identity_id))
 
     class ScimUser:
-        def __init__(self, workload):
+        def __init__(self, workload) -> None:
             self.britive = workload.britive
             self.base_url: str = workload.base_url + '/scim-user/identity-provider'
 
@@ -408,10 +415,7 @@ class Workload:
             :returns: Details of the newly assigned service identity to the identity provider.
             """
 
-            params = {
-                'idpName': idp_name,
-                'userId': service_identity_id
-            }
+            params = {'idpName': idp_name, 'userId': service_identity_id}
 
             return self.britive.post(self.base_url, json=params)
 

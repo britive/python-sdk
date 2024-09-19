@@ -1,11 +1,11 @@
 
 class SystemRoles:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/v1/policy-admin/roles'
 
     @staticmethod
-    def _validate_identifier_type(identifier_type):
+    def _validate_identifier_type(identifier_type) -> None:
         if identifier_type not in ['id', 'name']:
             raise ValueError(f'identifier_type of {identifier_type} is invalid. Only `name` and `id` are allowed.')
 

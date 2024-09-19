@@ -1,6 +1,6 @@
 
 class SecurityPolicies:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/security-policies'
 

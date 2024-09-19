@@ -1,17 +1,18 @@
 import csv as csv_lib
-from io import StringIO
 import json
+from io import StringIO
+from typing import Any
 
 
-def _json_loads(value):
+def _json_loads(value) -> dict:
     try:
         return json.loads(value)
-    except:
+    except json.JSONDecodeError:
         return value
 
 
 class Reports:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/reports'
 
@@ -27,7 +28,7 @@ class Reports:
         }
         return self.britive.get(self.base_url, params=params)
 
-    def run(self, report_id: str, csv: bool = False, filter_expression: str = None) -> any:
+    def run(self, report_id: str, csv: bool = False, filter_expression: str = None) -> Any:
         """
         Run a report.
 

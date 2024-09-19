@@ -20,8 +20,7 @@ def test_get(cached_notification):
 
 def test_update(cached_notification):
     notification = britive.notifications.update(
-        notification_id=cached_notification['notificationId'],
-        description='test2'
+        notification_id=cached_notification['notificationId'], description='test2'
     )
     assert isinstance(notification, dict)
     assert notification['description'] == 'test2'
@@ -65,7 +64,7 @@ def test_configure(cached_notification, cached_notification_rules, cached_notifi
         notification_id=cached_notification['notificationId'],
         users=[cached_user['userId']],
         rules=rules,
-        send_no_changes=True
+        send_no_changes=True,
     )
 
     assert isinstance(response, dict)
@@ -82,4 +81,3 @@ def test_delete(cached_notification):
     cleanup('notification-available-users')
     cleanup('notification-available-user-tags')
     cleanup('notification-available-applications')
-

@@ -1,5 +1,4 @@
 from .cache import *  # will also import some globals like `britive`
-import os
 
 
 def test_list():
@@ -10,4 +9,3 @@ def test_list():
 
 def test_create(cached_identity_attribute):
     assert isinstance(cached_identity_attribute, dict)
-

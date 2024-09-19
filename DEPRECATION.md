@@ -2,7 +2,15 @@
 
 This document holds the items which are deprecated and will be retired in the next major release.
 
-## Deprecations in Major Release 2.25.x (Retire in Major Release 3.0.0)
+## Removed in Major Release 3.0.0
+
+### `policies.py` has been removed.
+
+### Policy Condition Attributes `from_time` and `to_time` have been removed.
+
+New time based condition fields `date_schedule` and `days_schedule` provided enhanced functionality.
+
+## Deprecations in Major Release 2.x.x (Retire in Major Release 3.x.x)
 
 ### `policies.py`
 
