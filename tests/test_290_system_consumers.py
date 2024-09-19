@@ -6,5 +6,4 @@ def test_list():
     assert isinstance(response, list)
     assert len(response) > 0
     assert isinstance(response[0], dict)
-    assert 'name' in response[0].keys()
-
+    assert 'name' in response[0]

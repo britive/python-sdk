@@ -1,5 +1,5 @@
 class IdentityProviders:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/identity-providers'
         self.scim_tokens = ScimTokens(britive)
@@ -181,7 +181,7 @@ class IdentityProviders:
 
 
 class ScimTokens:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/identity-providers'
 
@@ -233,7 +233,7 @@ class ScimTokens:
 
 
 class ScimAttributes:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/identity-providers'
 

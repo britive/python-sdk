@@ -2,25 +2,35 @@ import json as native_json
 import os
 import socket
 import time
+
 import requests
+
+from .access_builder import AccessBuilderSettings
 from .accounts import Accounts
 from .api_tokens import ApiTokens
 from .applications import Applications
 from .audit_logs import AuditLogs
 from .environment_groups import EnvironmentGroups
 from .environments import Environments
-from .exceptions import *
+from .exceptions import (
+    InvalidFederationProvider,
+    RootEnvironmentGroupNotFound,
+    TenantMissingError,
+    TenantUnderMaintenance,
+    TokenMissingError,
+    allowed_exceptions,
+)
 from .groups import Groups
 from .helpers import federation_providers as fp
 from .helpers import methods as helper_methods
 from .identity_attributes import IdentityAttributes
 from .identity_providers import IdentityProviders
 from .my_access import MyAccess
+from .my_resources import MyResources
 from .my_secrets import MySecrets
 from .notification_mediums import NotificationMediums
 from .notifications import Notifications
 from .permissions import Permissions
-from .policies import Policies
 from .profiles import Profiles
 from .reports import Reports
 from .saml import Saml
@@ -37,7 +47,6 @@ from .task_services import TaskServices
 from .tasks import Tasks
 from .users import Users
 from .workload import Workload
-from .my_resources import MyResources
 
 BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
 BRITIVE_TOKEN_ENV_NAME = 'BRITIVE_API_TOKEN'
@@ -146,10 +155,11 @@ class Britive:
             # turn off ssl verification
             self.session.verify = False
             # wipe these due to this bug: https://github.com/psf/requests/issues/3829
-            os.environ['CURL_CA_BUNDLE'] = ""
-            os.environ['REQUESTS_CA_BUNDLE'] = ""
+            os.environ['CURL_CA_BUNDLE'] = ''
+            os.environ['REQUESTS_CA_BUNDLE'] = ''
             # disable the warning message
             import urllib3
+
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
         token_type = 'TOKEN' if len(self.__token) < 50 else 'Bearer'
@@ -158,6 +168,7 @@ class Britive:
 
         try:
             import britive
+
             version = britive.__version__
         except Exception:
             version = 'unknown'
@@ -196,7 +207,6 @@ class Britive:
         self.my_access = MyAccess(self)
         self.notifications = Notifications(self)
         self.my_secrets = MySecrets(self)
-        self.policies = Policies(self)
         self.secrets_manager = SecretsManager(self)
         self.notification_mediums = NotificationMediums(self)
         self.workload = Workload(self)
@@ -204,6 +214,7 @@ class Britive:
         self.settings = Settings(self)
         self.step_up = StepUpAuth(self)
         self.my_resources = MyResources(self)
+        self.access_builder = AccessBuilderSettings(self)
 
     @staticmethod
     def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:
@@ -319,10 +330,10 @@ class Britive:
             try:
                 socket.getaddrinfo(host=domain, port=443)  # validate the hostname is real
                 return domain  # and if so set the tenant accordingly
-            except socket.gaierror:
-                raise Exception(f'Invalid tenant provided: {tenant}. DNS resolution failed.')
+            except socket.gaierror as se:
+                raise Exception(f'Invalid tenant provided: {tenant}. DNS resolution failed.') from se
 
-    def features(self):
+    def features(self) -> dict:
         features = {}
         for feature in self.get(f'{self.base_url}/features'):
             features[feature['name']] = feature['enabled']
@@ -331,27 +342,27 @@ class Britive:
     def banner(self) -> dict:
         return self.get(f'{self.base_url}/banner')
 
-    def get(self, url, params=None):
+    def get(self, url, params=None) -> dict:
         """Internal use only."""
 
         return self.__request('get', url, params=params)
 
-    def post(self, url, params=None, data=None, json=None):
+    def post(self, url, params=None, data=None, json=None) -> dict:
         """Internal use only."""
 
         return self.__request('post', url, params=params, data=data, json=json)
 
-    def patch(self, url, params=None, data=None, json=None):
+    def patch(self, url, params=None, data=None, json=None) -> dict:
         """Internal use only."""
 
         return self.__request('patch', url, params=params, data=data, json=json)
 
-    def put(self, url, params=None, data=None, json=None):
+    def put(self, url, params=None, data=None, json=None) -> dict:
         """Internal use only."""
 
         return self.__request('put', url, params=params, data=data, json=json)
 
-    def delete(self, url, params=None, data=None, json=None):
+    def delete(self, url, params=None, data=None, json=None) -> dict:
         """Internal use only."""
 
         return self.__request('delete', url, params=params, data=data, json=json)
@@ -359,7 +370,7 @@ class Britive:
     # note - this method could be iffy in the future if the app changes the way it handles
     # file uploads. As of 2022-01-26 it is working fine with the "Upload SAML Metadata" action
     # of an identity provider. This is the only use case currently.
-    def patch_upload(self, url, file_content_as_str, content_type, filename):
+    def patch_upload(self, url, file_content_as_str, content_type, filename) -> dict:
         """Internal use only."""
 
         files = {filename: (f'{filename}.xml', file_content_as_str, content_type)}
@@ -370,7 +381,7 @@ class Britive:
             return response.content.decode('utf-8')
 
     # note - this method is only used to upload a file when creating a secret
-    def post_upload(self, url, params=None, files=None):
+    def post_upload(self, url, params=None, files=None) -> dict:
         """Internal use only."""
         response = self.session.post(url, params=params, files=files, headers={'Content-Type': None})
         try:
@@ -379,7 +390,7 @@ class Britive:
             return response.content.decode('utf-8')
 
     @staticmethod
-    def __check_response_for_error(response):
+    def __check_response_for_error(response) -> None:
         if response.status_code in allowed_exceptions:
             try:
                 content = native_json.loads(response.content.decode('utf-8'))
@@ -391,46 +402,43 @@ class Britive:
                 if content.get('details'):
                     message += f" - {content.get('details')}"
                 raise allowed_exceptions[response.status_code](message)
-            except native_json.decoder.JSONDecodeError:
+            except native_json.decoder.JSONDecodeError as je:
                 content = response.content.decode('utf-8')
-                message = f"{response.status_code} - {content}"
-                raise allowed_exceptions[response.status_code](message)
+                message = f'{response.status_code} - {content}'
+                raise allowed_exceptions[response.status_code](message) from je
 
     @staticmethod
-    def __response_has_no_content(response):
+    def __response_has_no_content(response) -> bool:
         # handle 204 No Content response
         if response.status_code == 204:
             return True
 
         # handle empty 200 response
-        if response.status_code == 200 and len(response.content) == 0:
-            return True
-
-        return False
+        return response.status_code == 200 and len(response.content) == 0
 
     @staticmethod
-    def __pagination_type(headers, result):
+    def __pagination_type(headers, result) -> str:
         is_dict = isinstance(result, dict)
-        has_next_page_header = 'next-page' in headers.keys()
+        has_next_page_header = 'next-page' in headers
 
-        if is_dict and all(x in result.keys() for x in ['count', 'page', 'size', 'data']):
+        if is_dict and all(x in result for x in ['count', 'page', 'size', 'data']):
             return 'inline'
-        if is_dict and has_next_page_header and all(x in result.keys() for x in ['data', 'reportId']):  # reports
+        if is_dict and has_next_page_header and all(x in result for x in ['data', 'reportId']):  # reports
             return 'report'
         if has_next_page_header:  # this interesting way of paginating is how audit_logs.query() does it
             return 'audit'
-        if is_dict and all(x in result.keys() for x in ['result', 'pagination']):
+        if is_dict and all(x in result for x in ['result', 'pagination']):
             return 'secmgr'
         return 'none'
 
     @staticmethod
-    def __tenant_is_under_maintenance(response):
+    def __tenant_is_under_maintenance(response) -> bool:
         try:
             return response.status_code == 503 and response.json().get('errorCode') == 'MAINT0001'
         except Exception:
             return False
 
-    def __request_with_exponential_backoff_and_retry(self, method, url, params, data, json):
+    def __request_with_exponential_backoff_and_retry(self, method, url, params, data, json) -> dict:
         num_retries = 0
         response = {}
         while num_retries <= self.retry_max_times:
@@ -452,7 +460,7 @@ class Britive:
         self.__check_response_for_error(response)  # handle an error response
         return response
 
-    def __request(self, method, url, params=None, data=None, json=None):
+    def __request(self, method, url, params=None, data=None, json=None) -> dict:
         return_data = []
         num_iterations = 1
         pagination_type = None
@@ -494,13 +502,13 @@ class Britive:
                 params['page'] = page + 1
             elif pagination_type == 'audit':
                 return_data += result  # result is already a list
-                if 'next-page' not in response.headers.keys():
+                if 'next-page' not in response.headers:
                     break
                 url = response.headers['next-page']
                 params = {}  # the next-page header has all the URL parameters we need so unset them here
             elif pagination_type == 'report':
                 return_data += result['data']
-                if 'next-page' not in response.headers.keys():
+                if 'next-page' not in response.headers:
                     break
                 url = response.headers['next-page']
                 params = {}  # the next-page header has all the URL parameters we need so unset them here

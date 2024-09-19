@@ -1,5 +1,6 @@
-from .cache import *  # will also import some globals like `britive`
 from britive import exceptions
+
+from .cache import *  # will also import some globals like `britive`
 
 
 def test_create(cached_identity_provider):
@@ -28,8 +29,7 @@ def test_get_by_name(cached_identity_provider):
 
 def test_update(cached_identity_provider):
     response = britive.identity_providers.update(
-        identity_provider_id=cached_identity_provider['id'],
-        sso_provider='Azure'
+        identity_provider_id=cached_identity_provider['id'], sso_provider='Azure'
     )
     assert response is None
     idp = britive.identity_providers.get_by_name(identity_provider_name=cached_identity_provider['name'])
@@ -50,8 +50,7 @@ def test_scim_token_get(cached_scim_token, cached_identity_provider):
 
 def test_scim_token_update(cached_identity_provider):
     response = britive.identity_providers.scim_tokens.update(
-        identity_provider_id=cached_identity_provider['id'],
-        token_expiration_days=30
+        identity_provider_id=cached_identity_provider['id'], token_expiration_days=30
     )
     assert response is None
     token = britive.identity_providers.scim_tokens.get(identity_provider_id=cached_identity_provider['id'])
@@ -66,7 +65,6 @@ def test_scim_attributes_list():
 
 
 def test_scim_tokens_update_attribute_mapping(cached_identity_provider):
-
     attributes = britive.identity_attributes.list()
     phone_id = None
     for attribute in attributes:
@@ -80,16 +78,15 @@ def test_scim_tokens_update_attribute_mapping(cached_identity_provider):
             'builtIn': True,
             'attributeId': phone_id,
             'attributeName': 'Phone',
-            'op': 'remove'
+            'op': 'remove',
         }
     ]
     response = britive.identity_providers.scim_attributes.update_mapping(
-        identity_provider_id=cached_identity_provider['id'],
-        mappings=mappings
+        identity_provider_id=cached_identity_provider['id'], mappings=mappings
     )
     assert response is None
     idp = britive.identity_providers.get(identity_provider_id=cached_identity_provider['id'])
-    assert 'userAttributeScimMappings' in idp.keys()
+    assert 'userAttributeScimMappings' in idp
     assert isinstance(idp['userAttributeScimMappings'], list)
     mappings = idp['userAttributeScimMappings']
     assert 'Phone' not in [m['attributeName'] for m in mappings]
@@ -97,10 +94,8 @@ def test_scim_tokens_update_attribute_mapping(cached_identity_provider):
 
 def test_configure_mfa(cached_identity_provider):
     with pytest.raises(exceptions.InvalidRequest) as e:
-        response = britive.identity_providers.configure_mfa(
-            identity_provider_id=cached_identity_provider['id'],
-            root_user=False,
-            non_root_user=True
+        britive.identity_providers.configure_mfa(
+            identity_provider_id=cached_identity_provider['id'], root_user=False, non_root_user=True
         )
     assert 'E1001 - MFA can only be enabled on default identity provider' in str(e)
 
@@ -113,11 +108,10 @@ def test_signing_certificate():
 
 def test_set_metadata(cached_identity_provider):
     response = britive.identity_providers.set_metadata(
-        identity_provider_id=cached_identity_provider['id'],
-        metadata_xml=britive.saml.metadata()
+        identity_provider_id=cached_identity_provider['id'], metadata_xml=britive.saml.metadata()
     )
     assert isinstance(response, dict)
-    assert 'certificateDn' in response.keys()
+    assert 'certificateDn' in response
     assert response['certificateDn'] == f'CN={britive.tenant.split(".")[0]}'
 
 

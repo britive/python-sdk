@@ -1,10 +1,10 @@
-def validate_token_expiration(days):
+def validate_token_expiration(days) -> None:
     if not (1 <= days <= 90):
-        raise ValueError(f'invalid token expiration value - must ust be between 1 and 90')
+        raise ValueError('invalid token expiration value - must ust be between 1 and 90')
 
 
 class ServiceIdentityTokens:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}'
 

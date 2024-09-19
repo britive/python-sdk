@@ -3,7 +3,7 @@ from .cache import *  # will also import some globals like `britive`
 
 def test_create(cached_api_token):
     assert isinstance(cached_api_token, dict)
-    assert 'token' in cached_api_token.keys()
+    assert 'token' in cached_api_token
 
 
 def test_list(cached_api_token):

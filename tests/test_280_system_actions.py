@@ -6,15 +6,15 @@ def test_list():
     assert isinstance(response1, list)
     assert len(response1) > 0
     assert isinstance(response1[0], dict)
-    assert 'name' in response1[0].keys()
-    assert 'tenantId' in response1[0].keys()
+    assert 'name' in response1[0]
+    assert 'tenantId' in response1[0]
 
     response2 = britive.system.actions.list(consumer='apps')
     assert isinstance(response2, list)
     assert len(response2) > 0
     assert isinstance(response2[0], dict)
-    assert 'name' in response2[0].keys()
-    assert 'tenantId' in response2[0].keys()
+    assert 'name' in response2[0]
+    assert 'tenantId' in response2[0]
 
     assert len(response2) < len(response1)
 
@@ -22,4 +22,3 @@ def test_list():
 
     assert len(consumers) == 1
     assert consumers[0] == 'apps'
-

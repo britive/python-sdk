@@ -4,78 +4,79 @@ import hashlib
 import hmac
 import json
 import os
+
 from .. import exceptions
 
 
 class FederationProvider:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def get_token(self):
-        raise NotImplemented()
+    def get_token(self) -> None:
+        raise NotImplementedError()
 
 
 class AzureSystemAssignedManagedIdentityFederationProvider(FederationProvider):
-    def __init__(self, audience: str = None):
+    def __init__(self, audience: str = None) -> None:
         self.audience = audience if audience else 'https://management.azure.com/'
         super().__init__()
 
-    def get_token(self):
+    def get_token(self) -> str:
         # azure-identity is not a hard requirement of this SDK but is required for the
         # azure provider so checking to ensure it exists
         try:
             from azure.identity._exceptions import CredentialUnavailableError
-        except ImportError:
+        except ImportError as e:
             raise Exception('azure-identity required - please install azure-identity package to use the azure managed '
-                            'identity federation provider')
+                            'identity federation provider') from e
 
         try:
             from azure.identity import ManagedIdentityCredential
             token = ManagedIdentityCredential().get_token(self.audience).token
             return f'OIDC::{token}'
-        except ImportError:
+        except ImportError as e:
             raise Exception('azure-identity required - please install azure-identity package to use the azure managed '
-                            'identity federation provider')
-        except CredentialUnavailableError:
+                            'identity federation provider') from e
+        except CredentialUnavailableError as e:
             msg = 'the codebase is not executing in a azure environment or some other issue is causing the ' \
                   'managed identity credentials to be unavailable'
-            raise exceptions.NotExecutingInAzureEnvironment(msg)
+            raise exceptions.NotExecutingInAzureEnvironment(msg) from e
 
 
 class AzureUserAssignedManagedIdentityFederationProvider(FederationProvider):
-    def __init__(self, client_id: str, audience: str = None):
+    def __init__(self, client_id: str, audience: str = None) -> None:
         self.audience = audience if audience else 'https://management.azure.com/'
         self.client_id = client_id
         super().__init__()
 
-    def get_token(self):
+    def get_token(self) -> str:
         # azure-identity is not a hard requirement of this SDK but is required for the
         # azure provider so checking to ensure it exists
         try:
             from azure.identity._exceptions import CredentialUnavailableError
-        except ImportError:
+        except ImportError as e:
             raise Exception('azure-identity required - please install azure-identity package to use the azure managed '
-                            'identity federation provider')
+                            'identity federation provider') from e
 
         try:
             from azure.identity import ManagedIdentityCredential
             token = ManagedIdentityCredential(client_id=self.client_id).get_token(self.audience).token
             return f'OIDC::{token}'
-        except ImportError:
+        except ImportError as e:
             raise Exception('azure-identity required - please install azure-identity package to use the azure managed '
-                            'identity federation provider')
-        except CredentialUnavailableError:
+                            'identity federation provider') from e
+        except CredentialUnavailableError as e:
             msg = 'the codebase is not executing in a azure environment or some other issue is causing the ' \
                   'managed identity credentials to be unavailable'
-            raise exceptions.NotExecutingInAzureEnvironment(msg)
+            raise exceptions.NotExecutingInAzureEnvironment(msg) from e
 
 
 class GithubFederationProvider(FederationProvider):
-    def __init__(self, audience: str = None):
+    def __init__(self, audience: str = None) -> None:
         self.audience = audience
         super().__init__()
 
-    def get_token(self):
+    def get_token(self) -> str:
         import requests
         url = os.environ.get('ACTIONS_ID_TOKEN_REQUEST_URL')
         bearer_token = os.environ.get('ACTIONS_ID_TOKEN_REQUEST_TOKEN')
@@ -98,7 +99,7 @@ class GithubFederationProvider(FederationProvider):
 
 
 class AwsFederationProvider(FederationProvider):
-    def __init__(self, profile: str, tenant: str, duration: int = 900):
+    def __init__(self, profile: str, tenant: str, duration: int = 900) -> None:
         from ..britive import Britive  # doing import here to avoid circular dependency
         self.profile = profile
         self.duration = duration
@@ -110,32 +111,32 @@ class AwsFederationProvider(FederationProvider):
         super().__init__()
 
     @staticmethod
-    def sign(key, msg):
+    def sign(key, msg) -> str:
         return hmac.new(key, msg.encode("utf-8"), hashlib.sha256).digest()
 
     @staticmethod
-    def get_signature_key(key, date_stamp, region_name, service_name):
+    def get_signature_key(key, date_stamp, region_name, service_name) -> str:
         k_date = AwsFederationProvider.sign(('AWS4' + key).encode('utf-8'), date_stamp)
         k_region = AwsFederationProvider.sign(k_date, region_name)
         k_service = AwsFederationProvider.sign(k_region, service_name)
         k_signing = AwsFederationProvider.sign(k_service, 'aws4_request')
         return k_signing
 
-    def get_token(self):
+    def get_token(self) -> str:
         # boto3 is not a hard requirement of this SDK but is required for the
         # aws provider so checking to ensure it exists
         try:
             import boto3
             import botocore.exceptions as botoexceptions
-        except ImportError:
-            raise Exception('boto3 required - please install boto3 package to use the aws federation provider')
+        except ImportError as e:
+            raise Exception('boto3 required - please install boto3 package to use the aws federation provider') from e
 
         # and do all the complex logic for sigv4 signing the sts get-caller-identity endpoint
         session = None
         try:
             session = boto3.Session(profile_name=self.profile)
         except botoexceptions.ProfileNotFound as e:
-            raise Exception(f'Error: {str(e)}')
+            raise Exception(f'Error: {str(e)}') from e
 
         creds = session.get_credentials()
         access_key_id = creds.access_key
@@ -191,7 +192,7 @@ class AwsFederationProvider(FederationProvider):
         # signed_headers include those that you want to be included in the hash of the request.
         signed_headers = ';'.join(sorted([h.strip().lower() for h, v in headers.items()]))
 
-        # Step 3: Create payload hash. In this example, the payload (body of the request) contains the request parameters.
+        # Step 3: Create payload hash. In this example, the payload (request body) contains the request parameters.
         payload_hash = hashlib.sha256(request_body.encode('utf-8')).hexdigest()
 
         # Step 4: Combine elements to create canonical request
@@ -232,10 +233,6 @@ class AwsFederationProvider(FederationProvider):
 
         # ************* TASK 4: ADD SIGNING INFORMATION TO THE REQUEST *************
         # Put the signature information in a header named Authorization.
-        authorization_header_parts = [
-            algorithm,
-            f'Credential={access_key_id}'
-        ]
         authorization_header = f'{algorithm} Credential={access_key_id}/{credential_scope}, ' \
                                f'SignedHeaders={signed_headers}, Signature={signature}'
 
@@ -256,11 +253,11 @@ class AwsFederationProvider(FederationProvider):
 
 
 class BitbucketFederationProvider(FederationProvider):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     # https://support.atlassian.com/bitbucket-cloud/docs/integrate-pipelines-with-resource-servers-using-oidc/
-    def get_token(self):
+    def get_token(self) -> str:
         id_token = os.environ.get('BITBUCKET_STEP_OIDC_TOKEN')
         if not id_token:
             msg = 'the codebase is not executing in a bitbucket environment and/or the `oidc` flag ' \
@@ -270,11 +267,11 @@ class BitbucketFederationProvider(FederationProvider):
 
 
 class SpaceliftFederationProvider(FederationProvider):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     # https://docs.spacelift.io/integrations/cloud-providers/oidc/
-    def get_token(self):
+    def get_token(self) -> str:
         id_token = os.environ.get('SPACELIFT_OIDC_TOKEN')
         if not id_token:
             msg = 'the codebase is not executing in a spacelift.io environment or not using a paid account'
@@ -283,11 +280,11 @@ class SpaceliftFederationProvider(FederationProvider):
 
 
 class GitlabFederationProvider(FederationProvider):
-    def __init__(self, token_env_var: str = None):
+    def __init__(self, token_env_var: str = None) -> None:
         super().__init__()
         self.token_env_var = token_env_var or 'BRITIVE_OIDC_TOKEN'
 
-    def get_token(self):
+    def get_token(self) -> str:
         id_token = os.environ.get(self.token_env_var)
         if not id_token:
             msg = 'the codebase is not executing in a gitlab environment or the incorrect token environment variable ' \

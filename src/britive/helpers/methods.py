@@ -1,5 +1,8 @@
-def safe_list_get(l, idx, default):
+from typing import Union
+
+
+def safe_list_get(lst, idx, default) -> Union[str, None]:
     try:
-        return l[idx]
+        return lst[idx]
     except IndexError:
         return default

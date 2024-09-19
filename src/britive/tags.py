@@ -1,6 +1,6 @@
 
 class TagMembershipRules:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/user-tags'
 
@@ -24,7 +24,7 @@ class TagMembershipRules:
 
         attribute_id = attribute_id_or_name
         if attribute_id not in existing_attr_ids:
-            attribute_id = attrs_by_name.get(attribute_id_or_name, None)
+            attribute_id = attrs_by_name.get(attribute_id_or_name)
         if not attribute_id:
             raise ValueError(f'identity attribute name {attribute_id_or_name} not found.')
 
@@ -95,7 +95,7 @@ class TagMembershipRules:
 
 
 class Tags:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/user-tags'
         self.membership_rules = TagMembershipRules(self.britive)
@@ -268,7 +268,7 @@ class Tags:
 
         return self.britive.delete(f'{self.base_url}/{tag_id}')
 
-    def minimized_tag_details(self, tag_id: str = None, tag_ids: list = []) -> list:
+    def minimized_tag_details(self, tag_id: str = None, tag_ids: list = None) -> list:
         """
         Retrieve a small set of user fields given a user id.
 
