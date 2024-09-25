@@ -255,3 +255,10 @@ def test_delete_access_broker_profile(cached_access_broker_profile):
         assert response is None
     finally:
         cleanup('access-broker-profile')
+
+def test_delete_access_broker_resource(cached_access_broker_resource):
+    try:
+        response = britive.access_broker.resources.delete(cached_access_broker_resource['resourceId'])
+        assert response is None
+    finally:
+        cleanup('access-broker-resource')
