@@ -725,6 +725,12 @@ def cached_resource_permission(pytestconfig, cached_resource_type):
     return britive.access_broker.resources.permissions.create(resource_type_id=cached_resource_type['resourceTypeId'], name=f'pytest-resource-permission-{r}', checkin_file=checkin_file, checkout_file=checkout_file)
 
 @pytest.fixture(scope='session')
+@cached_resource(name='access-broker-resource')
+def cached_access_broker_resource(pytestconfig, cached_resource_type):
+    r = str(random.randint(0, 1000000))
+    return britive.access_broker.resources.create(name=f'pytest-resource-{r}', resource_type_id=cached_resource_type['resourceTypeId'])
+
+@pytest.fixture(scope='session')
 @cached_resource(name='access-broker-profile-policy')
 def cached_access_broker_profile_policy(pytestconfig, cached_access_broker_profile):
     r = str(random.randint(0, 1000000))
