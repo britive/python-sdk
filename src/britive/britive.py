@@ -5,6 +5,7 @@ import time
 
 import requests
 
+from .access_broker.access_broker import AccessBroker
 from .access_builder import AccessBuilderSettings
 from .accounts import Accounts
 from .api_tokens import ApiTokens
@@ -181,40 +182,40 @@ class Britive:
             }
         )
 
-        self.feature_flags = self.features() if query_features else {}
-
-        self.users = Users(self)
-        self.service_identity_tokens = ServiceIdentityTokens(self)
-        self.service_identities = ServiceIdentities(self)
-        self.tags = Tags(self)
-        self.applications = Applications(self)
-        self.environments = Environments(self)
-        self.environment_groups = EnvironmentGroups(self)
-        self.scans = Scans(self)
+        self.access_broker = AccessBroker(self)
+        self.access_builder = AccessBuilderSettings(self)
         self.accounts = Accounts(self)
-        self.permissions = Permissions(self)
+        self.api_tokens = ApiTokens(self)
+        self.applications = Applications(self)
+        self.audit_logs = AuditLogs(self)
+        self.environment_groups = EnvironmentGroups(self)
+        self.environments = Environments(self)
+        self.feature_flags = self.features() if query_features else {}
         self.groups = Groups(self)
         self.identity_attributes = IdentityAttributes(self)
-        self.profiles = Profiles(self)
-        self.task_services = TaskServices(self)
-        self.tasks = Tasks(self)
-        self.security_policies = SecurityPolicies(self)
-        self.saml = Saml(self)
-        self.api_tokens = ApiTokens(self)
-        self.audit_logs = AuditLogs(self)
-        self.reports = Reports(self)
         self.identity_providers = IdentityProviders(self)
         self.my_access = MyAccess(self)
-        self.notifications = Notifications(self)
+        self.my_resources = MyResources(self)
         self.my_secrets = MySecrets(self)
-        self.secrets_manager = SecretsManager(self)
         self.notification_mediums = NotificationMediums(self)
-        self.workload = Workload(self)
-        self.system = System(self)
+        self.notifications = Notifications(self)
+        self.permissions = Permissions(self)
+        self.profiles = Profiles(self)
+        self.reports = Reports(self)
+        self.saml = Saml(self)
+        self.scans = Scans(self)
+        self.secrets_manager = SecretsManager(self)
+        self.security_policies = SecurityPolicies(self)
+        self.service_identities = ServiceIdentities(self)
+        self.service_identity_tokens = ServiceIdentityTokens(self)
         self.settings = Settings(self)
         self.step_up = StepUpAuth(self)
-        self.my_resources = MyResources(self)
-        self.access_builder = AccessBuilderSettings(self)
+        self.system = System(self)
+        self.tags = Tags(self)
+        self.task_services = TaskServices(self)
+        self.tasks = Tasks(self)
+        self.users = Users(self)
+        self.workload = Workload(self)
 
     @staticmethod
     def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:
@@ -468,7 +469,7 @@ class Britive:
             response = self.__request_with_exponential_backoff_and_retry(
                 method=method, url=url, params=params, data=data, json=json
             )
-            #print(response.content)
+            # print(response.content)
             if self.__response_has_no_content(response):  # handle no content responses
                 return None
 

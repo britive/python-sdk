@@ -1,91 +1,78 @@
-import random
 import requests
+
+
 class Permissions:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/resource-manager'
-    def list(self, resource_type_id) -> list:
+
+    def list(self, resource_type_id: str, search_text: str = '') -> list:
         """
         Retrieve all permissions for a resource type.
+
         :param resource_type_id: ID of the resource type.
+        :param search_text: filter resource types by search text.
         :return: List of permissions.
         """
-        return self.britive.get(f'{self.base_url}/resource-types/{resource_type_id}/permissions')
-    
-    def update(self, permission_id, resource_type_id, checkin_file : bytes = None, checkout_file : bytes = None, **kwargs) -> dict:     
-        """
-        Update a permission.
-        :param permission_id: ID of the permission.
-        :param resource_type_id: ID of the resource type.
-        :param file: File to upload.
-        :param kwargs: Valid fields are...
-            name - required
-            description
-            createdBy
-            updatedBy
-            version
-            checkinURL 
-            checkoutURL
-            checkinFileName
-            checkoutFileName
-            checkinTimeLimit
-            checkoutTimeLimit
-            variables - List of variables
-        :return: Updated permission.
-        """
-        kwargs['resourceTypeId'] = resource_type_id
-        if checkin_file and checkout_file:
-            urls = self.get_urls(permission_id)
-            requests.put(urls['checkinURL'], files={'file': checkin_file})
-            requests.put(urls['checkoutURL'], files={'file': checkout_file})
-            kwargs['checkinFileName'] = permission_id + '_checkin'
-            kwargs['checkoutFileName'] = permission_id + '_checkout'
-            kwargs['inlineFileExists'] = True
-            kwargs['checkinURL'] = urls['checkinURL']
-            kwargs['checkoutURL'] = urls['checkoutURL']
-        if 'checkinTimeLimit' not in kwargs:
-            kwargs['checkinTimeLimit'] = 60
-        if 'checkoutTimeLimit' not in kwargs:
-            kwargs['checkoutTimeLimit'] = 60
-            
-        return self.britive.put(f'{self.base_url}/permissions/{permission_id}', json=kwargs)
-        
-    
-    def get(self, permission_id, version_id = None) -> dict:
+
+        params = {**({'searchText': search_text} if search_text else {})}
+
+        return self.britive.get(f'{self.base_url}/resource-types/{resource_type_id}/permissions', params=params)
+
+    def get(self, permission_id: str, version_id: str = '') -> dict:
         """
         Retrieve a permission by ID.
+
         :param permission_id: ID of the permission.
         :param version_id: ID of the version. Optional.
         :return: Permission.
         """
+
         if version_id:
             return self.britive.get(f'{self.base_url}/permissions/{permission_id}/{version_id}')
-        else:
-            return self.britive.get(f'{self.base_url}/permissions/{permission_id}')
-    
-    def delete(self, permission_id, version_id = None) -> dict:
+
+        return self.britive.get(f'{self.base_url}/permissions/{permission_id}')
+
+    def delete(self, permission_id: str, version_id: str = '') -> None:
         """
         Delete a permission.
+
         :param permission_id: ID of the permission.
         :param version_id: Version of the permission. Optional.
         :return: None
         """
+
         if version_id:
             return self.britive.delete(f'{self.base_url}/permissions/{permission_id}/{version_id}')
-        else:
-            return self.britive.delete(f'{self.base_url}/permissions/{permission_id}')
-    
-    def get_urls(self, permission_id) -> dict:
+        return self.britive.delete(f'{self.base_url}/permissions/{permission_id}')
+
+    def get_urls(self, permission_id: str) -> dict:
         """
         Retrieve URLs for a permission.
+
         :param permission_id: ID of the permission.
         :return: URLs.
         """
+
         return self.britive.get(f'{self.base_url}/permissions/get-urls/{permission_id}')
-    
-    def create(self, resource_type_id, name, description = '', checkin_file : bytes = None, checkout_file : bytes = None, variables = []) -> dict:
+
+    def get_system_values(self, resource_type_id):
+        return self.britive.get(
+            f'{self.base_url}/permissions/system-defined-values', params={'resourceTypeId': resource_type_id}
+        )
+
+    def create(
+        self,
+        resource_type_id: str,
+        name: str,
+        description: str = '',
+        checkin_file: bytes = None,
+        checkout_file: bytes = None,
+        variables: list = None,
+    ) -> dict:
         """
         Create a new permission.
+
         :param resource_type_id: ID of the resource type.
         :param name: Name of the permission.
         :param description: Description of the permission.
@@ -95,30 +82,91 @@ class Permissions:
         :return: Created permission.
         """
 
-        
-        params = {
-            'resourceTypeId': resource_type_id,
-            'name': name,
+        if variables is None:
+            variables = []
+
+        create_params = {
             'description': description,
             'isDraft': True,
+            'name': name,
+            'resourceTypeId': resource_type_id,
         }
-        permissionId = self.britive.post(f'{self.base_url}/permissions', json=params)['permissionId']
+        permissionId = self.britive.post(f'{self.base_url}/permissions', json=create_params)['permissionId']
         urls = self.get_urls(permissionId)
         requests.put(urls['checkinURL'], files={'file': checkin_file})
         requests.put(urls['checkoutURL'], files={'file': checkout_file})
-        params = {
-            'checkinFileName' : permissionId + '_checkin',
-            'checkoutFileName' : permissionId + '_checkout',
-            'checkinTimeLimit' : 60,
-            'checkoutTimeLimit' : 60,
-            'createdBy' : 'Python-SDK',
-            'description' : description,
-            'inlineFileExists' : True,
-            'isDraft' : False,
-            'name' : name,
-            'resourceTypeId' : resource_type_id,
-            'updatedBy' : 'Python-SDK',
-            'variables' : variables,
+        update_params = {
+            'checkinFileName': permissionId + '_checkin',
+            'checkinTimeLimit': 60,
+            'checkoutFileName': permissionId + '_checkout',
+            'checkoutTimeLimit': 60,
+            'description': description,
+            'inlineFileExists': True,
+            'isDraft': False,
+            'name': name,
+            'resourceTypeId': resource_type_id,
+            'variables': variables,
         }
-        return self.britive.put(f'{self.base_url}/permissions/{permissionId}', json=params)
-        
+
+        return self.britive.put(f'{self.base_url}/permissions/{permissionId}', json=update_params)
+
+    def update(
+        self,
+        permission_id: str,
+        resource_type_id: str,
+        name: str,
+        checkin_file: bytes = None,
+        checkin_time_limit: int = 60,
+        checkout_file: bytes = None,
+        checkout_time_limit: int = 60,
+        **kwargs,
+    ) -> dict:
+        """
+        Update a permission.
+
+        :param permission_id: ID of the permission.
+        :param resource_type_id: ID of the resource type.
+        :param name: Name of the permission.
+        :param checkin_file: File to upload for checkin.
+        :param checkout_file: File to upload for checkout.
+        :param kwargs: Valid fields are...
+            checkinURL
+            checkoutURL
+            description
+            variables - List of variables
+            version
+        :return: Updated permission.
+        """
+
+        valid_fields = [
+            'checkinTimeLimit',
+            'checkinURL',
+            'checkoutTimeLimit',
+            'checkoutURL',
+            'description',
+            'variables',
+            'version',
+        ]
+
+        params = {k: v for k, v in kwargs.items() if k in valid_fields}
+        params.update(
+            name=name,
+            permissionId=permission_id,
+            resourceTypeId=resource_type_id,
+            checkinTimeLimit=checkin_time_limit,
+            checkoutTimeLimit=checkout_time_limit,
+        )
+
+        if checkin_file and checkout_file:
+            urls = self.get_urls(permission_id)
+            requests.put(urls['checkinURL'], files={'file': checkin_file})
+            requests.put(urls['checkoutURL'], files={'file': checkout_file})
+            params.update(
+                checkinFileName=permission_id + '_checkin',
+                checkinURL=urls['checkinURL'],
+                checkoutFileName=permission_id + '_checkout',
+                checkoutURL=urls['checkoutURL'],
+                inlineFileExists=True,
+            )
+
+        return self.britive.put(f'{self.base_url}/permissions/{permission_id}', json=params)
