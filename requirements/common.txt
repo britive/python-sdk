@@ -1,2 +1,3 @@
 # can likely change this to earlier versions - will deal with that later
+jmespath
 requests>=2.31.0

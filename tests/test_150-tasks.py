@@ -21,9 +21,7 @@ def test_get(cached_task_service, cached_task):
 
 def test_update(cached_task_service, cached_task):
     task = britive.tasks.update(
-        task_service_id=cached_task_service['taskServiceId'],
-        task_id=cached_task['taskId'],
-        name='test2'
+        task_service_id=cached_task_service['taskServiceId'], task_id=cached_task['taskId'], name='test2'
     )
     assert isinstance(task, dict)
     assert task['name'] == 'test2'
@@ -35,4 +33,3 @@ def test_delete(cached_task_service, cached_task):
     tasks = britive.tasks.list(task_service_id=cached_task_service['taskServiceId'])
     assert len(tasks) == 0
     cleanup('task')
-

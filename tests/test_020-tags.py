@@ -1,15 +1,6 @@
 from .cache import *  # will also import some globals like `britive`
 
-
-tag_keys = [
-    'userTagId',
-    'status',
-    'description',
-    'name',
-    'external',
-    'userCount',
-    'userTagIdentityProviders'
-]
+tag_keys = ['userTagId', 'status', 'description', 'name', 'external', 'userCount', 'userTagIdentityProviders']
 
 
 def test_create(cached_tag):
@@ -110,16 +101,10 @@ def test_membership_rules_create(cached_tag, cached_user):
 
 def test_membership_rules_update(cached_tag, cached_user):
     rules = [
+        britive.tags.membership_rules.build(attribute_id_or_name='Email', operator='is', value=cached_user['email']),
         britive.tags.membership_rules.build(
-            attribute_id_or_name='Email',
-            operator='is',
-            value=cached_user['email']
+            attribute_id_or_name='Username', operator='is', value=cached_user['username']
         ),
-        britive.tags.membership_rules.build(
-            attribute_id_or_name='Username',
-            operator='is',
-            value=cached_user['username']
-        )
     ]
 
     response = britive.tags.membership_rules.update(tag_id=cached_tag['userTagId'], rules=rules)

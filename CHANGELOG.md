@@ -1,6 +1,33 @@
-# Change Log
+# Change Log (v2.8.1+)
 
-All changes to the package starting with v2.8.1 will be logged here.
+## v3.0.0 [2024-09-09]
+
+__What's New:__
+
+* Added `access_builder` functionality.
+* Added `audit_logs.webhooks` functionality.
+
+__Enhancements:__
+
+* Added `comments` to `my-access.{approve|reject}_request` args.
+* Added `filter_expression` to `notification_mediums.list`.
+* `notification_mediums.create` now uses `url=...` and `token=...` instead of `connection_parameters`.
+* Added `otp` for step up authentication to `my_secrets.{download|view}`.
+
+__Bug Fixes:__
+
+* Fixed issues with some tests and added missing test deletes.
+
+__Dependencies:__
+
+* Dropped support for `python3.7`.
+* Dropped `pkg_resources` dependency.
+
+__Other:__
+
+* Removed deprecated `policies.py`.
+* Removed deprecated `from_time|to_time`.
+* Switched to `ruff` for style linting and code-quality checking.
 
 ## v2.25.0 [2024-07-01]
 
@@ -29,7 +56,6 @@ __Other:__
 
 * Added `*_CA_BUNDLE` examples to the docs.
 * Add `PYBRITIVE_CA_BUNDLE` to `requests` session if set, introduced in [pybritive (v1.8.0rc2)](https://github.com/britive/python-cli)
-
 
 ## v2.25.0rc5 [2024-06-21]
 

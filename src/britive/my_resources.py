@@ -1,6 +1,6 @@
-import sys
 import time
-from typing import Callable
+from typing import Any, Callable
+
 from . import exceptions
 
 approval_exceptions = {
@@ -23,7 +23,7 @@ class MyResources:
     administrator may not have access to any resource profiles.
     """
 
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/resource-manager/my-resources'
 
@@ -126,7 +126,7 @@ class MyResources:
                 )
             except exceptions.ForbiddenRequest as e:
                 if 'PE-0028' in str(e):  # Check for stepup totp
-                    raise exceptions.StepUpAuthRequiredButNotProvided()
+                    raise exceptions.StepUpAuthRequiredButNotProvided() from e
             # except exceptions.InvalidRequest as e:
             #     if 'MA-0010' in str(e):  # new approval process that de-couples approval from checkout
             #         # if the caller has not provided a justification we know for sure the call will fail
@@ -284,7 +284,7 @@ class MyResources:
         transaction: dict = None,
         return_transaction_details: bool = False,
         progress_func: Callable = None,
-    ) -> any:
+    ) -> Any:
         """
         Return credentials of a checked out profile given the transaction ID.
 
@@ -379,6 +379,6 @@ class MyResources:
 
         # do some error checking
         if not item:
-            raise ValueError(f'resource and profile combination not found')
+            raise ValueError('resource and profile combination not found')
 
         return item

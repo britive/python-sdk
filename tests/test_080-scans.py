@@ -1,11 +1,12 @@
-import time
+from time import sleep
+
 from .cache import *  # will also import some globals like `britive`
 
 
 @pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_scan(cached_scan):
     assert isinstance(cached_scan, dict)
-    assert 'taskId' in cached_scan.keys()
+    assert 'taskId' in cached_scan
 
 
 # warning - this will take a while if a scan was just initiated! grab and coffee and come back later
@@ -17,7 +18,7 @@ def test_status(cached_scan):
             break
         if status['status'] == 'Error':
             break
-        time.sleep(10)
+        sleep(10)
     assert status['status'] == 'Success'
 
 
@@ -33,7 +34,7 @@ def test_diff_accounts(cached_application, cached_environment):
     response = britive.scans.diff(
         resource='accounts',
         application_id=cached_application['appContainerId'],
-        environment_id=cached_environment['id']
+        environment_id=cached_environment['id'],
     )
     assert isinstance(response, list)
     assert len(response) > 0
@@ -42,9 +43,7 @@ def test_diff_accounts(cached_application, cached_environment):
 @pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_diff_groups(cached_application, cached_environment):
     response = britive.scans.diff(
-        resource='groups',
-        application_id=cached_application['appContainerId'],
-        environment_id=cached_environment['id']
+        resource='groups', application_id=cached_application['appContainerId'], environment_id=cached_environment['id']
     )
     assert isinstance(response, list)
     assert len(response) > 0
@@ -55,7 +54,7 @@ def test_diff_permissions(cached_application, cached_environment):
     response = britive.scans.diff(
         resource='permissions',
         application_id=cached_application['appContainerId'],
-        environment_id=cached_environment['id']
+        environment_id=cached_environment['id'],
     )
     assert isinstance(response, list)
     assert len(response) > 0

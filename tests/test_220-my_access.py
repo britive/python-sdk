@@ -1,5 +1,6 @@
-from .cache import *  # will also import some globals like `britive`
 import json
+
+from .cache import *  # will also import some globals like `britive`
 
 
 def test_whoami():
@@ -19,20 +20,18 @@ def test_list_profiles():
 def test_checkout(cached_checked_out_profile):
     assert isinstance(cached_checked_out_profile, dict)
     assert cached_checked_out_profile['accessType'] == 'PROGRAMMATIC'
-    assert 'credentials' in cached_checked_out_profile.keys()
+    assert 'credentials' in cached_checked_out_profile
 
 
 @pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_checkout_again(cached_profile, cached_environment):
     response = britive.my_access.checkout(
-            profile_id=cached_profile['papId'],
-            environment_id=cached_environment['id'],
-            include_credentials=True
-        )
+        profile_id=cached_profile['papId'], environment_id=cached_environment['id'], include_credentials=True
+    )
 
     assert isinstance(response, dict)
     assert response['accessType'] == 'PROGRAMMATIC'
-    assert 'credentials' in response.keys()
+    assert 'credentials' in response
 
 
 @pytest.mark.skipif(scan_skip, reason=scan_skip_message)
@@ -60,7 +59,7 @@ def test_checkin(cached_checked_out_profile):
 def test_checkout_by_name(cached_checked_out_profile_by_name):
     assert isinstance(cached_checked_out_profile_by_name, dict)
     assert cached_checked_out_profile_by_name['accessType'] == 'PROGRAMMATIC'
-    assert 'credentials' in cached_checked_out_profile_by_name.keys()
+    assert 'credentials' in cached_checked_out_profile_by_name
 
 
 @pytest.mark.skipif(scan_skip, reason=scan_skip_message)
@@ -69,7 +68,7 @@ def test_checkin_by_name(cached_profile, cached_environment, cached_application)
     response = britive.my_access.checkin_by_name(
         profile_name=cached_profile['name'],
         environment_name=f'{account_id} ({cached_environment["name"]})',
-        application_name=cached_application['catalogAppDisplayName']
+        application_name=cached_application['catalogAppDisplayName'],
     )
     assert isinstance(response, dict)
     assert response['status'] in ('checkedIn', 'checkInSubmitted')  # v1, v2
@@ -87,19 +86,17 @@ def test_favorites():
 
 
 @pytest.mark.skipif(scan_skip, reason=scan_skip_message)
-def test_request_and_approve(cached_profile, cached_service_identity_token, cached_environment,
-                             cached_service_identity):
-
+def test_request_and_approve(
+    cached_profile, cached_service_identity_token, cached_environment, cached_service_identity
+):
     token = britive.service_identity_tokens.create(cached_service_identity['userId'], 90)['token']
     other_britive = Britive(token=token, query_features=False)
 
     request = other_britive.my_access.request_approval(
-        profile_id=cached_profile['papId'],
-        environment_id=cached_environment['id'],
-        justification='let me in'
+        profile_id=cached_profile['papId'], environment_id=cached_environment['id'], justification='let me in'
     )
 
-    assert 'requestId' in request.keys()
+    assert 'requestId' in request
 
     request_id = request['requestId']
 
@@ -109,9 +106,7 @@ def test_request_and_approve(cached_profile, cached_service_identity_token, cach
             assert approval['status'] == 'PENDING'
             break
 
-    response = britive.my_access.reject_request(
-        request_id=request_id
-    )
+    response = britive.my_access.reject_request(request_id=request_id)
 
     assert response is None
 
@@ -122,12 +117,10 @@ def test_request_and_approve(cached_profile, cached_service_identity_token, cach
             break
 
     request = other_britive.my_access.request_approval(
-        profile_id=cached_profile['papId'],
-        environment_id=cached_environment['id'],
-        justification='let me in'
+        profile_id=cached_profile['papId'], environment_id=cached_environment['id'], justification='let me in'
     )
 
-    assert 'requestId' in request.keys()
+    assert 'requestId' in request
 
     request_id = request['requestId']
 
@@ -137,9 +130,7 @@ def test_request_and_approve(cached_profile, cached_service_identity_token, cach
             assert approval['status'] == 'PENDING'
             break
 
-    response = britive.my_access.approve_request(
-        request_id=request_id
-    )
+    response = britive.my_access.approve_request(request_id=request_id)
 
     assert response is None
 
@@ -148,4 +139,3 @@ def test_request_and_approve(cached_profile, cached_service_identity_token, cach
         if approval['requestId'] == request_id:
             assert approval['status'] == 'APPROVED'
             break
-

@@ -1,8 +1,7 @@
-from __future__ import annotations
 import json
 from typing import Union
-from . import exceptions
 
+from . import exceptions
 
 creation_defaults = {
     'expirationDuration': 3600000,
@@ -22,7 +21,7 @@ update_fields_to_keep.remove('status')
 
 
 class Profiles:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
         self.permissions = ProfilePermissions(britive)
@@ -262,7 +261,7 @@ class Profiles:
 
 
 class ProfilePermissions:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/paps'
         self.constraints = ProfilePermissionConstraints(britive)
@@ -333,7 +332,7 @@ class ProfilePermissions:
 
 
 class ProfilePermissionConstraints:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/paps'
 
@@ -453,7 +452,7 @@ class ProfilePermissionConstraints:
 
 
 class ProfileSessionAttributes:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/paps'
 
@@ -582,11 +581,11 @@ class ProfileSessionAttributes:
 
 
 class ProfilePolicies:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/paps'
 
-    def build(
+    def build(  # noqa: PLR0913
         self,
         name: str,
         description: str = '',
@@ -597,8 +596,6 @@ class ProfilePolicies:
         tags: list = None,
         service_identities: list = None,
         ips: list = None,
-        from_time: str = None,
-        to_time: str = None,
         date_schedule: dict = None,
         days_schedule: dict = None,
         approval_notification_medium: Union[str, list] = None,
@@ -625,16 +622,6 @@ class ProfilePolicies:
         :param service_identities: Optional list of service identity names or ids to which this policy applies.
         :param ips: Optional list of IP addresses for which this policy applies. Provide in CIDR notation
             or dotted decimal format for individual (/32) IP addresses.
-        :param from_time: The start date/time of when the policy is in effect. If a date is provided
-            (`YYYY-MM-DD HH:MM:SS`) this will represent the start date/time of 1 contiguous time range. If just a
-            time is provided (`HH:MM:SS`) this will represent the daily recurring start time. If this parameter is
-            provided then `to_time` must also be provided. This parameter is deprecated as of v2.19.0. The presence of
-            `date_schedule` and/or `days_schedule` will override this field.
-        :param to_time: The end date/time of when the policy is in effect. If a date is provided
-            (`YYYY-MM-DD HH:MM:SS`) this will represent the end date/time of 1 contiguous time range. If just a
-            time is provided (`HH:MM:SS`) this will represent the daily recurring end time. If this parameter is
-            provided then `from_time` must also be provided. This parameter is deprecated as of v2.19.0. The presence of
-            `date_schedule` and/or `days_schedule` will override this field.
         :param date_schedule: A dict in the format
             {
                 'fromDate': '2022-10-29 10:30:00',
@@ -687,8 +674,6 @@ class ProfilePolicies:
             tags=tags,
             service_identities=service_identities,
             ips=ips,
-            from_time=from_time,
-            to_time=to_time,
             date_schedule=date_schedule,
             days_schedule=days_schedule,
             approval_notification_medium=approval_notification_medium,
