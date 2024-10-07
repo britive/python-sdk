@@ -186,13 +186,15 @@ def test_policies_create_with_approval_single_notification_medium(cached_profile
     assert cached_profile_approval_policy['members']['serviceIdentities']
 
 
-def test_policies_create_with_approval_multiple_notification_medium(cached_profile, cached_service_identity):
+def test_policies_create_with_approval_multiple_notification_medium(
+    cached_profile, cached_service_identity, cached_user
+):
     policy = britive.profiles.policies.build(
         name=f"{cached_profile['papId']}-2",
         description='',
         service_identities=[cached_service_identity['username']],
         approval_notification_medium=['Email'],
-        approver_users=[britive.my_access.whoami()['username']],
+        approver_users=[cached_user['username']],
     )
     assert isinstance(policy, dict)
 
