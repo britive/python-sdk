@@ -1,4 +1,3 @@
-
 class SystemActions:
     def __init__(self, britive) -> None:
         self.britive = britive
@@ -16,5 +15,3 @@ class SystemActions:
         if consumer:
             params['filter'] = f'consumer eq {consumer}'
         return self.britive.get(self.base_url, params=params)['result']
-
-

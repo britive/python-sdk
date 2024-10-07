@@ -1,4 +1,3 @@
-
 class SystemPermissions:
     def __init__(self, britive) -> None:
         self.britive = britive
@@ -47,7 +46,7 @@ class SystemPermissions:
         """
 
         return self.britive.post(self.base_url, json=permission)
-    
+
     def update(self, permission_identifier: str, permission: dict, identifier_type: str = 'name') -> None:
         """
         Update a system level permission.
@@ -83,8 +82,15 @@ class SystemPermissions:
         return self.britive.delete(f'{self.base_url}/{permission_identifier}')
 
     @staticmethod
-    def build(name: str, consumer: str, actions: list, resources: list = None, description: str = '',
-              read_only: bool = False, is_inline: bool = False) -> dict:
+    def build(
+        name: str,
+        consumer: str,
+        actions: list,
+        resources: list = None,
+        description: str = '',
+        read_only: bool = False,
+        is_inline: bool = False,
+    ) -> dict:
         """
         Build a permission document given the provided inputs.
 
@@ -110,7 +116,7 @@ class SystemPermissions:
             'isInline': is_inline,
             'consumer': consumer,
             'actions': actions,
-            'resources': resources if len(resources) > 0 else ['*']
+            'resources': resources if len(resources) > 0 else ['*'],
         }
 
         return permission

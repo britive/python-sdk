@@ -27,19 +27,26 @@ class AzureSystemAssignedManagedIdentityFederationProvider(FederationProvider):
         try:
             from azure.identity._exceptions import CredentialUnavailableError
         except ImportError as e:
-            raise Exception('azure-identity required - please install azure-identity package to use the azure managed '
-                            'identity federation provider') from e
+            raise Exception(
+                'azure-identity required - please install azure-identity package to use the azure managed '
+                'identity federation provider'
+            ) from e
 
         try:
             from azure.identity import ManagedIdentityCredential
+
             token = ManagedIdentityCredential().get_token(self.audience).token
             return f'OIDC::{token}'
         except ImportError as e:
-            raise Exception('azure-identity required - please install azure-identity package to use the azure managed '
-                            'identity federation provider') from e
+            raise Exception(
+                'azure-identity required - please install azure-identity package to use the azure managed '
+                'identity federation provider'
+            ) from e
         except CredentialUnavailableError as e:
-            msg = 'the codebase is not executing in a azure environment or some other issue is causing the ' \
-                  'managed identity credentials to be unavailable'
+            msg = (
+                'the codebase is not executing in a azure environment or some other issue is causing the '
+                'managed identity credentials to be unavailable'
+            )
             raise exceptions.NotExecutingInAzureEnvironment(msg) from e
 
 
@@ -55,19 +62,26 @@ class AzureUserAssignedManagedIdentityFederationProvider(FederationProvider):
         try:
             from azure.identity._exceptions import CredentialUnavailableError
         except ImportError as e:
-            raise Exception('azure-identity required - please install azure-identity package to use the azure managed '
-                            'identity federation provider') from e
+            raise Exception(
+                'azure-identity required - please install azure-identity package to use the azure managed '
+                'identity federation provider'
+            ) from e
 
         try:
             from azure.identity import ManagedIdentityCredential
+
             token = ManagedIdentityCredential(client_id=self.client_id).get_token(self.audience).token
             return f'OIDC::{token}'
         except ImportError as e:
-            raise Exception('azure-identity required - please install azure-identity package to use the azure managed '
-                            'identity federation provider') from e
+            raise Exception(
+                'azure-identity required - please install azure-identity package to use the azure managed '
+                'identity federation provider'
+            ) from e
         except CredentialUnavailableError as e:
-            msg = 'the codebase is not executing in a azure environment or some other issue is causing the ' \
-                  'managed identity credentials to be unavailable'
+            msg = (
+                'the codebase is not executing in a azure environment or some other issue is causing the '
+                'managed identity credentials to be unavailable'
+            )
             raise exceptions.NotExecutingInAzureEnvironment(msg) from e
 
 
@@ -78,18 +92,18 @@ class GithubFederationProvider(FederationProvider):
 
     def get_token(self) -> str:
         import requests
+
         url = os.environ.get('ACTIONS_ID_TOKEN_REQUEST_URL')
         bearer_token = os.environ.get('ACTIONS_ID_TOKEN_REQUEST_TOKEN')
 
         if not url or not bearer_token:
-            msg = 'the codebase is not executing in a github environment and/or the action is ' \
-                  'is not set to use oidc permissions'
+            msg = (
+                'the codebase is not executing in a github environment and/or the action is '
+                'is not set to use oidc permissions'
+            )
             raise exceptions.NotExecutingInGithubEnvironment(msg)
 
-        headers = {
-            'User-Agent': 'actions/oidc-client',
-            'Authorization': f'Bearer {bearer_token}'
-        }
+        headers = {'User-Agent': 'actions/oidc-client', 'Authorization': f'Bearer {bearer_token}'}
 
         if self.audience:
             url += f'&audience={self.audience}'
@@ -101,6 +115,7 @@ class GithubFederationProvider(FederationProvider):
 class AwsFederationProvider(FederationProvider):
     def __init__(self, profile: str, tenant: str, duration: int = 900) -> None:
         from ..britive import Britive  # doing import here to avoid circular dependency
+
         self.profile = profile
         self.duration = duration
         temp_tenant = tenant or os.getenv('BRITIVE_TENANT')
@@ -112,7 +127,7 @@ class AwsFederationProvider(FederationProvider):
 
     @staticmethod
     def sign(key, msg) -> str:
-        return hmac.new(key, msg.encode("utf-8"), hashlib.sha256).digest()
+        return hmac.new(key, msg.encode('utf-8'), hashlib.sha256).digest()
 
     @staticmethod
     def get_signature_key(key, date_stamp, region_name, service_name) -> str:
@@ -157,27 +172,18 @@ class AwsFederationProvider(FederationProvider):
                 'value': f'sts.{region}.amazonaws.com',
                 'include_in_request': False,  # britive backend will auto-add host header when calling sts endpoint
             },
-            'x-amz-date': {
-                'value': t.strftime('%Y%m%dT%H%M%SZ'),
-                'include_in_request': True
-            },
-            'x-britive-workload-aws-tenant': {
-                'value': self.tenant,
-                'include_in_request': True
-            },
+            'x-amz-date': {'value': t.strftime('%Y%m%dT%H%M%SZ'), 'include_in_request': True},
+            'x-britive-workload-aws-tenant': {'value': self.tenant, 'include_in_request': True},
             'x-britive-expires': {
                 'value': f'{(t + datetime.timedelta(seconds=self.duration)).strftime("%Y%m%dT%H%M%SZ")}',
-                'include_in_request': True
-            }
+                'include_in_request': True,
+            },
         }
 
         # we only want to include the session token if we are dealing with temporary credentials
         # otherwise the sigv4 signing method does not need this value (which would be None)
         if session_token:
-            headers['x-amz-security-token'] = {
-                'value': session_token,
-                'include_in_request': True
-            }
+            headers['x-amz-security-token'] = {'value': session_token, 'include_in_request': True}
 
         # ************* TASK 1: CREATE A CANONICAL REQUEST *************
         # http://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
@@ -202,25 +208,20 @@ class AwsFederationProvider(FederationProvider):
             '',  # canonical_querystring
             canonical_headers,
             signed_headers,
-            payload_hash
+            payload_hash,
         ]
         canonical_request = '\n'.join(canonical_request_components)
 
         # ************* TASK 2: CREATE THE STRING TO SIGN*************
         # Match the algorithm to the hashing algorithm you use, either SHA-1 or SHA-256 (recommended)
         algorithm = 'AWS4-HMAC-SHA256'
-        credential_scope_components = [
-            date_stamp,
-            region,
-            service,
-            'aws4_request'
-        ]
+        credential_scope_components = [date_stamp, region, service, 'aws4_request']
         credential_scope = '/'.join(credential_scope_components)
         string_components_to_sign = [
             algorithm,
             headers['x-amz-date']['value'],
             credential_scope,
-            hashlib.sha256(canonical_request.encode('utf-8')).hexdigest()
+            hashlib.sha256(canonical_request.encode('utf-8')).hexdigest(),
         ]
         string_to_sign = '\n'.join(string_components_to_sign)
 
@@ -233,8 +234,10 @@ class AwsFederationProvider(FederationProvider):
 
         # ************* TASK 4: ADD SIGNING INFORMATION TO THE REQUEST *************
         # Put the signature information in a header named Authorization.
-        authorization_header = f'{algorithm} Credential={access_key_id}/{credential_scope}, ' \
-                               f'SignedHeaders={signed_headers}, Signature={signature}'
+        authorization_header = (
+            f'{algorithm} Credential={access_key_id}/{credential_scope}, '
+            f'SignedHeaders={signed_headers}, Signature={signature}'
+        )
 
         # Except for the authorization header, the headers must be included in the canonical_headers and
         # signed_headers values, as noted earlier. order here is not significant.
@@ -242,11 +245,7 @@ class AwsFederationProvider(FederationProvider):
         request_headers = {h: v['value'] for h, v in headers.items() if v['include_in_request'] and v['value']}
         request_headers['authorization'] = authorization_header
 
-        token = {
-            'iam_request_url': endpoint,
-            'iam_request_body': request_body,
-            'iam_request_headers': request_headers
-        }
+        token = {'iam_request_url': endpoint, 'iam_request_body': request_body, 'iam_request_headers': request_headers}
 
         token_encoded = base64.urlsafe_b64encode(json.dumps(token).encode('utf-8'))
         return f'AWS::{token_encoded.decode("utf-8")}'
@@ -260,8 +259,10 @@ class BitbucketFederationProvider(FederationProvider):
     def get_token(self) -> str:
         id_token = os.environ.get('BITBUCKET_STEP_OIDC_TOKEN')
         if not id_token:
-            msg = 'the codebase is not executing in a bitbucket environment and/or the `oidc` flag ' \
-                  'is not set on the pipeline step'
+            msg = (
+                'the codebase is not executing in a bitbucket environment and/or the `oidc` flag '
+                'is not set on the pipeline step'
+            )
             raise exceptions.NotExecutingInBitbucketEnvironment(msg)
         return f'OIDC::{id_token}'
 
@@ -280,14 +281,16 @@ class SpaceliftFederationProvider(FederationProvider):
 
 
 class GitlabFederationProvider(FederationProvider):
-    def __init__(self, token_env_var: str = None) -> None:
+    def __init__(self, token_env_var: str = 'BRITIVE_OIDC_TOKEN') -> None:
         super().__init__()
-        self.token_env_var = token_env_var or 'BRITIVE_OIDC_TOKEN'
+        self.token_env_var = token_env_var
 
     def get_token(self) -> str:
         id_token = os.environ.get(self.token_env_var)
         if not id_token:
-            msg = 'the codebase is not executing in a gitlab environment or the incorrect token environment variable ' \
-                  'was specified'
+            msg = (
+                'the codebase is not executing in a gitlab environment or the incorrect token environment variable '
+                'was specified'
+            )
             raise exceptions.NotExecutingInGitlabEnvironment(msg)
         return f'OIDC::{id_token}'

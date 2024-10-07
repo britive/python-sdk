@@ -24,9 +24,7 @@ class ServiceIdentityTokens:
 
         validate_token_expiration(token_expiration_days)
 
-        data = {
-            'tokenExpirationDays': token_expiration_days
-        }
+        data = {'tokenExpirationDays': token_expiration_days}
 
         return self.britive.post(f'{self.base_url}/users/{service_identity_id}/tokens', json=data)
 
@@ -42,9 +40,7 @@ class ServiceIdentityTokens:
 
         validate_token_expiration(token_expiration_days)
 
-        data = {
-            'tokenExpirationDays': token_expiration_days
-        }
+        data = {'tokenExpirationDays': token_expiration_days}
 
         return self.britive.post(f'{self.base_url}/users/{service_identity_id}/tokens', json=data)
 
@@ -57,4 +53,3 @@ class ServiceIdentityTokens:
         """
 
         return self.britive.get(f'{self.base_url}/users/{service_identity_id}/tokens')
-

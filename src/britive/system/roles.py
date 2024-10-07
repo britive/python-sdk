@@ -1,4 +1,3 @@
-
 class SystemRoles:
     def __init__(self, britive) -> None:
         self.britive = britive
@@ -35,9 +34,7 @@ class SystemRoles:
         """
 
         self._validate_identifier_type(identifier_type)
-        params = {
-            'compactResponse': not verbose
-        }
+        params = {'compactResponse': not verbose}
         return self.britive.get(f'{self.base_url}/{role_identifier}', params=params)
 
     def create(self, role: dict) -> dict:
@@ -49,7 +46,7 @@ class SystemRoles:
         """
 
         return self.britive.post(self.base_url, json=role)
-    
+
     def update(self, role_identifier: str, role: dict, identifier_type: str = 'name') -> None:
         """
         Update a system level role.
@@ -78,8 +75,9 @@ class SystemRoles:
         return self.britive.delete(f'{self.base_url}/{role_identifier}')
 
     @staticmethod
-    def build(name: str, permissions: list, description: str = '', read_only: bool = False,
-              identifier_type: str = 'name') -> dict:
+    def build(
+        name: str, permissions: list, description: str = '', read_only: bool = False, identifier_type: str = 'name'
+    ) -> dict:
         """
         Build a role document given the provided inputs.
 
@@ -98,7 +96,7 @@ class SystemRoles:
             'name': name,
             'description': description,
             'isReadOnly': read_only,
-            'permissions': [{identifier_type: p} for p in permissions]
+            'permissions': [{identifier_type: p} for p in permissions],
         }
 
         return role

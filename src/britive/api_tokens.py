@@ -36,9 +36,7 @@ class ApiTokens:
         :return: Details of the newly created token.
         """
 
-        data = {
-            'tokenExpirationDays': expiration_days
-        }
+        data = {'tokenExpirationDays': expiration_days}
 
         if name:
             data['name'] = name
@@ -88,9 +86,7 @@ class ApiTokens:
             raise ValueError('name and/or expiration_days must be provided.')
 
         if not name and expiration_days:  # only updating expiration days which is a different API call
-            data = {
-                'tokenExpirationDays': expiration_days
-            }
+            data = {'tokenExpirationDays': expiration_days}
             return self.britive.patch(f'{self.base_url}/{token_id}', json=data)
 
         # updating the name and possibly the expiration days - if expiration days not provided make a call
@@ -98,10 +94,6 @@ class ApiTokens:
 
         data = {
             'name': name,
-            'tokenExpirationDays': expiration_days or self.get(token_id=token_id)['tokenExpirationDays']
+            'tokenExpirationDays': expiration_days or self.get(token_id=token_id)['tokenExpirationDays'],
         }
         return self.britive.put(f'{self.base_url}/{token_id}', json=data)
-
-
-
-

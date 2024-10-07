@@ -44,9 +44,7 @@ class IdentityProviders:
         :return: Details of the identity provider.
         """
 
-        params = {
-            'name': identity_provider_name
-        }
+        params = {'name': identity_provider_name}
         return self.britive.get(self.base_url, params=params)
 
     def signing_certificate(self) -> str:
@@ -63,15 +61,18 @@ class IdentityProviders:
 
         return self.britive.get(f'{self.base_url}/signing-certificate')
 
-    def create(self, name: str, description: str = None) -> dict:
-        data = {
-            'name': name,
-            'description': description or ''
-        }
+    def create(self, name: str, description: str = '') -> dict:
+        data = {'name': name, 'description': description}
         return self.britive.post(self.base_url, json=data)
 
-    def update(self, identity_provider_id: str, name: str = None, description: str = None, sso_provider: str = None,
-               scim_provider: str = None) -> None:
+    def update(
+        self,
+        identity_provider_id: str,
+        name: str = None,
+        description: str = None,
+        sso_provider: str = None,
+        scim_provider: str = None,
+    ) -> None:
         """
         Updates an identity provider.
 
@@ -100,7 +101,7 @@ class IdentityProviders:
             'name': name,
             'description': description,
             'scimProvider': scim_provider,
-            'ssoProvider': sso_provider
+            'ssoProvider': sso_provider,
         }
         updates = {k: v for k, v in possible_updates.items() if v is not None}
 
@@ -110,7 +111,7 @@ class IdentityProviders:
             'name': idp['name'],
             'description': idp['description'],
             'scimProvider': idp['scimProvider'],
-            'ssoProvider': idp['ssoProvider']
+            'ssoProvider': idp['ssoProvider'],
         }
 
         # merge in any updates
@@ -144,18 +145,12 @@ class IdentityProviders:
         """
 
         # collect what needs to be updated
-        possible_updates = {
-            'mfaEnabled': non_root_user,
-            'mfaEnabledRootUser': root_user
-        }
+        possible_updates = {'mfaEnabled': non_root_user, 'mfaEnabledRootUser': root_user}
         updates = {k: v for k, v in possible_updates.items() if v is not None}
 
         # collect what already exists
         idp = self.get(identity_provider_id=identity_provider_id)
-        existing = {
-            'mfaEnabled': idp['mfaEnabled'],
-            'mfaEnabledRootUser': idp['mfaRootUserEnabled']
-        }
+        existing = {'mfaEnabled': idp['mfaEnabled'], 'mfaEnabledRootUser': idp['mfaRootUserEnabled']}
 
         # merge in any updates
         data = {**existing, **updates}
@@ -176,7 +171,7 @@ class IdentityProviders:
             url=f'{self.base_url}/{identity_provider_id}/saml-metadata',
             file_content_as_str=metadata_xml,
             filename='file',
-            content_type='text/xml'
+            content_type='text/xml',
         )
 
 
@@ -201,9 +196,7 @@ class ScimTokens:
         :return: Details of the newly created SCIM token.
         """
 
-        data = {
-            'tokenExpirationDays': token_expiration_days
-        }
+        data = {'tokenExpirationDays': token_expiration_days}
         return self.britive.post(f'{self.base_url}/{identity_provider_id}/scim-token', json=data)
 
     def get(self, identity_provider_id: str) -> dict:
@@ -226,9 +219,7 @@ class ScimTokens:
         :return: None
         """
 
-        data = {
-            'tokenExpirationDays': token_expiration_days
-        }
+        data = {'tokenExpirationDays': token_expiration_days}
         return self.britive.patch(f'{self.base_url}/{identity_provider_id}/scim-token', json=data)
 
 

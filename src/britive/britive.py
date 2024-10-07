@@ -49,9 +49,6 @@ from .tasks import Tasks
 from .users import Users
 from .workload import Workload
 
-BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
-BRITIVE_TOKEN_ENV_NAME = 'BRITIVE_API_TOKEN'
-
 
 class Britive:
     """
@@ -114,12 +111,11 @@ class Britive:
         :raises: TenantMissingError, TokenMissingError
         """
 
-        self.tenant = tenant or os.environ.get(BRITIVE_TENANT_ENV_NAME)
+        self.tenant = tenant or os.getenv('BRITIVE_TENANT')
 
         if not self.tenant:
             raise TenantMissingError(
-                'Tenant not explicitly provided and could not be sourced '
-                f'from environment variable {BRITIVE_TENANT_ENV_NAME}'
+                'Tenant not explicitly provided and could not be sourced from environment variable BRITIVE_TENANT'
             )
 
         if token_federation_provider:
@@ -129,12 +125,11 @@ class Britive:
                 duration_seconds=token_federation_provider_duration_seconds,
             )
         else:
-            self.__token = token or os.environ.get(BRITIVE_TOKEN_ENV_NAME)
+            self.__token = token or os.getenv('BRITIVE_API_TOKEN')
 
         if not self.__token:
             raise TokenMissingError(
-                'Token not explicitly provided and could not be sourced '
-                f'from environment variable {BRITIVE_TOKEN_ENV_NAME}'
+                'Token not explicitly provided and could not be sourced from environment variable BRITIVE_API_TOKEN'
             )
 
         # clean up and apply logic to the passed in tenant (for backwards compatibility with no domain being required)
@@ -182,7 +177,6 @@ class Britive:
             }
         )
 
-        self.access_broker = AccessBroker(self)
         self.access_builder = AccessBuilderSettings(self)
         self.accounts = Accounts(self)
         self.api_tokens = ApiTokens(self)
@@ -216,6 +210,10 @@ class Britive:
         self.tasks = Tasks(self)
         self.users = Users(self)
         self.workload = Workload(self)
+
+        # depends on my_access
+        self.access_broker = AccessBroker(self)
+
 
     @staticmethod
     def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:
@@ -469,7 +467,6 @@ class Britive:
             response = self.__request_with_exponential_backoff_and_retry(
                 method=method, url=url, params=params, data=data, json=json
             )
-            # print(response.content)
             if self.__response_has_no_content(response):  # handle no content responses
                 return None
 

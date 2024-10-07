@@ -71,10 +71,12 @@ include = ["pyproject.toml", "src/**/*.py", "tests/*.py"]
 line-length = 120
 
 [tool.ruff.format]
-quote-style = "single"
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
 indent-style = "space"
-skip-magic-trailing-comma = false
 line-ending = "auto"
+quote-style = "single"
+skip-magic-trailing-comma = false
 
 [tool.ruff.lint]
 select = [

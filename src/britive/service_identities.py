@@ -19,11 +19,7 @@ class ServiceIdentities:
         :return: List of service identity records
         """
 
-        params = {
-            'type': 'ServiceIdentity',
-            'page': 0,
-            'size': 100
-        }
+        params = {'type': 'ServiceIdentity', 'page': 0, 'size': 100}
         if filter_expression:
             params['filter'] = filter_expression
         if include_tags:
@@ -39,9 +35,7 @@ class ServiceIdentities:
         :return: Details of the specified user.
         """
 
-        params = {
-            'type': 'ServiceIdentity'
-        }
+        params = {'type': 'ServiceIdentity'}
         return self.britive.get(f'{self.base_url}/{service_identity_id}', params=params)
 
     def get_by_name(self, name: str) -> list:
@@ -77,12 +71,7 @@ class ServiceIdentities:
         :return: List of user records
         """
 
-        params = {
-            'type': 'ServiceIdentity',
-            'page': 0,
-            'size': 100,
-            'searchText': search_string
-        }
+        params = {'type': 'ServiceIdentity', 'page': 0, 'size': 100, 'searchText': search_string}
 
         return self.britive.get(self.base_url, params)
 
