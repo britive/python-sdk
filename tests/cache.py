@@ -414,9 +414,9 @@ def cached_notification_applications(pytestconfig, cached_notification):
 @pytest.fixture(scope='session')
 @cached_resource(name='vault')
 def cached_vault(pytestconfig, timestamp, cached_tag):
-    if (
-        vault := britive.secrets_manager.vaults.create(name=f'vault-{timestamp}', tags=[cached_tag['userTagId']])
-    ).get('errorCode') == 'SM-0026':
+    if (vault := britive.secrets_manager.vaults.create(name=f'vault-{timestamp}', tags=[cached_tag['userTagId']])).get(
+        'errorCode'
+    ) == 'SM-0026':
         vault = {'DONOTDELETE': True, **britive.secrets_manager.vaults.list()}
     return vault
 
@@ -635,8 +635,8 @@ def cached_workload_identity_provider_aws(pytestconfig, timestamp, cached_identi
             name=f'python-sdk-aws-{timestamp}', attributes_map={'UserId': cached_identity_attribute['id']}
         )
         return response
-    except exceptions.InternalServerError:
-        raise Exception('AWS provider could not be created and none found')
+    except exceptions.InternalServerError as e:
+        raise Exception('AWS provider could not be created and none found') from e
 
 
 @pytest.fixture(scope='session')
