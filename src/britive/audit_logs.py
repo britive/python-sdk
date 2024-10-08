@@ -12,7 +12,6 @@ class AuditLogs:
         self.base_url = f'{self.britive.base_url}/logs'
         self.webhooks = AuditLogsWebhooks(britive)
 
-
     def fields(self) -> dict:
         """
         Return list of fields that be can used in a filter for an audit query.
@@ -80,9 +79,7 @@ class AuditLogsWebhooks:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/logs/webhooks'
 
-    def create_or_update(
-        self, notification_medium_id: str, jmespath_filter: str = None, description: str = None
-    ) -> dict:
+    def create_or_update(self, notification_medium_id: str, jmespath_filter: str = '', description: str = '') -> dict:
         """
         Return details of a created, or updated if the notificationMediumId already exists, audit log webhook.
 
@@ -92,13 +89,11 @@ class AuditLogsWebhooks:
         :return: Dict of field keys to field names.
         """
 
-        if jmespath_filter is None:
-            jmespath_filter = ''
         try:
             with contextlib.suppress(EmptyExpressionError):
                 jmespath.compile(jmespath_filter)
-        except ParseError:
-            raise ValueError('Invalid JMESPath.')
+        except ParseError as e:
+            raise ValueError('Invalid JMESPath.') from e
 
         params = {
             'notificationMediumId': notification_medium_id,

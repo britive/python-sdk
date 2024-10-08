@@ -3,7 +3,7 @@ class Environments:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
 
-    def create(self, application_id: str, name: str, description: str = None, parent_group_id: str = None) -> dict:
+    def create(self, application_id: str, name: str, description: str = '', parent_group_id: str = None) -> dict:
         """
         Create a new environment inside the specified application.
 
@@ -20,10 +20,9 @@ class Environments:
         data = {
             'name': name,
             'type': 'environment',
-            'description': description or '',
-            'parentGroupId': parent_group_id or self.britive.environment_groups.get_or_create_root(
-                application_id=application_id
-            )
+            'description': description,
+            'parentGroupId': parent_group_id
+            or self.britive.environment_groups.get_or_create_root(application_id=application_id),
         }
 
         return self.britive.post(f'{self.base_url}/{application_id}/root-environment-group/environments', json=data)
@@ -65,7 +64,7 @@ class Environments:
 
         return self.britive.post(f'{self.base_url}/{application_id}/environments/{environment_id}/tests')
 
-    def update(self, application_id: str, environment_id: str,  **kwargs) -> dict:
+    def update(self, application_id: str, environment_id: str, **kwargs) -> dict:
         """
         Update the supplied properties of the environment.
 
@@ -77,20 +76,11 @@ class Environments:
         :return: Details of the updated environment.
         """
 
-        data = {
-            'propertyTypes': []
-        }
+        data = {'propertyTypes': []}
         for key, value in kwargs.items():
-            data['propertyTypes'].append(
-                {
-                    'name': key,
-                    'value': value,
-                    'defaultValue': value
-                }
-            )
+            data['propertyTypes'].append({'name': key, 'value': value, 'defaultValue': value})
         return self.britive.patch(
-            f'{self.base_url}/{application_id}/environments/{environment_id}/properties',
-            json=data
+            f'{self.base_url}/{application_id}/environments/{environment_id}/properties', json=data
         )
 
     def scan(self, application_id: str, environment_id: str) -> dict:
@@ -123,5 +113,3 @@ class Environments:
         """
 
         return self.britive.delete(f'{self.base_url}/{application_id}/environments/{environment_id}')
-
-

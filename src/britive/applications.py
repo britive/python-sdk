@@ -1,16 +1,6 @@
 valid_user_account_mappings = {
-    'email': [
-        {
-            'name': 'email',
-            'description': 'Email'
-        }
-    ],
-    'username': [
-        {
-            'name': 'username',
-            'description': 'Username'
-        }
-    ]
+    'email': [{'name': 'email', 'description': 'Email'}],
+    'username': [{'name': 'username', 'description': 'Username'}],
 }
 
 
@@ -64,10 +54,7 @@ class Applications:
         :return: Details of the created application.
         """
 
-        data = {
-            'catalogAppId': catalog_id,
-            'catalogAppDisplayName': application_name
-        }
+        data = {'catalogAppId': catalog_id, 'catalogAppDisplayName': application_name}
 
         return self.britive.post(self.base_url, json=data)
 
@@ -84,9 +71,7 @@ class Applications:
         if user_account_mapping and user_account_mapping not in valid_user_account_mappings:
             raise ValueError('invalid user_account_mapping value')
 
-        data = {
-            'userAccountMappings': valid_user_account_mappings.get(user_account_mapping, [])
-        }
+        data = {'userAccountMappings': valid_user_account_mappings.get(user_account_mapping, [])}
         self.britive.post(f'{self.base_url}/{application_id}/user-account-mappings', json=data)
         return self.get(application_id=application_id)
 
@@ -98,9 +83,7 @@ class Applications:
         :return: Details of the newly enabled application.
         """
 
-        data = {
-            'status': 'active'
-        }
+        data = {'status': 'active'}
         return self.britive.patch(f'{self.base_url}/{application_id}', json=data)
 
     def disable(self, application_id: str) -> dict:
@@ -111,9 +94,7 @@ class Applications:
         :return: Details of the newly disabled application.
         """
 
-        data = {
-            'status': 'inactive'
-        }
+        data = {'status': 'inactive'}
         return self.britive.patch(f'{self.base_url}/{application_id}', json=data)
 
     def test(self, application_id: str) -> dict:
@@ -140,17 +121,9 @@ class Applications:
         :return: Details of the updated application.
         """
 
-        data = {
-            'propertyTypes': []
-        }
+        data = {'propertyTypes': []}
         for key, value in kwargs.items():
-            data['propertyTypes'].append(
-                {
-                    'name': key,
-                    'value': value,
-                    'defaultValue': value
-                }
-            )
+            data['propertyTypes'].append({'name': key, 'value': value, 'defaultValue': value})
         return self.britive.patch(f'{self.base_url}/{application_id}/properties', json=data)
 
     def scan(self, application_id: str) -> dict:
@@ -186,7 +159,5 @@ class Applications:
         :return: None
         """
 
-        params = {
-            'appContainerId': application_id
-        }
+        params = {'appContainerId': application_id}
         return self.britive.delete(self.base_url, params=params)

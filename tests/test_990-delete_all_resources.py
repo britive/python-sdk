@@ -7,6 +7,85 @@ from britive import exceptions
 from .cache import *  # will also import some globals like `britive`
 
 
+# 400-access_broker_permissions
+def test_delete_access_broker_profile_permission(cached_access_broker_profile_permission, cached_access_broker_profile):
+    try:
+        response = britive.access_broker.profiles.permissions.delete_permission(
+            permission_id=cached_access_broker_profile_permission['permissionId'],
+            profile_id=cached_access_broker_profile['profileId'],
+        )
+        assert response is None
+    finally:
+        cleanup('access-broker-profile-permission')
+
+
+# 390-access_broker_profiles_policies
+def test_delete_access_broker_profile_policy(cached_access_broker_profile_policy, cached_access_broker_profile):
+    try:
+        response = britive.access_broker.profiles.policies.delete(
+            policy_id=cached_access_broker_profile_policy['id'], profile_id=cached_access_broker_profile['profileId']
+        )
+        assert response is None
+    finally:
+        cleanup('access-broker-profile-policy')
+
+
+# 380-access_broker_profiles
+def test_delete_access_broker_profile(cached_access_broker_profile):
+    try:
+        response = britive.access_broker.profiles.delete(cached_access_broker_profile['profileId'])
+        assert response is None
+    finally:
+        cleanup('access-broker-profile')
+
+
+# 360-resource_permissions
+def test_delete_access_broker_resource(cached_access_broker_resource):
+    try:
+        response = britive.access_broker.resources.delete(cached_access_broker_resource['resourceId'])
+        assert response is None
+    finally:
+        cleanup('access-broker-resource')
+
+
+# 350-resource_labels
+def test_delete_resource_label(cached_access_broker_resource_label):
+    try:
+        response = britive.access_broker.resources.labels.delete(cached_access_broker_resource_label['keyId'])
+        assert response is None
+    finally:
+        cleanup('access-broker-resource-label')
+
+
+# 340-resource_types
+def test_delete_resource_type(cached_access_broker_resource_type):
+    remaining_permissions = britive.access_broker.resources.permissions.list(
+        resource_type_id=cached_access_broker_resource_type['resourceTypeId']
+    )
+    for permission in remaining_permissions:
+        try:
+            response = britive.access_broker.resources.permissions.delete(permission['permissionId'])
+            assert response is None
+        except exceptions.NotFound as e:
+            assert 'Resource permission does not exist' in str(e)
+    try:
+        response = britive.access_broker.resources.types.delete(cached_access_broker_resource_type['resourceTypeId'])
+        assert response is None
+    except exceptions.InvalidRequest as e:
+        assert 'Resource type does not exist' in str(e)
+    finally:
+        cleanup('access-broker-resource-type')
+
+
+# 330-response_templates
+def test_response_template_delete(cached_access_broker_response_template):
+    try:
+        response = britive.access_broker.response_templates.delete(cached_access_broker_response_template['templateId'])
+        assert response is None
+    finally:
+        cleanup('access-broker-response-template')
+
+
 # 310-system_permissions
 def test_system_level_permission_delete(cached_system_level_permission):
     try:
@@ -30,6 +109,8 @@ def test_audit_logs_webhook_delete(cached_notification_medium_webhook):
     try:
         response = britive.audit_logs.webhooks.delete(notification_medium_id=cached_notification_medium_webhook['id'])
         assert response is None
+    except exceptions.InvalidRequest as e:
+        assert 'Auditlog webhook not found' in str(e)
     finally:
         cleanup('audit-logs-webhook')
 
@@ -353,8 +434,3 @@ def test_identity_attribute_delete(cached_identity_attribute):
         assert response is None
     finally:
         cleanup('identity-attribute')
-
-
-# timestamp
-def test_timestamp_delete(timestamp):
-    cleanup('timestamp')

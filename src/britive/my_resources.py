@@ -83,9 +83,8 @@ class MyResources:
         otp: str = None,
         wait_time: int = 60,
         max_wait_time: int = 600,
-        progress_func: Callable = None
+        progress_func: Callable = None,
     ) -> dict:
-
         data = {'justification': justification}
 
         transaction = None
@@ -370,7 +369,7 @@ class MyResources:
         resource_profile_map = {
             f'{item["resourceName"].lower()}|{item["profileName"].lower()}': {
                 'profile_id': item['profileId'],
-                'resource_id': item['resourceId']
+                'resource_id': item['resourceId'],
             }
             for item in self.list_profiles()
         }

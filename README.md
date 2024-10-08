@@ -75,6 +75,8 @@ All pagination is handled by the package. The caller will never have to deal wit
 The following Britive resources are supported with full CRUDL operations where appropriate, and additional actions where
 they exist.
 
+* Access Broker
+* Access Builder
 * Accounts
 * Accounts (associated with an application/environment)
 * API Tokens (for Users)
@@ -86,6 +88,7 @@ they exist.
 * Identity Attributes
 * Identity Providers
 * My Access (access granted to the given identity (user or service))
+* My Resources (access granted to the given identity (user or service))
 * My Secrets (access granted to the given identity (user or service))
 * Notifications
 * Permissions (associated with an application/environment)

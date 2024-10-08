@@ -460,7 +460,7 @@ class Policies:
         """
 
         params = {'resource': path, 'consumer': 'secretmanager'}
-        if filter:
+        if filter_str:
             params['filter'] = filter_str
         return self.britive.get(f'{self.base_url}', params=params)
 

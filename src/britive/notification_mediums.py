@@ -41,8 +41,8 @@ class NotificationMediums:
             description = f'notification medium - {notification_medium_type}'
 
         connection_parameters = {
-            **({"URL": url} if notification_medium_type != "teams" else {"Webhook URL": url}),
-            **({"token": token} if notification_medium_type == "slack" and token else {}),
+            **({'URL': url} if notification_medium_type != 'teams' else {'Webhook URL': url}),
+            **({'token': token} if notification_medium_type == 'slack' and token else {}),
         }
 
         params = {

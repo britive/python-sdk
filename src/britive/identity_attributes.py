@@ -1,4 +1,3 @@
-
 class IdentityAttributes:
     def __init__(self, britive) -> None:
         self.britive = britive
@@ -28,12 +27,7 @@ class IdentityAttributes:
         if data_type not in ['String', 'Number', 'Boolean', 'Date']:
             raise ValueError(f'invalid data_type {data_type}')
 
-        data = {
-            'name': name,
-            'description': description,
-            'dataType': data_type,
-            'multiValued': multi_valued
-        }
+        data = {'name': name, 'description': description, 'dataType': data_type, 'multiValued': multi_valued}
 
         return self.britive.post(self.base_url, json=data)
 
@@ -46,4 +40,3 @@ class IdentityAttributes:
         """
 
         return self.britive.delete(f'{self.base_url}/{attribute_id}')
-

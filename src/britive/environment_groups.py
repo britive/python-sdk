@@ -1,10 +1,9 @@
-
 class EnvironmentGroups:
     def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
 
-    def create(self, application_id: str, name: str, description: str = None, parent_id: str = None) -> dict:
+    def create(self, application_id: str, name: str, description: str = '', parent_id: str = None) -> dict:
         """
         Create a new environment group inside the specified application.
 
@@ -21,8 +20,8 @@ class EnvironmentGroups:
         data = {
             'name': name,
             'type': 'group',
-            'description': description or '',
-            'parentId': parent_id or self.get_or_create_root(application_id=application_id)
+            'description': description,
+            'parentId': parent_id or self.get_or_create_root(application_id=application_id),
         }
 
         return self.britive.post(f'{self.base_url}/{application_id}/root-environment-group/groups', json=data)
@@ -50,17 +49,11 @@ class EnvironmentGroups:
                 break
 
         if not root_id:
-            data = {
-                'name': 'root',
-                'type': 'group',
-                'description': '',
-                'parentId': ''
-            }
+            data = {'name': 'root', 'type': 'group', 'description': '', 'parentId': ''}
 
-            root_id = self.britive.post(
-                f'{self.base_url}/{application_id}/root-environment-group/groups',
-                json=data
-            )['id']
+            root_id = self.britive.post(f'{self.base_url}/{application_id}/root-environment-group/groups', json=data)[
+                'id'
+            ]
 
         return root_id
 
@@ -102,6 +95,3 @@ class EnvironmentGroups:
         """
 
         return self.britive.delete(f'{self.base_url}/{application_id}/environment-groups/{environment_group_id}')
-
-
-

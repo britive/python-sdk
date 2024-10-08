@@ -23,9 +23,7 @@ class Reports:
         :return: List of reports.
         """
 
-        params = {
-            'type': 'report'
-        }
+        params = {'type': 'report'}
         return self.britive.get(self.base_url, params=params)
 
     def run(self, report_id: str, csv: bool = False, filter_expression: str = None) -> Any:
@@ -54,5 +52,3 @@ class Reports:
             for row in csv_lib.DictReader(StringIO(csv_results), quoting=csv_lib.QUOTE_MINIMAL):
                 dict_results.append({k: _json_loads(v) for k, v in row.items()})
             return dict_results
-
-
