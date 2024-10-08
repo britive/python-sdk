@@ -1,11 +1,15 @@
-
 class Accounts:
     def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
 
-    def list(self, application_id: str, environment_id: str = None,
-             include_associations: bool = True, filter_expression: str = None) -> list:
+    def list(
+        self,
+        application_id: str,
+        environment_id: str = None,
+        include_associations: bool = True,
+        filter_expression: str = None,
+    ) -> list:
         """
         Return details of all the accounts associated with a given application and environment.
 
@@ -17,11 +21,7 @@ class Accounts:
         :return: List containing details of each account.
         """
 
-        params = {
-            'page': 0,
-            'size': 100,
-            'includeMembers': include_associations
-        }
+        params = {'page': 0, 'size': 100, 'includeMembers': include_associations}
 
         environment_id = environment_id or self.britive.get_root_environment_group(application_id)
 
@@ -31,8 +31,9 @@ class Accounts:
         url = f'{self.base_url}/{application_id}/environments/{environment_id}/accounts'
         return self.britive.get(url, params=params)
 
-    def permissions(self, account_id: str, application_id: str,
-                    environment_id: str = None, filter_expression: str = None) -> list:
+    def permissions(
+        self, account_id: str, application_id: str, environment_id: str = None, filter_expression: str = None
+    ) -> list:
         """
         Return details about the permissions associated to the specified account.
 
@@ -44,10 +45,7 @@ class Accounts:
         :return: List of permissions associated with the specified account.
         """
 
-        params = {
-            'page': 0,
-            'size': 100
-        }
+        params = {'page': 0, 'size': 100}
 
         environment_id = environment_id or self.britive.get_root_environment_group(application_id)
 
@@ -57,8 +55,9 @@ class Accounts:
         url = f'{self.base_url}/{application_id}/environments/{environment_id}/accounts/{account_id}/permissions'
         return self.britive.get(url, params=params)
 
-    def groups(self, account_id: str, application_id: str,
-               environment_id: str = None, filter_expression: str = None) -> list:
+    def groups(
+        self, account_id: str, application_id: str, environment_id: str = None, filter_expression: str = None
+    ) -> list:
         """
         Return details about the groups associated to the specified account.
 
@@ -70,10 +69,7 @@ class Accounts:
         :return: List of groups associated with the specified account.
         """
 
-        params = {
-            'page': 0,
-            'size': 100
-        }
+        params = {'page': 0, 'size': 100}
 
         environment_id = environment_id or self.britive.get_root_environment_group(application_id)
 
@@ -83,8 +79,14 @@ class Accounts:
         url = f'{self.base_url}/{application_id}/environments/{environment_id}/accounts/{account_id}/groups'
         return self.britive.get(url, params=params)
 
-    def map(self, user_id: str, account_id: str, application_id: str, environment_id: str = None,
-            map_user_to_account_in_all_application_environments: bool = False) -> list:
+    def map(
+        self,
+        user_id: str,
+        account_id: str,
+        application_id: str,
+        environment_id: str = None,
+        map_user_to_account_in_all_application_environments: bool = False,
+    ) -> list:
         """
         Associate a user (or users) with an account.
 
@@ -108,8 +110,14 @@ class Accounts:
         else:
             return self.britive.post(url, json=[user_id])
 
-    def unmap(self, user_id: str, account_id: str, application_id: str,
-              environment_id: str = None, force_profile_checkins: bool = True) -> list:
+    def unmap(
+        self,
+        user_id: str,
+        account_id: str,
+        application_id: str,
+        environment_id: str = None,
+        force_profile_checkins: bool = True,
+    ) -> list:
         """
         Remove a user from an account.
 
@@ -126,9 +134,7 @@ class Accounts:
 
         environment_id = environment_id or self.britive.get_root_environment_group(application_id)
 
-        params = {
-            'forceCheckinPaps': force_profile_checkins
-        }
+        params = {'forceCheckinPaps': force_profile_checkins}
 
         url = f'{self.base_url}/{application_id}/environments/{environment_id}/accounts/{account_id}/users/{user_id}'
         return self.britive.delete(url, params=params)
@@ -160,11 +166,7 @@ class Accounts:
         :return: List of users available to be mapped to the specified account.
         """
 
-        params = {
-            'page': 0,
-            'size': 100,
-            'query': 'available'
-        }
+        params = {'page': 0, 'size': 100, 'query': 'available'}
 
         environment_id = environment_id or self.britive.get_root_environment_group(application_id)
 

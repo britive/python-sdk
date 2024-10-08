@@ -1,4 +1,3 @@
-
 class TagMembershipRules:
     def __init__(self, britive) -> None:
         self.britive = britive
@@ -28,11 +27,7 @@ class TagMembershipRules:
         if not attribute_id:
             raise ValueError(f'identity attribute name {attribute_id_or_name} not found.')
 
-        return {
-            'attributeId': attribute_id,
-            'operator': operator.lower(),
-            'value': value
-        }
+        return {'attributeId': attribute_id, 'operator': operator.lower(), 'value': value}
 
     def list(self, tag_id: str) -> list:
         """
@@ -87,10 +82,7 @@ class TagMembershipRules:
         :returns: List of matching users.
         """
 
-        params = {
-            'page': 0,
-            'size': 100
-        }
+        params = {'page': 0, 'size': 100}
         return self.britive.get(f'{self.base_url}/{tag_id}/matched-users', params=params)
 
 
@@ -110,10 +102,7 @@ class Tags:
         :return: Details of the newly created tag.
         """
 
-        data = {
-            'name': name,
-            'description': description
-        }
+        data = {'name': name, 'description': description}
 
         if idp:
             data['userTagIdentityProviders'] = [{'identityProvider': {'id': idp}}]
@@ -140,10 +129,7 @@ class Tags:
         :return: List of tags.
         """
 
-        params = {
-            'page': 0,
-            'size': 100
-        }
+        params = {'page': 0, 'size': 100}
         if filter_expression:
             params['filter'] = filter_expression
 
@@ -158,11 +144,7 @@ class Tags:
         :return: List of user records.
         """
 
-        params = {
-            'page': 0,
-            'size': 100,
-            'searchText': search_string
-        }
+        params = {'page': 0, 'size': 100, 'searchText': search_string}
 
         return self.britive.get(self.base_url, params)
 
@@ -176,10 +158,7 @@ class Tags:
         :return: List of users associated with `tag_id`.
         """
 
-        params = {
-            'page': 0,
-            'size': 100
-        }
+        params = {'page': 0, 'size': 100}
         if filter_expression:
             params['filter'] = filter_expression
 
@@ -247,11 +226,7 @@ class Tags:
         :return: Details of the updated tag.
         """
 
-        data = {
-            'userTagId': tag_id,
-            'name': name,
-            'description': description
-        }
+        data = {'userTagId': tag_id, 'name': name, 'description': description}
 
         self.britive.patch(self.base_url, json=data)
         return self.get(tag_id)

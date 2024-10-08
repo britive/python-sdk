@@ -274,7 +274,7 @@ class MyAccess:
 
         return self.britive.delete(url)
 
-    def approve_request(self, request_id: str, comments: str = None) -> None:
+    def approve_request(self, request_id: str, comments: str = '') -> None:
         """
         Approves a request.
 
@@ -284,11 +284,11 @@ class MyAccess:
         """
 
         params = {'approveRequest': 'yes'}
-        data = {'approverComment': comments or ""}
+        data = {'approverComment': comments}
 
         return self.britive.patch(f'{self.britive.base_url}/v1/approvals/{request_id}', params=params, json=data)
 
-    def reject_request(self, request_id: str, comments: str = None) -> None:
+    def reject_request(self, request_id: str, comments: str = '') -> None:
         """
         Rejects a request.
 
@@ -298,7 +298,7 @@ class MyAccess:
         """
 
         params = {'approveRequest': 'no'}
-        data = {'approverComment': comments or ""}
+        data = {'approverComment': comments}
 
         return self.britive.patch(f'{self.britive.base_url}/v1/approvals/{request_id}', params=params, json=data)
 

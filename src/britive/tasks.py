@@ -1,4 +1,3 @@
-
 class Tasks:
     def __init__(self, britive) -> None:
         self.britive = britive
@@ -29,8 +28,15 @@ class Tasks:
 
         return self.britive.get(f'{self.base_url}/services/{task_service_id}/tasks/{task_id}')[0]
 
-    def create(self, task_service_id: str, name: str, properties: dict, frequency_type: str, start_time: str = None,
-               frequency_interval: str = None) -> dict:
+    def create(
+        self,
+        task_service_id: str,
+        name: str,
+        properties: dict,
+        frequency_type: str,
+        start_time: str = None,
+        frequency_interval: str = None,
+    ) -> dict:
         """
         Create a new task.
 
@@ -69,7 +75,7 @@ class Tasks:
             'startTime': start_time,
             'frequencyType': frequency_type,
             'frequencyInterval': frequency_interval,
-            'properties': properties
+            'properties': properties,
         }
         return self.britive.post(f'{self.base_url}/services/{task_service_id}/tasks', json=data)
 
@@ -84,8 +90,16 @@ class Tasks:
 
         return self.britive.get(f'{self.base_url}/services/{task_service_id}/tasks/{task_id}/statuses')
 
-    def update(self, task_service_id: str, task_id: str, name: str = None, properties: dict = None,
-               frequency_type: str = None, start_time: str = None, frequency_interval: str = None) -> dict:
+    def update(
+        self,
+        task_service_id: str,
+        task_id: str,
+        name: str = None,
+        properties: dict = None,
+        frequency_type: str = None,
+        start_time: str = None,
+        frequency_interval: str = None,
+    ) -> dict:
         """
         Updates a task.
 
@@ -128,7 +142,7 @@ class Tasks:
             'startTime': start_time,
             'frequencyType': frequency_type,
             'frequencyInterval': frequency_interval,
-            'properties': properties
+            'properties': properties,
         }
 
         # and now remove any None values
@@ -146,4 +160,3 @@ class Tasks:
         """
 
         return self.britive.delete(f'{self.base_url}/services/{task_service_id}/tasks/{task_id}')
-

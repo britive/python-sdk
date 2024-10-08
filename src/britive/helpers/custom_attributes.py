@@ -52,11 +52,7 @@ class CustomAttributes:
         :param custom_attributes: An attribute map where keys are the custom attribute ids or names and values are
             custom attribute values as strings or list of strings for multivalued attributes.
         """
-        return self._modify(
-            principal_id=principal_id,
-            operation='remove',
-            custom_attributes=custom_attributes
-        )
+        return self._modify(principal_id=principal_id, operation='remove', custom_attributes=custom_attributes)
 
     def _build_list(self, operation: str, custom_attributes: dict) -> list:
         # first get list of existing custom identity attributes and build some helpers
@@ -78,13 +74,7 @@ class CustomAttributes:
             multi_value = value if isinstance(value, list) else [value]  # handle multivalued attributes
             for v in multi_value:
                 attrs_list.append(
-                    {
-                        'op': operation,
-                        'customUserAttribute': {
-                            'attributeValue': v,
-                            'attributeId': custom_attribute_id
-                        }
-                    }
+                    {'op': operation, 'customUserAttribute': {'attributeValue': v, 'attributeId': custom_attribute_id}}
                 )
         return attrs_list
 
@@ -94,5 +84,5 @@ class CustomAttributes:
 
         return self.britive.patch(
             self.base_url.format(id=principal_id),
-            json=self._build_list(operation=operation, custom_attributes=custom_attributes)
+            json=self._build_list(operation=operation, custom_attributes=custom_attributes),
         )

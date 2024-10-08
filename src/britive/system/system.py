@@ -15,4 +15,3 @@ class System:
         self.permissions = SystemPermissions(britive)
         self.consumers = SystemConsumers(britive)
         self.actions = SystemActions(britive)
-

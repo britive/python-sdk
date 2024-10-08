@@ -150,6 +150,14 @@ pytest tests/test_290_system_consumers.py -v
 pytest tests/test_300-system_roles.py -v
 pytest tests/test_310-system_permissions.py -v
 pytest tests/test_320-settings_banner.py -v
+pytest tests/test_330-response_templates.py -v
+pytest tests/test_340-resource_types.py -v
+pytest tests/test_350-resource_labels.py -v
+pytest tests/test_360-resource.py -v
+pytest tests/test_370-resource_permissions.py -v
+pytest tests/test_380-access_broker_profiles.py -v
+pytest tests/test_390-access_broker_profiles_policies.py -v
+pytest tests/test_400-access_broker_permissions.py -v
 pytest tests/test_990-delete_all_resources.py -v
 ```
 

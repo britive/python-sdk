@@ -1,4 +1,3 @@
-
 class SecurityPolicies:
     def __init__(self, britive) -> None:
         self.britive = britive
@@ -23,7 +22,7 @@ class SecurityPolicies:
 
         return self.britive.get(f'{self.base_url}/{security_policy_id}')
 
-    def create(self, name: str, effect: str, ips: list, tokens: list, description: str = None) -> dict:
+    def create(self, name: str, effect: str, ips: list, tokens: list, description: str = '') -> dict:
         """
         Create a new security policy.
 
@@ -40,16 +39,10 @@ class SecurityPolicies:
 
         data = {
             'name': name,
-            'description': description or '',
+            'description': description,
             'effect': effect,
-            'conditions': [
-                {
-                    'values': ips,
-                    'type': 'ipAddress',
-                    'evaluation': 'any'
-                }
-            ],
-            'assignedTokens': [{'id': t} for t in tokens]
+            'conditions': [{'values': ips, 'type': 'ipAddress', 'evaluation': 'any'}],
+            'assignedTokens': [{'id': t} for t in tokens],
         }
         return self.britive.post(self.base_url, json=data)
 
@@ -73,8 +66,15 @@ class SecurityPolicies:
 
         return self.britive.patch(f'{self.base_url}/{security_policy_id}/disabled-statuses')
 
-    def update(self, security_policy_id: str, name: str = None, effect: str = None, ips: list = None,
-               tokens: list = None, description: str = None) -> None:
+    def update(
+        self,
+        security_policy_id: str,
+        name: str = None,
+        effect: str = None,
+        ips: list = None,
+        tokens: list = None,
+        description: str = None,
+    ) -> None:
         """
         Update a security policy.
 
@@ -98,31 +98,20 @@ class SecurityPolicies:
         existing_policy = self.get(security_policy_id=security_policy_id)
 
         # construct part of the dict assuming every parameter is present
-        raw_data = {
-            'id': security_policy_id,
-            'name': name,
-            'description': description,
-            'effect': effect
-        }
+        raw_data = {'id': security_policy_id, 'name': name, 'description': description, 'effect': effect}
 
         # and now remove any None values
         update = {k: v for k, v in raw_data.items() if v is not None}
 
         # handle the more complex attributes if needed
         if ips:
-            update['conditions'] = [
-                {
-                    'values': ips,
-                    'type': 'ipAddress',
-                    'evaluation': 'any'
-                }
-            ]
+            update['conditions'] = [{'values': ips, 'type': 'ipAddress', 'evaluation': 'any'}]
         if tokens:
             update['assignedTokens'] = [{'id': t} for t in tokens]
 
         # and finally overwrite old values with new values, if they exist
         data = {**existing_policy, **update}
-        
+
         return self.britive.put(f'{self.base_url}', json=data)
 
     def delete(self, security_policy_id: str) -> None:

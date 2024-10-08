@@ -1,4 +1,3 @@
-
 class TaskServices:
     def __init__(self, britive) -> None:
         self.britive = britive
@@ -17,10 +16,7 @@ class TaskServices:
         :return: Details of the task scheduler service.
         """
 
-        params = {
-            'name': service_name,
-            'appId': application_id
-        }
+        params = {'name': service_name, 'appId': application_id}
         return self.britive.get(f'{self.base_url}', params=params)
 
     def enable(self, task_service_id: str) -> dict:

@@ -5,6 +5,7 @@ import time
 
 import requests
 
+from .access_broker.access_broker import AccessBroker
 from .access_builder import AccessBuilderSettings
 from .accounts import Accounts
 from .api_tokens import ApiTokens
@@ -47,9 +48,6 @@ from .task_services import TaskServices
 from .tasks import Tasks
 from .users import Users
 from .workload import Workload
-
-BRITIVE_TENANT_ENV_NAME = 'BRITIVE_TENANT'
-BRITIVE_TOKEN_ENV_NAME = 'BRITIVE_API_TOKEN'
 
 
 class Britive:
@@ -113,12 +111,11 @@ class Britive:
         :raises: TenantMissingError, TokenMissingError
         """
 
-        self.tenant = tenant or os.environ.get(BRITIVE_TENANT_ENV_NAME)
+        self.tenant = tenant or os.getenv('BRITIVE_TENANT')
 
         if not self.tenant:
             raise TenantMissingError(
-                'Tenant not explicitly provided and could not be sourced '
-                f'from environment variable {BRITIVE_TENANT_ENV_NAME}'
+                'Tenant not explicitly provided and could not be sourced from environment variable BRITIVE_TENANT'
             )
 
         if token_federation_provider:
@@ -128,12 +125,11 @@ class Britive:
                 duration_seconds=token_federation_provider_duration_seconds,
             )
         else:
-            self.__token = token or os.environ.get(BRITIVE_TOKEN_ENV_NAME)
+            self.__token = token or os.getenv('BRITIVE_API_TOKEN')
 
         if not self.__token:
             raise TokenMissingError(
-                'Token not explicitly provided and could not be sourced '
-                f'from environment variable {BRITIVE_TOKEN_ENV_NAME}'
+                'Token not explicitly provided and could not be sourced from environment variable BRITIVE_API_TOKEN'
             )
 
         # clean up and apply logic to the passed in tenant (for backwards compatibility with no domain being required)
@@ -181,40 +177,43 @@ class Britive:
             }
         )
 
-        self.feature_flags = self.features() if query_features else {}
-
-        self.users = Users(self)
-        self.service_identity_tokens = ServiceIdentityTokens(self)
-        self.service_identities = ServiceIdentities(self)
-        self.tags = Tags(self)
-        self.applications = Applications(self)
-        self.environments = Environments(self)
-        self.environment_groups = EnvironmentGroups(self)
-        self.scans = Scans(self)
+        self.access_builder = AccessBuilderSettings(self)
         self.accounts = Accounts(self)
-        self.permissions = Permissions(self)
+        self.api_tokens = ApiTokens(self)
+        self.applications = Applications(self)
+        self.audit_logs = AuditLogs(self)
+        self.environment_groups = EnvironmentGroups(self)
+        self.environments = Environments(self)
+        self.feature_flags = self.features() if query_features else {}
         self.groups = Groups(self)
         self.identity_attributes = IdentityAttributes(self)
-        self.profiles = Profiles(self)
-        self.task_services = TaskServices(self)
-        self.tasks = Tasks(self)
-        self.security_policies = SecurityPolicies(self)
-        self.saml = Saml(self)
-        self.api_tokens = ApiTokens(self)
-        self.audit_logs = AuditLogs(self)
-        self.reports = Reports(self)
         self.identity_providers = IdentityProviders(self)
         self.my_access = MyAccess(self)
-        self.notifications = Notifications(self)
+        self.my_resources = MyResources(self)
         self.my_secrets = MySecrets(self)
-        self.secrets_manager = SecretsManager(self)
         self.notification_mediums = NotificationMediums(self)
-        self.workload = Workload(self)
-        self.system = System(self)
+        self.notifications = Notifications(self)
+        self.permissions = Permissions(self)
+        self.profiles = Profiles(self)
+        self.reports = Reports(self)
+        self.saml = Saml(self)
+        self.scans = Scans(self)
+        self.secrets_manager = SecretsManager(self)
+        self.security_policies = SecurityPolicies(self)
+        self.service_identities = ServiceIdentities(self)
+        self.service_identity_tokens = ServiceIdentityTokens(self)
         self.settings = Settings(self)
         self.step_up = StepUpAuth(self)
-        self.my_resources = MyResources(self)
-        self.access_builder = AccessBuilderSettings(self)
+        self.system = System(self)
+        self.tags = Tags(self)
+        self.task_services = TaskServices(self)
+        self.tasks = Tasks(self)
+        self.users = Users(self)
+        self.workload = Workload(self)
+
+        # depends on my_access
+        self.access_broker = AccessBroker(self)
+
 
     @staticmethod
     def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:

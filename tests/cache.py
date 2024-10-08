@@ -244,13 +244,13 @@ def cached_profile_policy_condition_as_dict(pytestconfig, cached_profile, cached
 
 @pytest.fixture(scope='session')
 @cached_resource(name='profile-approval-policy')
-def cached_profile_approval_policy(pytestconfig, cached_profile, cached_service_identity):
+def cached_profile_approval_policy(pytestconfig, cached_profile, cached_service_identity, cached_user):
     policy = britive.profiles.policies.build(
         name=f"{cached_profile['papId']}-2",
         description='',
         service_identities=[cached_service_identity['username']],
         approval_notification_medium='Email',
-        approver_users=[britive.my_access.whoami()['username']],
+        approver_users=[cached_user['username']],
     )
     return britive.profiles.policies.create(profile_id=cached_profile['papId'], policy=policy)
 
@@ -414,9 +414,9 @@ def cached_notification_applications(pytestconfig, cached_notification):
 @pytest.fixture(scope='session')
 @cached_resource(name='vault')
 def cached_vault(pytestconfig, timestamp, cached_tag):
-    if (
-        vault := britive.secrets_manager.vaults.create(name=f'vault-{timestamp}', tags=[cached_tag['userTagId']])
-    ).get('errorCode') == 'SM-0026':
+    if (vault := britive.secrets_manager.vaults.create(name=f'vault-{timestamp}', tags=[cached_tag['userTagId']])).get(
+        'errorCode'
+    ) == 'SM-0026':
         vault = {'DONOTDELETE': True, **britive.secrets_manager.vaults.list()}
     return vault
 
@@ -635,8 +635,8 @@ def cached_workload_identity_provider_aws(pytestconfig, timestamp, cached_identi
             name=f'python-sdk-aws-{timestamp}', attributes_map={'UserId': cached_identity_attribute['id']}
         )
         return response
-    except exceptions.InternalServerError:
-        raise Exception('AWS provider could not be created and none found')
+    except exceptions.InternalServerError as e:
+        raise Exception('AWS provider could not be created and none found') from e
 
 
 @pytest.fixture(scope='session')
@@ -748,3 +748,110 @@ def cached_audit_logs_webhook_create(pytestconfig, timestamp, cached_notificatio
     )
 
     return response
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='access-broker-response-template')
+def cached_access_broker_response_template(pytestconfig, timestamp):
+    template_data = 'The user {{name}} has the role {{role}}.'
+    return britive.access_broker.response_templates.create(
+        name=f'python-sdk-response-template-{timestamp}', template_data=template_data
+    )
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='access-broker-profile')
+def cached_access_broker_profile(pytestconfig, timestamp):
+    return britive.access_broker.profiles.create(name=f'python-sdk-access-broker-profile-{timestamp}')
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='access-broker-resource-type')
+def cached_access_broker_resource_type(pytestconfig, timestamp):
+    return britive.access_broker.resources.types.create(name=f'python-sdk-resource-type-{timestamp}')
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='access-broker-resource-permission')
+def cached_access_broker_resource_permission(pytestconfig, timestamp, cached_access_broker_resource_type):
+    checkin_file = bytes(f'checkin-testfile-{timestamp}', 'utf-8')
+    checkout_file = bytes(f'checkout-testfile-{timestamp}', 'utf-8')
+    return britive.access_broker.resources.permissions.create(
+        resource_type_id=cached_access_broker_resource_type['resourceTypeId'],
+        name=f'python-sdk-resource-permission-{timestamp}',
+        checkin_file=checkin_file,
+        checkout_file=checkout_file,
+    )
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='access-broker-resource-permission-id')
+def cached_access_broker_resource_permission_id(
+    pytestconfig, cached_access_broker_resource_type, cached_access_broker_resource_permission
+):
+    list_perms = britive.access_broker.resources.permissions.list(
+        resource_type_id=cached_access_broker_resource_type['resourceTypeId']
+    )
+    return [p['permissionId'] for p in list_perms if p['name'] == cached_access_broker_resource_permission['name']][0]
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='access-broker-resource')
+def cached_access_broker_resource(pytestconfig, timestamp, cached_access_broker_resource_type):
+    return britive.access_broker.resources.create(
+        name=f'python-sdk-resource-{timestamp}', resource_type_id=cached_access_broker_resource_type['resourceTypeId']
+    )
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='access-broker-profile-policy')
+def cached_access_broker_profile_policy(pytestconfig, timestamp, cached_access_broker_profile, cached_user):
+    return britive.access_broker.profiles.policies.create(
+        profile_id=cached_access_broker_profile['profileId'],
+        name=f'python-sdk-access-broker-profile-policy-{timestamp}',
+        access_type='Allow',
+        members={'users': [{'id': cached_user['userId']}]},
+    )
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='access-broker-resource-label')
+def cached_access_broker_resource_label(pytestconfig, timestamp):
+    while True:
+        label = britive.access_broker.resources.labels.create(
+            name=f'python-sdk-resource-label-{timestamp}',
+            values=[{'name': f'{timestamp}-test-value', 'description': f'{timestamp}-test-description'}],
+        )
+        if britive.access_broker.resources.labels.get(label_id=label['keyId']):
+            return label
+        print(label)
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='access-broker-profile-association')
+def cached_access_broker_profile_association(
+    pytestconfig, cached_access_broker_profile, cached_access_broker_resource_label, timestamp
+):
+    return britive.access_broker.profiles.add_association(
+        cached_access_broker_profile['profileId'],
+        associations={cached_access_broker_resource_label['keyName']: [f'{timestamp}-test-value']},
+    )
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='access-broker-profile-permission')
+def cached_access_broker_profile_permission(pytestconfig, cached_access_broker_profile):
+    available_permissions = britive.access_broker.profiles.permissions.list_available_permissions(
+        profile_id=cached_access_broker_profile['profileId']
+    )
+    resource_type_id = [
+        r['resourceTypeId']
+        for r in britive.access_broker.resources.types.list()
+        if r['name'] == available_permissions[0]['resourceTypeName']
+    ][0]
+    return britive.access_broker.profiles.permissions.add_permissions(
+        profile_id=cached_access_broker_profile['profileId'],
+        permission_id=available_permissions[0]['permissionId'],
+        resource_type_id=resource_type_id,
+        version=1,
+    )

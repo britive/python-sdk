@@ -1,4 +1,3 @@
-
 class SystemConsumers:
     def __init__(self, britive) -> None:
         self.britive = britive
@@ -12,5 +11,3 @@ class SystemConsumers:
         """
 
         return self.britive.get(self.base_url)['result']
-
-

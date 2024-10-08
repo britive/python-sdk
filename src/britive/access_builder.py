@@ -97,7 +97,7 @@ class AccessBuilderApproversGroups:
 
         return self.britive.post(f'{self.base_url}/{application_id}/approvers-groups', json=data)
 
-    def update(self, application_id: str, group_id: str, name: str, condition: str, member_list: list = []) -> dict:
+    def update(self, application_id: str, group_id: str, name: str, condition: str, member_list: list = None) -> dict:
         """
         Updates Approvers Group for given id
 
@@ -113,6 +113,9 @@ class AccessBuilderApproversGroups:
             ]
         :return: dictionary of Approvers Group members
         """
+
+        if member_list is None:
+            member_list = []
 
         data = {'name': name, 'condition': condition, 'members': member_list}
 

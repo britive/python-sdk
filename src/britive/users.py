@@ -25,11 +25,7 @@ class Users:
         :return: List of user records
         """
 
-        params = {
-            'type': 'User',
-            'page': 0,
-            'size': 100
-        }
+        params = {'type': 'User', 'page': 0, 'size': 100}
         if filter_expression:
             params['filter'] = filter_expression
         if include_tags:
@@ -78,12 +74,7 @@ class Users:
         :return: List of user records.
         """
 
-        params = {
-            'type': 'User',
-            'page': 0,
-            'size': 100,
-            'searchText': search_string
-        }
+        params = {'type': 'User', 'page': 0, 'size': 100, 'searchText': search_string}
 
         return self.britive.get(self.base_url, params)
 
@@ -106,19 +97,11 @@ class Users:
         :return: Details of the newly created user.
         """
 
-        required_fields = [
-            'email',
-            'username',
-            'lastName',
-            'firstName',
-            'status'
-        ]
+        required_fields = ['email', 'username', 'lastName', 'firstName', 'status']
 
         kwargs['type'] = 'User'
         if idp:
-            kwargs['identityProvider'] = {
-                'id': idp
-            }
+            kwargs['identityProvider'] = {'id': idp}
         else:
             required_fields.append('password')
 

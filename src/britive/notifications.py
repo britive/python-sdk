@@ -31,10 +31,7 @@ class Notifications:
         :return: Details of the newly created notification.
         """
 
-        data = {
-            'name': name,
-            'description': description or ''
-        }
+        data = {'name': name, 'description': description or ''}
         return self.britive.post(self.base_url, json=data)
 
     def update(self, notification_id: str, name: str = None, description: str = None) -> dict:
@@ -94,8 +91,16 @@ class Notifications:
 
         return self.britive.get(f'{self.base_url}/{notification_id}/available-apps')
 
-    def configure(self, notification_id: str, rules: list = None, users: list = None, user_tags: list = None,
-                  applications: list = None, send_no_changes: bool = None, notification_medium_id: str = None) -> dict:
+    def configure(
+        self,
+        notification_id: str,
+        rules: list = None,
+        users: list = None,
+        user_tags: list = None,
+        applications: list = None,
+        send_no_changes: bool = None,
+        notification_medium_id: str = None,
+    ) -> dict:
         """
         Configure the details of a notification.
 
@@ -126,24 +131,10 @@ class Notifications:
 
         members = []
         for user in self.britive.users.minimized_user_details(user_ids=users):
-            members.append(
-                {
-                    'id': user['id'],
-                    'memberType': 'User',
-                    'name': user['username'],
-                    'condition': None
-                }
-            )
+            members.append({'id': user['id'], 'memberType': 'User', 'name': user['username'], 'condition': None})
 
         for tag in self.britive.tags.minimized_tag_details(tag_ids=user_tags):
-            members.append(
-                {
-                    'id': tag['userTagId'],
-                    'memberType': 'Tag',
-                    'name': tag['name'],
-                    'condition': None
-                }
-            )
+            members.append({'id': tag['userTagId'], 'memberType': 'Tag', 'name': tag['name'], 'condition': None})
 
         # set the possible parameters
         params = {
@@ -151,7 +142,7 @@ class Notifications:
             'memberRules': members,
             'applications': applications,
             'sendNoChanges': send_no_changes,
-            'notificationMedium': notification_medium_id
+            'notificationMedium': notification_medium_id,
         }
 
         # fo each parameter update the existing notification data if the parameter was provided

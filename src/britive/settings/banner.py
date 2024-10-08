@@ -13,9 +13,16 @@ class SettingsBanner:
         :returns: Details of the banner.
         """
         return self.britive.get(self.base_url)
-    
-    def set(self, display_banner: bool, message: str, message_type: str, start_datetime: datetime = None,
-            end_datetime: datetime = None, time_zone: str = None) -> dict:
+
+    def set(
+        self,
+        display_banner: bool,
+        message: str,
+        message_type: str,
+        start_datetime: datetime = None,
+        end_datetime: datetime = None,
+        time_zone: str = None,
+    ) -> dict:
         """
         Sets the banner.
 
@@ -32,25 +39,22 @@ class SettingsBanner:
         :returns: Details of the banner.
         """
 
-        data = {
-            'status': 'ON' if display_banner else 'OFF',
-            'message': message,
-            'messageType': message_type
-        }
+        data = {'status': 'ON' if display_banner else 'OFF', 'message': message, 'messageType': message_type}
 
         schedule_fields = [start_datetime, end_datetime, time_zone]
         all_schedule_fields_present = all(v is not None for v in schedule_fields)
         no_schedule_fields_present = all(v is None for v in schedule_fields)
 
         if not all_schedule_fields_present and not no_schedule_fields_present:
-            raise ValueError('if providing schedule information then start_datetime, '
-                             'end_datetime, and time_zone are required')
+            raise ValueError(
+                'if providing schedule information then start_datetime, ' 'end_datetime, and time_zone are required'
+            )
 
         if all_schedule_fields_present:
             data['messageSchedule'] = {
                 'endDate': end_datetime.isoformat(sep=' ', timespec='seconds'),
                 'startDate': start_datetime.isoformat(sep=' ', timespec='seconds'),
-                'timeZone': time_zone
+                'timeZone': time_zone,
             }
 
         return self.britive.post(self.base_url, json=data)

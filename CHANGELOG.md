@@ -1,5 +1,27 @@
 # Change Log (v2.8.1+)
 
+## v3.1.0 [2024-10-07]
+
+__What's New:__
+
+* Added `access_broker` functionality.
+
+__Enhancements:__
+
+* None
+
+__Bug Fixes:__
+
+* Fixed incorrect `if filter` in `secrets_manager`.
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* Switched `tox` to install from `requirements.txt`
+
 ## v3.0.0 [2024-09-09]
 
 __What's New:__

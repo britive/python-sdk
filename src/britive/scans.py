@@ -1,4 +1,3 @@
-
 class Scans:
     def __init__(self, britive) -> None:
         self.britive = britive
@@ -48,10 +47,7 @@ class Scans:
         :return: A list of historical scans.
         """
 
-        params = {
-            'page': 0,
-            'size': 100
-        }
+        params = {'page': 0, 'size': 100}
         if filter_expression:
             params['filter'] = filter_expression
         return self.britive.get(f'{self.base_url}/{application_id}/scans/env-status/history', params=params)
