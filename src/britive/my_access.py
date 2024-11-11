@@ -42,7 +42,6 @@ class MyAccess:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/access'
 
-    def list_profiles(self) -> list:
         # MyApprovals backwards compatibility
         self.__my_approvals = MyApprovals(self.britive)
         self.approve_request = self.__my_approvals.approve_request
@@ -57,13 +56,25 @@ class MyAccess:
         self.withdraw_approval_request = self.__my_requests.withdraw_approval_request
         self.withdraw_approval_request_by_name = self.__my_requests.withdraw_approval_request_by_name
 
+    def list_profiles(self, include_approval_status: bool = False) -> list:
         """
         List the profiles for which the user has access.
 
+        :param include_approval_status: Include `approval_status` of each profile
         :return: List of profiles.
         """
 
-        return self.britive.get(self.base_url)
+        profiles = self.britive.get(self.base_url)
+
+        if include_approval_status:
+            approval_status_list = {
+                a['papId']: a['status'] for a in self.britive.get(self.base_url, params={'type': 'ui'})
+            }
+            for app in profiles:
+                for profile in app['profiles']:
+                    profile['approval_status'] = approval_status_list[profile['profileId']]
+
+        return profiles
 
     def list_checked_out_profiles(self) -> list:
         """
