@@ -375,6 +375,29 @@ class MyResources:
 
         return self.list_profiles(list_type='favorites')
 
+    def add_favorite(self, resource_id: str, profile_id: str) -> dict:
+        """
+        Add a resource favorite.
+
+        :param resource_id: The resource ID of the resource favorite to add.
+        :param profile_id: The profile ID of the resource favorite to add.
+        :return: Details of the favorite resource.
+        """
+
+        data = {'resource-id': resource_id, 'profile-id': profile_id}
+
+        return self.post(f'{self.base_url}/favorites', json=data)
+
+    def delete_favorite(self, favorite_id: str) -> None:
+        """
+        Delete a resource favorite.
+
+        :param favorite_id: The ID of the resource favorite to delete.
+        :return: None
+        """
+
+        return self.delete(f'{self.base_url}/favorites/{favorite_id}')
+
     def _get_profile_and_resource_ids_given_names(self, profile_name: str, resource_name: str) -> dict:
         resource_profile_map = {
             f'{item["resourceName"].lower()}|{item["profileName"].lower()}': {
