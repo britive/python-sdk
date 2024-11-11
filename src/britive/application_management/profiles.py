@@ -1,7 +1,7 @@
 import json
 from typing import Union
 
-from . import exceptions
+from .. import exceptions
 
 creation_defaults = {
     'expirationDuration': 3600000,

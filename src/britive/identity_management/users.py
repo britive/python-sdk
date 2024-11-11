@@ -1,9 +1,9 @@
-from .exceptions import (
+from ..exceptions import (
     UserDoesNotHaveMFAEnabled,
     UserNotAllowedToChangePassword,
     UserNotAssociatedWithDefaultIdentityProvider,
 )
-from .helpers.custom_attributes import CustomAttributes
+from ..helpers.custom_attributes import CustomAttributes
 
 valid_statues = ['active', 'inactive']
 

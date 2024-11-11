@@ -5,14 +5,9 @@ import time
 
 import requests
 
-from .access_broker.access_broker import AccessBroker
-from .access_builder import AccessBuilderSettings
-from .accounts import Accounts
-from .api_tokens import ApiTokens
-from .applications import Applications
+from .access_broker import AccessBroker
+from .application_management import ApplicationManagement
 from .audit_logs import AuditLogs
-from .environment_groups import EnvironmentGroups
-from .environments import Environments
 from .exceptions import (
     InvalidFederationProvider,
     RootEnvironmentGroupNotFound,
@@ -21,33 +16,28 @@ from .exceptions import (
     TokenMissingError,
     allowed_exceptions,
 )
-from .groups import Groups
-from .helpers import federation_providers as fp
+from .federation_providers import (
+    AwsFederationProvider,
+    AzureSystemAssignedManagedIdentityFederationProvider,
+    AzureUserAssignedManagedIdentityFederationProvider,
+    BitbucketFederationProvider,
+    GithubFederationProvider,
+    GitlabFederationProvider,
+    SpaceliftFederationProvider,
+)
+from .global_settings import GlobalSettings
 from .helpers import methods as helper_methods
-from .identity_attributes import IdentityAttributes
-from .identity_providers import IdentityProviders
+from .identity_management import IdentityManagement
 from .my_access import MyAccess
+from .my_approvals import MyApprovals
+from .my_requests import MyRequests
 from .my_resources import MyResources
 from .my_secrets import MySecrets
-from .notification_mediums import NotificationMediums
-from .notifications import Notifications
-from .permissions import Permissions
-from .profiles import Profiles
-from .reports import Reports
-from .saml import Saml
-from .scans import Scans
-from .secrets_manager import SecretsManager
-from .security_policies import SecurityPolicies
-from .service_identities import ServiceIdentities
-from .service_identity_tokens import ServiceIdentityTokens
-from .settings.settings import Settings
-from .step_up import StepUpAuth
-from .system.system import System
-from .tags import Tags
-from .task_services import TaskServices
-from .tasks import Tasks
-from .users import Users
-from .workload import Workload
+from .reports.reports import Reports
+from .secrets_manager.secrets_manager import SecretsManager
+from .security import ApiTokens, Security
+from .system import System
+from .workflows import Workflows
 
 
 class Britive:
@@ -87,11 +77,11 @@ class Britive:
 
     def __init__(
         self,
-        tenant: str = None,
-        token: str = None,
-        query_features: bool = True,
-        token_federation_provider: str = None,
-        token_federation_provider_duration_seconds: int = 900,
+        tenant=None,
+        token=None,
+        query_features=True,
+        token_federation_provider=None,
+        token_duration=900,
     ):
         """
         Instantiate an authenticated interface that can be used to communicate with the Britive API.
@@ -112,108 +102,116 @@ class Britive:
         """
 
         self.tenant = tenant or os.getenv('BRITIVE_TENANT')
-
         if not self.tenant:
-            raise TenantMissingError(
-                'Tenant not explicitly provided and could not be sourced from environment variable BRITIVE_TENANT'
-            )
+            raise TenantMissingError('Tenant not provided and cannot be sourced from environment.')
 
-        if token_federation_provider:
-            self.__token = self.source_federation_token_from(
-                provider=token_federation_provider,
-                tenant=self.tenant,
-                duration_seconds=token_federation_provider_duration_seconds,
-            )
-        else:
-            self.__token = token or os.getenv('BRITIVE_API_TOKEN')
+        self.__token = self._initialize_token(token, token_federation_provider, token_duration)
+        self.base_url = f'https://{self.parse_tenant(self.tenant)}/api'
+        self.session = self._setup_session()
 
-        if not self.__token:
-            raise TokenMissingError(
-                'Token not explicitly provided and could not be sourced from environment variable BRITIVE_API_TOKEN'
-            )
-
-        # clean up and apply logic to the passed in tenant (for backwards compatibility with no domain being required)
-        self.tenant = self.parse_tenant(self.tenant)
-
-        self.base_url = f'https://{self.tenant}/api'
-        self.session = requests.Session()
-        self.retry_max_times = 5
         self.retry_backoff_factor = 1
-        self.retry_response_status = [429, 500, 502, 503, 504]
+        self.retry_max_times = 5
+        self.retry_response_status = {429, 500, 502, 503, 504}
+
+        self._initialize_components(query_features)
+
+    def _initialize_token(self, token, provider, duration):
+        if provider:
+            return self.source_federation_token_from(provider, self.tenant, duration)
+        return token or os.getenv('BRITIVE_API_TOKEN') or TokenMissingError('Token not provided.')
+
+    def _setup_session(self):
+        session = requests.Session()
 
         # if PYBRITIVE_CA_BUNDLE set, in pybritive most likely, use it
-        britive_ca_bundle = os.getenv('PYBRITIVE_CA_BUNDLE')
-        if britive_ca_bundle:
-            self.session.verify = britive_ca_bundle
+        if britive_ca_bundle := os.getenv('PYBRITIVE_CA_BUNDLE'):
+            session.verify = britive_ca_bundle
 
         # allow the disabling of TLS/SSL verification for testing in development (mostly local development)
         if os.getenv('BRITIVE_NO_VERIFY_SSL') and '.dev.' in self.tenant:
-            # turn off ssl verification
-            self.session.verify = False
-            # wipe these due to this bug: https://github.com/psf/requests/issues/3829
-            os.environ['CURL_CA_BUNDLE'] = ''
-            os.environ['REQUESTS_CA_BUNDLE'] = ''
-            # disable the warning message
-            import urllib3
+            session.verify = False
+            self._disable_ssl_verification_warnings()
 
-            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        token_type = self._determine_token_type()
+        version = self._get_version()
 
-        token_type = 'TOKEN' if len(self.__token) < 50 else 'Bearer'
-        if len(self.__token.split('::')) > 1:
-            token_type = 'WorkloadToken'
-
-        try:
-            import britive
-
-            version = britive.__version__
-        except Exception:
-            version = 'unknown'
-
-        self.session.headers.update(
+        session.headers.update(
             {
                 'Authorization': f'{token_type} {self.__token}',
                 'Content-Type': 'application/json',
                 'User-Agent': f'britive-python-sdk/{version} {requests.utils.default_user_agent()}',
             }
         )
+        return session
 
-        self.access_builder = AccessBuilderSettings(self)
-        self.accounts = Accounts(self)
+    def _disable_ssl_verification_warnings(self):
+        # wipe these due to this bug: https://github.com/psf/requests/issues/3829
+        os.environ['CURL_CA_BUNDLE'] = ''
+        os.environ['REQUESTS_CA_BUNDLE'] = ''
+        import urllib3
+
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+    def _determine_token_type(self):
+        if len(self.__token) < 50:
+            return 'TOKEN'
+        if len(self.__token.split('::')) > 1:
+            return 'WorkloadToken'
+        return 'Bearer'
+
+    def _get_version(self):
+        try:
+            import britive
+
+            return britive.__version__
+        except ImportError:
+            return 'unknown'
+
+    def _initialize_components(self, query_features):
+        application_management = ApplicationManagement(self)
+        identity_management = IdentityManagement(self)
+        global_settings = GlobalSettings(self)
+        security = Security(self)
+        workflows = Workflows(self)
+
+        self.access_builder = application_management.access_builder
+        self.accounts = application_management.accounts
         self.api_tokens = ApiTokens(self)
-        self.applications = Applications(self)
-        self.audit_logs = AuditLogs(self)
-        self.environment_groups = EnvironmentGroups(self)
-        self.environments = Environments(self)
+        self.applications = application_management.applications
+        self.audit_logs = AuditLogs(self).audit_logs
+        self.environment_groups = application_management.environment_groups
+        self.environments = application_management.environments
         self.feature_flags = self.features() if query_features else {}
-        self.groups = Groups(self)
-        self.identity_attributes = IdentityAttributes(self)
-        self.identity_providers = IdentityProviders(self)
+        self.groups = application_management.groups
+        self.identity_attributes = identity_management.identity_attributes
+        self.identity_providers = identity_management.identity_providers
         self.my_access = MyAccess(self)
+        self.my_approvals = MyApprovals(self)
+        self.my_requests = MyRequests(self)
         self.my_resources = MyResources(self)
         self.my_secrets = MySecrets(self)
-        self.notification_mediums = NotificationMediums(self)
-        self.notifications = Notifications(self)
-        self.permissions = Permissions(self)
-        self.profiles = Profiles(self)
+        self.notification_mediums = global_settings.notification_mediums
+        self.notifications = workflows.notifications
+        self.permissions = application_management.permissions
+        self.profiles = application_management.profiles
         self.reports = Reports(self)
-        self.saml = Saml(self)
-        self.scans = Scans(self)
+        self.saml = security.saml
+        self.scans = application_management.scans
         self.secrets_manager = SecretsManager(self)
-        self.security_policies = SecurityPolicies(self)
-        self.service_identities = ServiceIdentities(self)
-        self.service_identity_tokens = ServiceIdentityTokens(self)
-        self.settings = Settings(self)
-        self.step_up = StepUpAuth(self)
+        self.security_policies = security.security_policies
+        self.service_identities = identity_management.service_identities
+        self.service_identity_tokens = identity_management.service_identity_tokens
+        self.settings = GlobalSettings(self)
+        self.step_up = security.step_up_auth
         self.system = System(self)
-        self.tags = Tags(self)
-        self.task_services = TaskServices(self)
-        self.tasks = Tasks(self)
-        self.users = Users(self)
-        self.workload = Workload(self)
+        self.tags = identity_management.tags
+        self.task_services = workflows.task_services
+        self.tasks = workflows.tasks
+        self.users = identity_management.users
+        self.workload = identity_management.workload
 
         # depends on my_access
         self.access_broker = AccessBroker(self)
-
 
     @staticmethod
     def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:
@@ -275,68 +273,45 @@ class Britive:
         """
 
         helper = provider.split('-', maxsplit=1)
-        provider = helper[0]
+        provider_name = helper[0]
 
-        if provider == 'aws':
-            profile = helper_methods.safe_list_get(helper, 1, None)
-            return fp.AwsFederationProvider(profile=profile, tenant=tenant, duration=duration_seconds).get_token()
+        federation_providers = {
+            'aws': lambda: AwsFederationProvider(profile=helper_methods.safe_list_get(helper, 1)).get_token(),
+            'azuresmi': lambda: AzureSystemAssignedManagedIdentityFederationProvider(
+                audience=helper_methods.safe_list_get(helper, 1)
+            ).get_token(),
+            'azureumi': lambda: AzureUserAssignedManagedIdentityFederationProvider(
+                client_id=helper[1].split('|')[0], audience=helper_methods.safe_list_get(helper[1].split('|'), 1)
+            ).get_token(),
+            'bitbucket': lambda: BitbucketFederationProvider().get_token(),
+            'github': lambda: GithubFederationProvider(audience=helper_methods.safe_list_get(helper, 1)).get_token(),
+            'gitlab': lambda: GitlabFederationProvider(
+                token_env_var=helper_methods.safe_list_get(helper, 1)
+            ).get_token(),
+            'spacelift': lambda: SpaceliftFederationProvider().get_token(),
+        }
 
-        if provider == 'github':
-            audience = helper_methods.safe_list_get(helper, 1, None)
-            return fp.GithubFederationProvider(audience=audience).get_token()
+        if provider_name in federation_providers:
+            return federation_providers[provider_name]()
 
-        if provider == 'bitbucket':
-            return fp.BitbucketFederationProvider().get_token()
-
-        if provider == 'azuresmi':
-            audience = helper_methods.safe_list_get(helper, 1, None)
-            return fp.AzureSystemAssignedManagedIdentityFederationProvider(audience=audience).get_token()
-
-        if provider == 'azureumi':
-            additional_attributes_str = helper_methods.safe_list_get(helper, 1, None)
-            if not additional_attributes_str:
-                raise ValueError('client id is required via azurumi-<client-id>')
-            additional_attributes = additional_attributes_str.split('|')
-            client_id = additional_attributes[0]
-            audience = helper_methods.safe_list_get(additional_attributes, 1, None)
-            return fp.AzureUserAssignedManagedIdentityFederationProvider(
-                client_id=client_id, audience=audience
-            ).get_token()
-
-        if provider == 'spacelift':
-            return fp.SpaceliftFederationProvider().get_token()
-
-        if provider == 'gitlab':
-            token_name = helper_methods.safe_list_get(helper, 1, None)
-            return fp.GitlabFederationProvider(token_env_var=token_name).get_token()
-
-        raise InvalidFederationProvider(f'federation provider {provider} not supported')
+        raise InvalidFederationProvider(f'federation provider {provider_name} not supported')
 
     @staticmethod
     def parse_tenant(tenant: str) -> str:
-        domain = tenant.replace('https://', '').replace('http://', '')  # remove scheme
-        domain = domain.split('/')[0]  # remove any paths as they will not be needed
+        domain = tenant.replace('https://', '').replace('http://', '').split('/')[0]  # remove scheme and paths
         try:
-            domain_helper = domain.split(':')
-            port = 443
-            if len(domain_helper) > 1:
-                port = domain_helper[1]
-            domain_without_port = domain_helper[0]
-            socket.getaddrinfo(host=domain_without_port, port=port)  # if success then a full domain was provided
+            socket.getaddrinfo(host=domain, port=443)  # if success then a full domain was provided
             return domain
         except socket.gaierror:  # assume just the tenant name was provided (originally the only supported method)
-            domain = f'{tenant}.britive-app.com'
+            resolved_domain = f'{tenant}.britive-app.com'
             try:
-                socket.getaddrinfo(host=domain, port=443)  # validate the hostname is real
-                return domain  # and if so set the tenant accordingly
-            except socket.gaierror as se:
-                raise Exception(f'Invalid tenant provided: {tenant}. DNS resolution failed.') from se
+                socket.getaddrinfo(host=resolved_domain, port=443)  # validate the hostname is real
+                return resolved_domain  # and if so set the tenant accordingly
+            except socket.gaierror as e:
+                raise Exception(f'Invalid tenant provided: {tenant}. DNS resolution failed.') from e
 
     def features(self) -> dict:
-        features = {}
-        for feature in self.get(f'{self.base_url}/features'):
-            features[feature['name']] = feature['enabled']
-        return features
+        return {feature['name']: feature['enabled'] for feature in self.get(f'{self.base_url}/features')}
 
     def banner(self) -> dict:
         return self.get(f'{self.base_url}/banner')
@@ -374,46 +349,39 @@ class Britive:
 
         files = {filename: (f'{filename}.xml', file_content_as_str, content_type)}
         response = self.session.patch(url, files=files, headers={'Content-Type': None})
-        try:
-            return response.json()
-        except native_json.decoder.JSONDecodeError:  # if we cannot decode json then the response isn't json
-            return response.content.decode('utf-8')
+        return self._handle_response(response)
 
     # note - this method is only used to upload a file when creating a secret
     def post_upload(self, url, params=None, files=None) -> dict:
         """Internal use only."""
+
         response = self.session.post(url, params=params, files=files, headers={'Content-Type': None})
+        return self._handle_response(response)
+
+    @staticmethod
+    def _handle_response(response):
         try:
             return response.json()
-        except native_json.decoder.JSONDecodeError:  # if we cannot decode json then the response isn't json
+        except native_json.decoder.JSONDecodeError:
             return response.content.decode('utf-8')
 
     @staticmethod
     def __check_response_for_error(response) -> None:
         if response.status_code in allowed_exceptions:
-            try:
-                content = native_json.loads(response.content.decode('utf-8'))
-                message = (
-                    f"{response.status_code} - "
-                    f"{content.get('errorCode') or 'E0000'} - "
-                    f"{content.get('message') or 'no message available'}"
-                )
-                if content.get('details'):
-                    message += f" - {content.get('details')}"
-                raise allowed_exceptions[response.status_code](message)
-            except native_json.decoder.JSONDecodeError as je:
-                content = response.content.decode('utf-8')
-                message = f'{response.status_code} - {content}'
-                raise allowed_exceptions[response.status_code](message) from je
+            content = native_json.loads(response.content.decode('utf-8'))
+            message = (
+                f"{response.status_code} - "
+                f"{content.get('errorCode', 'E0000')} -"
+                f" {content.get('message', 'no message available')}"
+            )
+            if content.get('details'):
+                message += f" - {content.get('details')}"
+            raise allowed_exceptions[response.status_code](message)
 
     @staticmethod
     def __response_has_no_content(response) -> bool:
         # handle 204 No Content response
-        if response.status_code == 204:
-            return True
-
-        # handle empty 200 response
-        return response.status_code == 200 and len(response.content) == 0
+        return response.status_code in (204,) or (response.status_code == 200 and len(response.content) == 0)
 
     @staticmethod
     def __pagination_type(headers, result) -> str:
@@ -432,105 +400,79 @@ class Britive:
 
     @staticmethod
     def __tenant_is_under_maintenance(response) -> bool:
-        try:
-            return response.status_code == 503 and response.json().get('errorCode') == 'MAINT0001'
-        except Exception:
-            return False
+        return response.status_code == 503 and response.json().get('errorCode') == 'MAINT0001'
 
     def __request_with_exponential_backoff_and_retry(self, method, url, params, data, json) -> dict:
         num_retries = 0
-        response = {}
+
         while num_retries <= self.retry_max_times:
             response = self.session.request(method, url, params=params, data=data, json=json)
 
             # handle the use case of a tenant being in maintenance mode
             # which means we should break out of this loop early and
             # not perform the backoff and retry logic
-            if self.__tenant_is_under_maintenance(response=response):
+            if self.__tenant_is_under_maintenance(response):
                 raise TenantUnderMaintenance(response.json().get('message'))
 
-            # check for error - if so perform exponential backoff
             if response.status_code in self.retry_response_status:
-                wait_time = (2**num_retries) * self.retry_backoff_factor
-                time.sleep(wait_time)
+                time.sleep((2**num_retries) * self.retry_backoff_factor)
                 num_retries += 1
-            else:  # we got a "good" response so break out of while loop
-                break
-        self.__check_response_for_error(response)  # handle an error response
-        return response
+            else:
+                self.__check_response_for_error(response)
+                return response
 
     def __request(self, method, url, params=None, data=None, json=None) -> dict:
         return_data = []
-        num_iterations = 1
         pagination_type = None
-        while True:  # infinite loop in case of pagination - we will break the loop when needed
-            response = self.__request_with_exponential_backoff_and_retry(
-                method=method, url=url, params=params, data=data, json=json
-            )
-            if self.__response_has_no_content(response):  # handle no content responses
+
+        while True:
+            response = self.__request_with_exponential_backoff_and_retry(method, url, params, data, json)
+            if self.__response_has_no_content(response):
                 return None
 
             # handle secrets file download
-            lowercase_headers = {h.lower(): v.lower() for h, v in response.headers.items()}
-            content_disposition = lowercase_headers.get('content-disposition', '')
+            content_disposition = response.headers.get('content-disposition', '').lower()
             if 'attachment' in content_disposition and 'downloadfile' in url:
-                filename = response.headers.get('content-disposition').split('=')[1].replace('"', '').strip()
+                filename = response.headers['content-disposition'].split('=')[1].replace('"', '').strip()
                 return {'filename': filename, 'content_bytes': bytes(response.content)}
 
             # load the result as a dict
-            try:
-                result = response.json()
-            except ValueError:  # includes simplejson.decoder.JSONDecodeError and native_json.decoder.JSONDecodeError
-                return response.content.decode('utf-8')
+            result = self._handle_response(response)
+            pagination_type = pagination_type or self.__pagination_type(response.headers, result)
 
             # check on the pagination and iterate if required - we only need to check on this after the first
             # request - checking it each time can screw up the logic when dealing with pagination coming from
             # the response headers as the header won't exist which will mean pagination_type will change to 'none'
             # which means we drop into the else block below and assign just the LAST page as the result, which
             # is obviously not what we want to be doing.
-            if num_iterations == 1:
-                pagination_type = self.__pagination_type(response.headers, result)
-
             if pagination_type == 'inline':
                 return_data += result['data']
-                count = result['count']
-                page = result['page']
-                size = result['size']
-                if size * (page + 1) >= count:  # if we have reached the max number of records time to break the loop
+                if result['size'] * (result['page'] + 1) >= result['count']:
                     break
-                params['page'] = page + 1
-            elif pagination_type == 'audit':
-                return_data += result  # result is already a list
-                if 'next-page' not in response.headers:
-                    break
-                url = response.headers['next-page']
-                params = {}  # the next-page header has all the URL parameters we need so unset them here
-            elif pagination_type == 'report':
+                params['page'] = result['page'] + 1
+            elif pagination_type in ('audit', 'report'):
                 return_data += result['data']
                 if 'next-page' not in response.headers:
                     break
                 url = response.headers['next-page']
-                params = {}  # the next-page header has all the URL parameters we need so unset them here
+                params = {}
             elif pagination_type == 'secmgr':
                 return_data += result['result']
                 url = result['pagination'].get('next', '')
-                if url == '':
+                if not url:
                     break
-            else:  # we are not dealing with pagination so just return the response as-is
+            else:
                 return_data = result
                 break
 
-            num_iterations += 1
-
-        # finally return the response data
         return return_data
 
     def get_root_environment_group(self, application_id: str) -> str:
         """Internal use only."""
 
         app = self.applications.get(application_id=application_id)
-        root_env_group = app.get('rootEnvironmentGroup') or {}
-        for group in root_env_group.get('environmentGroups', []):
-            if group['parentId'] == '':
+        root_env_group = app.get('rootEnvironmentGroup', {}).get('environmentGroups', [])
+        for group in root_env_group:
+            if not group['parentId']:
                 return group['id']
         raise RootEnvironmentGroupNotFound()

@@ -96,6 +96,16 @@ def cached_service_identity(pytestconfig, timestamp):
 
 
 @pytest.fixture(scope='session')
+@cached_resource(name='service-identity-federated')
+def cached_service_identity_federated(pytestconfig, timestamp):
+    service_identity_to_create = {
+        'name': f'testpythonapiwrapperfederated{timestamp}',
+        'status': 'active',
+    }
+    return britive.service_identities.create(**service_identity_to_create)
+
+
+@pytest.fixture(scope='session')
 @cached_resource(name='service-identity-token')
 def cached_service_identity_token(pytestconfig, cached_service_identity):
     return britive.service_identity_tokens.create(cached_service_identity['userId'], 90)
@@ -253,6 +263,15 @@ def cached_profile_approval_policy(pytestconfig, cached_profile, cached_service_
         approver_users=[cached_user['username']],
     )
     return britive.profiles.policies.create(profile_id=cached_profile['papId'], policy=policy)
+
+
+@pytest.fixture(scope='session')
+@cached_resource(name='profile-checkout-request')
+def cached_profile_checkout_request(pytestconfig, cached_profile, cached_service_identity_token):
+    other_britive = Britive(token=cached_service_identity_token['token'], query_features=False)
+    return other_britive.my_access.request_approval(
+        profile_id=cached_profile['papId'], environment_id=cached_environment['id'], justification='reject me'
+    )
 
 
 @pytest.fixture(scope='session')
@@ -824,7 +843,6 @@ def cached_access_broker_resource_label(pytestconfig, timestamp):
         )
         if britive.access_broker.resources.labels.get(label_id=label['keyId']):
             return label
-        print(label)
 
 
 @pytest.fixture(scope='session')

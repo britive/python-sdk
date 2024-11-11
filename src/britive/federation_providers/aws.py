@@ -5,111 +5,8 @@ import hmac
 import json
 import os
 
-from .. import exceptions
-
-
-class FederationProvider:
-    def __init__(self) -> None:
-        pass
-
-    def get_token(self) -> None:
-        raise NotImplementedError()
-
-
-class AzureSystemAssignedManagedIdentityFederationProvider(FederationProvider):
-    def __init__(self, audience: str = None) -> None:
-        self.audience = audience if audience else 'https://management.azure.com/'
-        super().__init__()
-
-    def get_token(self) -> str:
-        # azure-identity is not a hard requirement of this SDK but is required for the
-        # azure provider so checking to ensure it exists
-        try:
-            from azure.identity._exceptions import CredentialUnavailableError
-        except ImportError as e:
-            raise Exception(
-                'azure-identity required - please install azure-identity package to use the azure managed '
-                'identity federation provider'
-            ) from e
-
-        try:
-            from azure.identity import ManagedIdentityCredential
-
-            token = ManagedIdentityCredential().get_token(self.audience).token
-            return f'OIDC::{token}'
-        except ImportError as e:
-            raise Exception(
-                'azure-identity required - please install azure-identity package to use the azure managed '
-                'identity federation provider'
-            ) from e
-        except CredentialUnavailableError as e:
-            msg = (
-                'the codebase is not executing in a azure environment or some other issue is causing the '
-                'managed identity credentials to be unavailable'
-            )
-            raise exceptions.NotExecutingInAzureEnvironment(msg) from e
-
-
-class AzureUserAssignedManagedIdentityFederationProvider(FederationProvider):
-    def __init__(self, client_id: str, audience: str = None) -> None:
-        self.audience = audience if audience else 'https://management.azure.com/'
-        self.client_id = client_id
-        super().__init__()
-
-    def get_token(self) -> str:
-        # azure-identity is not a hard requirement of this SDK but is required for the
-        # azure provider so checking to ensure it exists
-        try:
-            from azure.identity._exceptions import CredentialUnavailableError
-        except ImportError as e:
-            raise Exception(
-                'azure-identity required - please install azure-identity package to use the azure managed '
-                'identity federation provider'
-            ) from e
-
-        try:
-            from azure.identity import ManagedIdentityCredential
-
-            token = ManagedIdentityCredential(client_id=self.client_id).get_token(self.audience).token
-            return f'OIDC::{token}'
-        except ImportError as e:
-            raise Exception(
-                'azure-identity required - please install azure-identity package to use the azure managed '
-                'identity federation provider'
-            ) from e
-        except CredentialUnavailableError as e:
-            msg = (
-                'the codebase is not executing in a azure environment or some other issue is causing the '
-                'managed identity credentials to be unavailable'
-            )
-            raise exceptions.NotExecutingInAzureEnvironment(msg) from e
-
-
-class GithubFederationProvider(FederationProvider):
-    def __init__(self, audience: str = None) -> None:
-        self.audience = audience
-        super().__init__()
-
-    def get_token(self) -> str:
-        import requests
-
-        url = os.environ.get('ACTIONS_ID_TOKEN_REQUEST_URL')
-        bearer_token = os.environ.get('ACTIONS_ID_TOKEN_REQUEST_TOKEN')
-
-        if not url or not bearer_token:
-            msg = (
-                'the codebase is not executing in a github environment and/or the action is '
-                'is not set to use oidc permissions'
-            )
-            raise exceptions.NotExecutingInGithubEnvironment(msg)
-
-        headers = {'User-Agent': 'actions/oidc-client', 'Authorization': f'Bearer {bearer_token}'}
-
-        if self.audience:
-            url += f'&audience={self.audience}'
-
-        response = requests.get(url, headers=headers)
-        return f'OIDC::{response.json()["value"]}'
+from ..exceptions import TenantMissingError
+from .federation_provider import FederationProvider
 
 
 class AwsFederationProvider(FederationProvider):
@@ -121,7 +18,7 @@ class AwsFederationProvider(FederationProvider):
         temp_tenant = tenant or os.getenv('BRITIVE_TENANT')
         if not temp_tenant:
             print('Error: the aws federation provider requires the britive tenant as part of the signing algorithm')
-            raise exceptions.TenantMissingError()
+            raise TenantMissingError()
         self.tenant = Britive.parse_tenant(temp_tenant).split(':')[0]  # remove the port if it exists
         super().__init__()
 
@@ -249,48 +146,3 @@ class AwsFederationProvider(FederationProvider):
 
         token_encoded = base64.urlsafe_b64encode(json.dumps(token).encode('utf-8'))
         return f'AWS::{token_encoded.decode("utf-8")}'
-
-
-class BitbucketFederationProvider(FederationProvider):
-    def __init__(self) -> None:
-        super().__init__()
-
-    # https://support.atlassian.com/bitbucket-cloud/docs/integrate-pipelines-with-resource-servers-using-oidc/
-    def get_token(self) -> str:
-        id_token = os.environ.get('BITBUCKET_STEP_OIDC_TOKEN')
-        if not id_token:
-            msg = (
-                'the codebase is not executing in a bitbucket environment and/or the `oidc` flag '
-                'is not set on the pipeline step'
-            )
-            raise exceptions.NotExecutingInBitbucketEnvironment(msg)
-        return f'OIDC::{id_token}'
-
-
-class SpaceliftFederationProvider(FederationProvider):
-    def __init__(self) -> None:
-        super().__init__()
-
-    # https://docs.spacelift.io/integrations/cloud-providers/oidc/
-    def get_token(self) -> str:
-        id_token = os.environ.get('SPACELIFT_OIDC_TOKEN')
-        if not id_token:
-            msg = 'the codebase is not executing in a spacelift.io environment or not using a paid account'
-            raise exceptions.NotExecutingInSpaceliftEnvironment(msg)
-        return f'OIDC::{id_token}'
-
-
-class GitlabFederationProvider(FederationProvider):
-    def __init__(self, token_env_var: str = 'BRITIVE_OIDC_TOKEN') -> None:
-        super().__init__()
-        self.token_env_var = token_env_var
-
-    def get_token(self) -> str:
-        id_token = os.environ.get(self.token_env_var)
-        if not id_token:
-            msg = (
-                'the codebase is not executing in a gitlab environment or the incorrect token environment variable '
-                'was specified'
-            )
-            raise exceptions.NotExecutingInGitlabEnvironment(msg)
-        return f'OIDC::{id_token}'

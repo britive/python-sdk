@@ -98,7 +98,6 @@ def test_policies_condition_created_as_dict_get_formatted_json(cached_system_lev
         identifier_type='id',
         condition_as_dict=False,
     )
-    print(response)
     assert 'condition' in response
     assert 'name' in response
     assert isinstance(response['condition'], str)

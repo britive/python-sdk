@@ -117,48 +117,48 @@ to an internal end-to-end process vs. integrating with a cloud service provider.
 Then run these in order or as required.
 
 ```sh
-pytest tests/test_005-identity_attributes.py -v
-pytest tests/test_010-users.py -v
-pytest tests/test_020-tags.py -v
-pytest tests/test_030-service_identities.py -v
-pytest tests/test_040-service_identity_tokens.py -v
-pytest tests/test_050-applications.py -v
-pytest tests/test_060-environment_groups.py -v
-pytest tests/test_070-environments.py -v
-pytest tests/test_080-scans.py -v  # WARNING - this one will take a while since it initiates a real scan
-pytest tests/test_090-accounts.py -v  # NOTE - a scan must first be completed
-pytest tests/test_100-permissions.py -v  # NOTE - a scan must first be completed
-pytest tests/test_110-groups.py -v  # NOTE - a scan must first be completed
-pytest tests/test_130-profiles.py -v
-pytest tests/test_140-task_services.py -v
-pytest tests/test_150-tasks.py -v
-pytest tests/test_160-security_policies.py -v
-pytest tests/test_170-saml.py -v
-pytest tests/test_180-api_tokens.py -v
-pytest tests/test_190-audit_logs.py -v
-pytest tests/test_200-reports.py -v
-pytest tests/test_210-identity_providers.py -v
-pytest tests/test_215-workload.py -v
-pytest tests/test_220-my_access.py -v
-pytest tests/test_230-notifications.py -v
-pytest tests/test_240-secrets_manager.py -v
-pytest tests/test_250-my_secrets.py -v
-pytest tests/test_260-notification_mediums.py -v
-pytest tests/test_270-system_policies.py -v
-pytest tests/test_280_system_actions.py -v
-pytest tests/test_290_system_consumers.py -v
-pytest tests/test_300-system_roles.py -v
-pytest tests/test_310-system_permissions.py -v
-pytest tests/test_320-settings_banner.py -v
-pytest tests/test_330-response_templates.py -v
-pytest tests/test_340-resource_types.py -v
-pytest tests/test_350-resource_labels.py -v
-pytest tests/test_360-resource.py -v
-pytest tests/test_370-resource_permissions.py -v
-pytest tests/test_380-access_broker_profiles.py -v
-pytest tests/test_390-access_broker_profiles_policies.py -v
-pytest tests/test_400-access_broker_permissions.py -v
-pytest tests/test_990-delete_all_resources.py -v
+pytest tests/005-identity_attributes.py -v
+pytest tests/010-users.py -v
+pytest tests/020-tags.py -v
+pytest tests/030-service_identities.py -v
+pytest tests/040-service_identity_tokens.py -v
+pytest tests/050-applications.py -v
+pytest tests/060-environment_groups.py -v
+pytest tests/070-environments.py -v
+pytest tests/080-scans.py -v  # WARNING - this one will take a while since it initiates a real scan
+pytest tests/090-accounts.py -v  # NOTE - a scan must first be completed
+pytest tests/100-permissions.py -v  # NOTE - a scan must first be completed
+pytest tests/110-groups.py -v  # NOTE - a scan must first be completed
+pytest tests/130-profiles.py -v
+pytest tests/140-task_services.py -v
+pytest tests/150-tasks.py -v
+pytest tests/160-security_policies.py -v
+pytest tests/170-saml.py -v
+pytest tests/180-api_tokens.py -v
+pytest tests/190-audit_logs.py -v
+pytest tests/200-reports.py -v
+pytest tests/210-identity_providers.py -v
+pytest tests/215-workload.py -v
+pytest tests/220-my_access.py -v
+pytest tests/230-notifications.py -v
+pytest tests/240-secrets_manager.py -v
+pytest tests/250-my_secrets.py -v
+pytest tests/260-notification_mediums.py -v
+pytest tests/270-system_policies.py -v
+pytest tests/280_system_actions.py -v
+pytest tests/290_system_consumers.py -v
+pytest tests/300-system_roles.py -v
+pytest tests/310-system_permissions.py -v
+pytest tests/320-settings_banner.py -v
+pytest tests/330-response_templates.py -v
+pytest tests/340-resource_types.py -v
+pytest tests/350-resource_labels.py -v
+pytest tests/360-resource.py -v
+pytest tests/370-resource_permissions.py -v
+pytest tests/380-access_broker_profiles.py -v
+pytest tests/390-access_broker_profiles_policies.py -v
+pytest tests/400-access_broker_permissions.py -v
+pytest tests/990-delete_all_resources.py -v
 ```
 
 Or you can simply run `pytest -v` to test everything all at once. The above commands however allow you to halt testing

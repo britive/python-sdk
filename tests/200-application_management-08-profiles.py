@@ -135,7 +135,6 @@ def test_session_attributes_remove(cached_profile, cached_static_session_attribu
 
 
 def test_policies_create(cached_profile_policy):
-    print(cached_profile_policy)
     assert isinstance(cached_profile_policy, dict)
     assert cached_profile_policy['members']['tags']
 

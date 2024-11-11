@@ -1,7 +1,16 @@
 import time
 from datetime import datetime, timedelta, timezone
 
-from . import exceptions
+from .exceptions import (
+    AccessDenied,
+    ApprovalRequiredButNoJustificationProvided,
+    ApprovalWorkflowRejected,
+    ApprovalWorkflowTimedOut,
+    ForbiddenRequest,
+    NoSecretsVaultFound,
+    StepUpAuthFailed,
+    StepUpAuthRequiredButNotProvided,
+)
 
 
 class MySecrets:
@@ -27,7 +36,7 @@ class MySecrets:
             return self.britive.get(f'{self.base_url}/vault')['id']
         except KeyError as e:
             if 'id' in str(e):
-                raise exceptions.NoSecretsVaultFound() from e
+                raise NoSecretsVaultFound() from e
 
     def list(self, path: str = '/', search: str = None) -> list:
         """
@@ -80,13 +89,13 @@ class MySecrets:
             try:
                 # handle when the time has expired waiting for approval
                 if datetime.now(timezone.utc) >= quit_time:
-                    raise exceptions.ApprovalWorkflowTimedOut()
+                    raise ApprovalWorkflowTimedOut()
 
                 # handle stepup totp
                 if otp:
                     response = self.britive.step_up.authenticate(otp=otp)
                     if response.get('result') == 'FAILED':
-                        raise exceptions.StepUpAuthFailed()
+                        raise StepUpAuthFailed()
 
                 # attempt to get the secret value and return it
                 return self.britive.post(
@@ -94,19 +103,19 @@ class MySecrets:
                 )['value']
 
             # 403 will be returned when approval or stepup auth are required or pending, or access is denied
-            except exceptions.ForbiddenRequest as e:
+            except ForbiddenRequest as e:
                 if 'PE-0002' in str(e):
-                    raise exceptions.AccessDenied() from e
+                    raise AccessDenied() from e
                 if 'PE-0010' in str(e):  # approval to view the secret is pending...
                     first = False
                     time.sleep(wait_time)
                 if 'PE-0011' in str(e) and not justification:
                     if first:
-                        raise exceptions.ApprovalRequiredButNoJustificationProvided() from e
+                        raise ApprovalRequiredButNoJustificationProvided() from e
                     else:
-                        raise exceptions.ApprovalWorkflowRejected() from e
+                        raise ApprovalWorkflowRejected() from e
                 if 'PE-0028' in str(e):  # Check for stepup totp
-                    raise exceptions.StepUpAuthRequiredButNotProvided() from e
+                    raise StepUpAuthRequiredButNotProvided() from e
                 else:
                     raise e
 
@@ -144,14 +153,14 @@ class MySecrets:
             if otp:
                 response = self.britive.step_up.authenticate(otp=otp)
                 if response.get('result') == 'FAILED':
-                    raise exceptions.StepUpAuthFailed()
+                    raise StepUpAuthFailed()
 
             # attempt to get the secret file and return it
             return self.britive.get(f'{self.base_url}/vault/{vault_id}/downloadfile', params=params)
         # 403 will be returned when approval is required or access is denied
-        except exceptions.ForbiddenRequest as e:
+        except ForbiddenRequest as e:
             if 'PE-0002' in str(e):
-                raise exceptions.AccessDenied() from e
+                raise AccessDenied() from e
             if 'PE-0011' in str(e):  # justification is required which means we have an approval workflow to deal with
                 # lets call view so we can go through the full approval process
                 self.view(
@@ -161,7 +170,7 @@ class MySecrets:
                 # and then we can get the file again
                 return self.britive.get(f'{self.base_url}/vault/{vault_id}/downloadfile', params=params)
             if 'PE-0028' in str(e):  # Check for stepup totp
-                raise exceptions.StepUpAuthRequiredButNotProvided() from e
+                raise StepUpAuthRequiredButNotProvided() from e
 
             else:
                 raise e

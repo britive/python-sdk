@@ -11,7 +11,7 @@ class Groups:
         filter_expression: str = None,
     ) -> list:
         """
-        Returnsdetails of all the groups associated with a given application and environment.
+        Returns details of all the groups associated with a given application and environment.
 
         :param application_id: The ID of the application.
         :param environment_id: Optionally the ID of the environment. Required only for applications which have

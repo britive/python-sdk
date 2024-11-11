@@ -1,4 +1,4 @@
-from . import exceptions
+from ..exceptions import ApiTokenNotFound
 
 
 class ApiTokens:
@@ -19,7 +19,7 @@ class ApiTokens:
         for token in self.list():
             if token['id'] == token_id:
                 return token
-        raise exceptions.ApiTokenNotFound()
+        raise ApiTokenNotFound()
 
     def create(self, name: str = None, expiration_days: int = 90) -> dict:
         """

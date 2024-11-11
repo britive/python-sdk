@@ -81,35 +81,37 @@ def test_generate_attribute_map(cached_identity_attribute):
     assert response['userAttr'] == cached_identity_attribute['id']
 
 
-def test_service_identity_get_when_nothing_associated(cached_service_identity):
+def test_service_identity_get_when_nothing_associated(cached_service_identity_federated):
     with pytest.raises(exceptions.NotFound):
-        britive.workload.service_identities.get(service_identity_id=cached_service_identity['userId'])
+        britive.workload.service_identities.get(service_identity_id=cached_service_identity_federated['userId'])
 
 
 def test_service_identity_assign_and_unassign(
-    cached_service_identity, cached_identity_attribute, cached_workload_identity_provider_oidc
+    cached_service_identity_federated, cached_identity_attribute, cached_workload_identity_provider_oidc
 ):
     response = britive.workload.service_identities.assign(
-        service_identity_id=cached_service_identity['userId'],
+        service_identity_id=cached_service_identity_federated['userId'],
         idp_id=cached_workload_identity_provider_oidc['id'],
         federated_attributes={cached_identity_attribute['id']: 'test'},
     )
     assert isinstance(response, dict)
 
     attrs = britive.service_identities.custom_attributes.get(
-        principal_id=cached_service_identity['userId'], as_dict=True
+        principal_id=cached_service_identity_federated['userId'], as_dict=True
     )
 
     assert isinstance(attrs, dict)
     assert len(attrs) == 1
     assert attrs[cached_identity_attribute['id']] == 'test'
 
-    response = britive.workload.service_identities.unassign(service_identity_id=cached_service_identity['userId'])
+    response = britive.workload.service_identities.unassign(
+        service_identity_id=cached_service_identity_federated['userId']
+    )
 
     assert response is None
 
     attrs = britive.service_identities.custom_attributes.get(
-        principal_id=cached_service_identity['userId'], as_dict=False
+        principal_id=cached_service_identity_federated['userId'], as_dict=False
     )
 
     assert isinstance(attrs, list)
@@ -117,26 +119,28 @@ def test_service_identity_assign_and_unassign(
     assert attrs[0]['attributeName'] is None
 
     response = britive.workload.service_identities.assign(
-        service_identity_id=cached_service_identity['userId'],
+        service_identity_id=cached_service_identity_federated['userId'],
         idp_id=cached_workload_identity_provider_oidc['id'],
         federated_attributes={cached_identity_attribute['name']: 'test'},
     )
     assert isinstance(response, dict)
 
     attrs = britive.service_identities.custom_attributes.get(
-        principal_id=cached_service_identity['userId'], as_dict=True
+        principal_id=cached_service_identity_federated['userId'], as_dict=True
     )
 
     assert isinstance(attrs, dict)
     assert len(attrs) == 1
     assert attrs[cached_identity_attribute['id']] == 'test'
 
-    response = britive.workload.service_identities.unassign(service_identity_id=cached_service_identity['userId'])
+    response = britive.workload.service_identities.unassign(
+        service_identity_id=cached_service_identity_federated['userId']
+    )
 
     assert response is None
 
     attrs = britive.service_identities.custom_attributes.get(
-        principal_id=cached_service_identity['userId'], as_dict=False
+        principal_id=cached_service_identity_federated['userId'], as_dict=False
     )
 
     assert isinstance(attrs, list)

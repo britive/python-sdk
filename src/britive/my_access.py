@@ -1,13 +1,26 @@
-import sys
 import time
 from typing import Any, Callable
 
-from . import exceptions
+from .exceptions import (
+    ApprovalRequiredButNoJustificationProvided,
+    ApprovalWorkflowRejected,
+    ApprovalWorkflowTimedOut,
+    ForbiddenRequest,
+    InvalidRequest,
+    ProfileApprovalRejected,
+    ProfileApprovalTimedOut,
+    ProfileApprovalWithdrawn,
+    StepUpAuthFailed,
+    StepUpAuthRequiredButNotProvided,
+    TransactionNotFound,
+)
+from .my_approvals import MyApprovals
+from .my_requests import MyRequests
 
 approval_exceptions = {
-    'rejected': exceptions.ProfileApprovalRejected(),
-    'cancelled': exceptions.ProfileApprovalWithdrawn(),
-    'timeout': exceptions.ProfileApprovalTimedOut(),
+    'rejected': ProfileApprovalRejected(),
+    'cancelled': ProfileApprovalWithdrawn(),
+    'timeout': ProfileApprovalTimedOut(),
 }
 
 
@@ -30,6 +43,20 @@ class MyAccess:
         self.base_url = f'{self.britive.base_url}/access'
 
     def list_profiles(self) -> list:
+        # MyApprovals backwards compatibility
+        self.__my_approvals = MyApprovals(self.britive)
+        self.approve_request = self.__my_approvals.approve_request
+        self.list_approvals = self.__my_approvals.list_approvals
+        self.reject_request = self.__my_approvals.reject_request
+
+        # MyRequests backwards compatibility
+        self.__my_requests = MyRequests(self.britive)
+        self.approval_request_status = self.__my_requests.approval_request_status
+        self.request_approval = self.__my_requests.request_approval
+        self.request_approval_by_name = self.__my_requests.request_approval_by_name
+        self.withdraw_approval_request = self.__my_requests.withdraw_approval_request
+        self.withdraw_approval_request_by_name = self.__my_requests.withdraw_approval_request_by_name
+
         """
         List the profiles for which the user has access.
 
@@ -58,7 +85,7 @@ class MyAccess:
         for t in self.list_checked_out_profiles():
             if t['transactionId'] == transaction_id:
                 return t
-        raise exceptions.TransactionNotFound()
+        raise TransactionNotFound()
 
     def extend_checkout(self, transaction_id: str) -> dict:
         """
@@ -98,233 +125,21 @@ class MyAccess:
                 transaction_id = transaction['transactionId']
                 break
         if not transaction_id:
-            raise exceptions.TransactionNotFound()
+            raise TransactionNotFound()
         return self.extend_checkout(transaction_id=transaction_id)
-
-    def request_approval_by_name(
-        self,
-        profile_name: str,
-        environment_name: str,
-        application_name: str = None,
-        justification: str = None,
-        wait_time: int = 60,
-        max_wait_time: int = 600,
-        block_until_disposition: bool = False,
-        progress_func: Callable = None,
-    ) -> Any:
-        """
-        Requests approval to checkout a profile at a later time, using names of entities instead of IDs.
-
-        Console vs. Programmatic access is not applicable here. The request for approval will allow the caller
-        to checkout either type of access once the request has been approved.
-
-        :param profile_name: The name of the profile. Use `list_profiles()` to obtain the eligible profiles.
-        :param environment_name: The name of the environment. Use `list_profiles()` to obtain the eligible environments.
-        :param application_name: Optionally the name of the application, which can help disambiguate between profiles
-            with the same name across applications.
-        :param justification: Optional justification if checking out the profile requires approval.
-        :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
-            was approved. Only applicable if `block_until_disposition = True`.
-        :param max_wait_time: The maximum number of seconds to wait for an approval before throwing
-            an exception. Only applicable if `block_until_disposition = True`.
-        :param block_until_disposition: Should this method wait/block until the request has been either approved,
-            rejected, or withdrawn. If `True` then `wait_time` and `max_wait_time` will govern how long to wait before
-            exiting.
-        :param progress_func: An optional callback that will be invoked as the checkout process progresses.
-        :return: If `block_until_disposition = True` then returns the final status of the request. If
-            `block_until_disposition = False` then returns details about the approval request.
-        :raises ProfileApprovalMaxBlockTimeExceeded: if max_wait_time has been reached while waiting for approval.
-        """
-
-        ids = self._get_profile_and_environment_ids_given_names(profile_name, environment_name, application_name)
-
-        return self.request_approval(
-            profile_id=ids['profile_id'],
-            environment_id=ids['environment_id'],
-            justification=justification,
-            wait_time=wait_time,
-            max_wait_time=max_wait_time,
-            block_until_disposition=block_until_disposition,
-            progress_func=progress_func,
-        )
-
-    def request_approval(
-        self,
-        profile_id: str,
-        environment_id: str,
-        justification: str,
-        wait_time: int = 60,
-        max_wait_time: int = 600,
-        block_until_disposition: bool = False,
-        progress_func: Callable = None,
-    ) -> Any:
-        """
-        Requests approval to checkout a profile at a later time.
-
-        Console vs. Programmatic access is not applicable here. The request for approval will allow the caller
-        to checkout either type of access once the request has been approved.
-
-        :param profile_id: The ID of the profile. Use `list_profiles()` to obtain the eligible profiles.
-        :param environment_id: The ID of the environment. Use `list_profiles()` to obtain the eligible environments.
-        :param justification: Optional justification if checking out the profile requires approval.
-        :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
-            was approved. Only applicable if `block_until_disposition = True`.
-        :param max_wait_time: The maximum number of seconds to wait for an approval before throwing
-            an exception. Only applicable if `block_until_disposition = True`.
-        :param block_until_disposition: Should this method wait/block until the request has been either approved,
-            rejected, or withdrawn. If `True` then `wait_time` and `max_wait_time` will govern how long to wait before
-            exiting.
-        :param progress_func: An optional callback that will be invoked as the checkout process progresses.
-        :return: If `block_until_disposition = True` then returns the final status of the request. If
-            `block_until_disposition = False` then returns details about the approval request.
-        :raises ProfileApprovalMaxBlockTimeExceeded: if max_wait_time has been reached while waiting for approval.
-        """
-
-        data = {'justification': justification}
-
-        request = self.britive.post(
-            f'{self.base_url}/{profile_id}/environments/{environment_id}/approvalRequest', json=data
-        )
-
-        if request is None:
-            raise exceptions.ProfileCheckoutAlreadyApproved()
-
-        request_id = request['requestId']
-
-        if block_until_disposition:
-            try:
-                quit_time = time.time() + max_wait_time
-                while True:
-                    status = self.approval_request_status(request_id=request_id)['status'].lower()
-                    if status == 'pending':
-                        if time.time() >= quit_time:
-                            raise exceptions.ProfileApprovalMaxBlockTimeExceeded()
-                        if progress_func:
-                            progress_func('awaiting approval')
-                        time.sleep(wait_time)
-                        continue
-                    # status == timeout or approved or rejected or cancelled
-                    return status
-            except KeyboardInterrupt:  # handle Ctrl+C (^C)
-                # the first ^C we get we will try to withdraw the request
-                # if we get another ^C while doing this we simply exit immediately
-                try:
-                    time.sleep(1)  # give the caller a small window to ^C again
-                    self.withdraw_approval_request(request_id=request_id)
-                    sys.exit()
-                except KeyboardInterrupt:
-                    sys.exit()
-
-        else:
-            return request
-
-    def approval_request_status(self, request_id: str) -> dict:
-        """
-        Provides details on and approval request.
-
-        :param request_id: The ID of the approval request.
-        :return: Details of the approval request.
-        """
-
-        return self.britive.get(f'{self.britive.base_url}/v1/approvals/{request_id}')
-
-    def withdraw_approval_request_by_name(
-        self, profile_name: str, environment_name: str, application_name: str = None
-    ) -> None:
-        """
-        Withdraws a pending approval request, using names of entities instead of IDs.
-
-        :param profile_name: The name of the profile. Use `list_profiles()` to obtain the eligible profiles.
-        :param environment_name: The name of the environment. Use `list_profiles()` to obtain the eligible environments.
-        :param application_name: Optionally the name of the application, which can help disambiguate between profiles
-            with the same name across applications.
-        :return: None
-        """
-
-        ids = self._get_profile_and_environment_ids_given_names(profile_name, environment_name, application_name)
-
-        return self.withdraw_approval_request(profile_id=ids['profile_id'], environment_id=ids['environment_id'])
-
-    def withdraw_approval_request(
-        self, request_id: str = None, profile_id: str = None, environment_id: str = None
-    ) -> None:
-        """
-        Withdraws a pending approval request.
-
-        Either `request_id` or (`profile_id` AND `environment_id`) are required.
-
-        :param request_id: The ID of the approval request.
-        :param profile_id: The ID of the profile.
-        :param environment_id: The ID of the environment.
-        :return: None
-        """
-
-        url = None
-        if request_id:
-            url = f'{self.britive.base_url}/v1/approvals/{request_id}'
-        else:
-            if not profile_id:
-                raise ValueError('profile_id is required.')
-            if not environment_id:
-                raise ValueError('environment_id is required')
-            url = (
-                f'{self.britive.base_url}/v1/approvals/consumer/papservice/resource?resourceId='
-                f'{profile_id}/{environment_id}'
-            )
-
-        return self.britive.delete(url)
-
-    def approve_request(self, request_id: str, comments: str = '') -> None:
-        """
-        Approves a request.
-
-        :param request_id: The ID of the request.
-        :param comments: Approver comments.
-        :return: None.
-        """
-
-        params = {'approveRequest': 'yes'}
-        data = {'approverComment': comments}
-
-        return self.britive.patch(f'{self.britive.base_url}/v1/approvals/{request_id}', params=params, json=data)
-
-    def reject_request(self, request_id: str, comments: str = '') -> None:
-        """
-        Rejects a request.
-
-        :param request_id: The ID of the request.
-        :param comments: Approver comments.
-        :return: None.
-        """
-
-        params = {'approveRequest': 'no'}
-        data = {'approverComment': comments}
-
-        return self.britive.patch(f'{self.britive.base_url}/v1/approvals/{request_id}', params=params, json=data)
-
-    def list_approvals(self) -> dict:
-        """
-        Lists approval requests.
-
-        :return: List of approval requests.
-        """
-
-        params = {'requestType': 'myApprovals', 'consumer': 'papservice'}
-
-        return self.britive.get(f'{self.britive.base_url}/v1/approvals/', params=params)
 
     def _checkout(
         self,
         profile_id: str,
         environment_id: str,
-        programmatic: bool = True,
         include_credentials: bool = False,
-        justification: str = None,
-        otp: str = None,
-        wait_time: int = 60,
-        max_wait_time: int = 600,
-        progress_func: Callable = None,
         iteration_num: int = 1,
+        justification: str = None,
+        max_wait_time: int = 600,
+        otp: str = None,
+        programmatic: bool = True,
+        progress_func: Callable = None,
+        wait_time: int = 60,
     ) -> dict:
         params = {'accessType': 'PROGRAMMATIC' if programmatic else 'CONSOLE'}
 
@@ -360,35 +175,34 @@ class MyAccess:
         if not transaction:
             if otp:
                 response = self.britive.step_up.authenticate(otp=otp)
-                print(str(response))
                 if response.get('result') == 'FAILED':
-                    raise exceptions.StepUpAuthFailed()
+                    raise StepUpAuthFailed()
 
             try:
                 transaction = self.britive.post(
                     f'{self.base_url}/{profile_id}/environments/{environment_id}', params=params, json=data
                 )
-            except exceptions.ForbiddenRequest as e:
+            except ForbiddenRequest as e:
                 if 'PE-0028' in str(e):  # Check for stepup totp
-                    raise exceptions.StepUpAuthRequiredButNotProvided() from e
-            except exceptions.InvalidRequest as e:
+                    raise StepUpAuthRequiredButNotProvided() from e
+            except InvalidRequest as e:
                 if 'MA-0009' in str(e):  # old approval process that coupled approval and checkout
-                    raise exceptions.ApprovalRequiredButNoJustificationProvided() from e
+                    raise ApprovalRequiredButNoJustificationProvided() from e
                 if 'MA-0010' in str(e):  # new approval process that de-couples approval from checkout
                     # if the caller has not provided a justification we know for sure the call will fail
                     # so raise the exception
                     if not justification:
-                        raise exceptions.ApprovalRequiredButNoJustificationProvided() from e
+                        raise ApprovalRequiredButNoJustificationProvided() from e
 
                     # request approval
                     status = self.request_approval(
-                        profile_id=profile_id,
+                        block_until_disposition=True,
                         environment_id=environment_id,
                         justification=justification,
-                        wait_time=wait_time,
                         max_wait_time=max_wait_time,
-                        block_until_disposition=True,
+                        profile_id=profile_id,
                         progress_func=progress_func,
+                        wait_time=wait_time,
                     )
 
                     # handle the response based on the value of status
@@ -412,16 +226,16 @@ class MyAccess:
                     if iteration_num > 2:
                         raise e
                     return self._checkout(
-                        profile_id=profile_id,
                         environment_id=environment_id,
-                        programmatic=programmatic,
                         include_credentials=include_credentials,
-                        justification=justification,
-                        wait_time=wait_time,
-                        max_wait_time=max_wait_time,
-                        progress_func=progress_func,
                         iteration_num=iteration_num + 1,
+                        justification=justification,
+                        max_wait_time=max_wait_time,
                         otp=otp,
+                        profile_id=profile_id,
+                        programmatic=programmatic,
+                        progress_func=progress_func,
+                        wait_time=wait_time,
                     )
                 raise e
 
@@ -434,11 +248,11 @@ class MyAccess:
             while True:
                 try:
                     transaction = self.get_checked_out_profile(transaction_id=transaction_id)
-                except exceptions.TransactionNotFound as e:
-                    raise exceptions.ApprovalWorkflowRejected() from e
+                except TransactionNotFound as e:
+                    raise ApprovalWorkflowRejected() from e
                 if transaction['status'] == 'checkOutInApproval':  # we have an approval workflow occurring
                     if time.time() >= quit_time:
-                        raise exceptions.ApprovalWorkflowTimedOut()
+                        raise ApprovalWorkflowTimedOut()
                     if progress_func:
                         progress_func('awaiting approval')
                     time.sleep(wait_time)
@@ -466,13 +280,13 @@ class MyAccess:
         self,
         profile_id: str,
         environment_id: str,
-        programmatic: bool = True,
         include_credentials: bool = False,
         justification: str = None,
-        otp: str = None,
-        wait_time: int = 60,
         max_wait_time: int = 600,
+        otp: str = None,
+        programmatic: bool = True,
         progress_func: Callable = None,
+        wait_time: int = 60,
     ) -> dict:
         """
         Checkout a profile.
@@ -486,18 +300,18 @@ class MyAccess:
 
         :param profile_id: The ID of the profile. Use `list_profiles()` to obtain the eligible profiles.
         :param environment_id: The ID of the environment. Use `list_profiles()` to obtain the eligible environments.
-        :param programmatic: True for programmatic credential checkout. False for console checkout.
         :param include_credentials: True if tokens should be included in the response. False if the caller wishes to
             call `credentials()` at a later time. If True, the `credentials` key will be included in the response which
             contains the response from `credentials()`. Setting this parameter to `True` will result in a synchronous
             call vs. setting to `False` will allow for an async call.
         :param justification: Optional justification if checking out the profile requires approval.
-        :param otp: Optional time based one-time passcode use for step up authentication.
-        :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
-            was approved.
         :param max_wait_time: The maximum number of seconds to wait for an approval before throwing
             an exception.
+        :param otp: Optional time based one-time passcode use for step up authentication.
+        :param programmatic: True for programmatic credential checkout. False for console checkout.
         :param progress_func: An optional callback that will be invoked as the checkout process progresses.
+        :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
+            was approved.
         :return: Details about the checked out profile, and optionally the credentials generated by the checkout.
         :raises ApprovalRequiredButNoJustificationProvided: if approval is required but no justification is provided.
         :raises ApprovalWorkflowTimedOut: if max_wait_time has been reached while waiting for approval.
@@ -525,13 +339,13 @@ class MyAccess:
         profile_name: str,
         environment_name: str,
         application_name: str = None,
-        programmatic: bool = True,
         include_credentials: bool = False,
         justification: str = None,
-        otp: str = None,
-        wait_time: int = 60,
         max_wait_time: int = 600,
+        otp: str = None,
+        programmatic: bool = True,
         progress_func: Callable = None,
+        wait_time: int = 60,
     ) -> dict:
         """
         Checkout a profile by supplying the names of entities vs. the IDs of those entities.
@@ -545,18 +359,18 @@ class MyAccess:
         :param environment_name: The name of the environment. Use `list_profiles()` to obtain the eligible environments.
         :param application_name: Optionally the name of the application, which can help disambiguate between profiles
             with the same name across applications.
-        :param programmatic: True for programmatic credential checkout. False for console checkout.
         :param include_credentials: True if tokens should be included in the response. False if the caller wishes to
             call `credentials()` at a later time. If True, the `credentials` key will be included in the response which
             contains the response from `credentials()`. Setting this parameter to `True` will result in a synchronous
             call vs. setting to `False` will allow for an async call.
         :param justification: Optional justification if checking out the profile requires approval.
-        :param otp: Optional time based one-time passcode use for step up authentication.
-        :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
-            was approved.
         :param max_wait_time: The maximum number of seconds to wait for an approval before throwing
             an exception.
+        :param otp: Optional time based one-time passcode use for step up authentication.
+        :param programmatic: True for programmatic credential checkout. False for console checkout.
         :param progress_func: An optional callback that will be invoked as the checkout process progresses.
+        :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
+            was approved.
         :return: Details about the checked out profile, and optionally the credentials generated by the checkout.
         :raises ApprovalRequiredButNoJustificationProvided: if approval is required but no justification is provided.
         :raises ApprovalWorkflowTimedOut: if max_wait_time has been reached while waiting for approval.
