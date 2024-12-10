@@ -546,15 +546,117 @@ class MyAccess:
 
     def favorites(self) -> list:
         """
-        Return list of favorite profiles for the user.
+        Return list of favorite profiles for the current user.
 
         :return: List of profiles.
         """
 
         return self.britive.get(f'{self.base_url}/favorites')
 
+    def create_filter(self, filter_name: str, filter_properties: str, user_id: str = None) -> dict:
+        """
+        Create a user filter.
+
+        :param filter_name: Name of the filter.
+        :param filter_properties: Dict of the filter properties.
+            Filter properties:
+                applications:
+                    type: list
+                    desc: Application ID(s)
+                associations:
+                    type: list
+                    desc: Assocation(s)
+                profiles:
+                    type: list
+                    desc: Profile ID(s)
+                statuses:
+                    type: list
+                    desc: Status(es)
+                application_types:
+                    type: list
+                    desc: Application Type(s)
+        :param user_id: ID of the user to create the filter for. Default: `my_access.whoami()['userId']`
+        :return: Details of the created filter.
         """
 
+        if user_id is None:
+            user_id = self.whoami()['userId']
+
+        if application_types := filter_properties.pop('application_types', None):
+            filter_properties['applicationTypes'] = application_types
+
+        data = {
+            "name": filter_name,
+            "filter": filter_properties
+        }
+
+        return self.britive.post(f'{self.base_url}/{user_id}/filters', json=data)
+
+    def list_filters(self, user_id: str = None) -> list:
         """
+        Return list of filters for a user.
+
+        :param user_id: ID of the user to list filters for. Default: `my_access.whoami()['userId']`
+        :return: List of filters.
+        """
+
+        if user_id is None:
+            user_id = self.whoami()['userId']
+
+        return self.britive.get(f'{self.base_url}/{user_id}/filters')
+
+    def update_filter(self, filter_id: str, filter_name: str, filter_properties: str, user_id: str = None) -> dict:
+        """
+        Update a user filter.
+
+        :param filter_id: ID of the filter.
+        :param filter_name: Name of the filter.
+        :param filter_properties: Dict of the filter properties.
+            Filter properties:
+                applications:
+                    type: list
+                    desc: Application ID(s)
+                associations:
+                    type: list
+                    desc: Assocation(s)
+                profiles:
+                    type: list
+                    desc: Profile ID(s)
+                statuses:
+                    type: list
+                    desc: Status(es)
+                application_types:
+                    type: list
+                    desc: Application Type(s)
+        :param user_id: ID of the user to create the filter for. Default: `my_access.whoami()['userId']`
+        :return: Details of the created filter.
+        """
+
+        if user_id is None:
+            user_id = self.whoami()['userId']
+
+        if application_types := filter_properties.pop('application_types', None):
+            filter_properties['applicationTypes'] = application_types
+
+        data = {
+            "name": filter_name,
+            "filter": filter_properties
+        }
+
+        return self.britive.put(f'{self.base_url}/{user_id}/filters/{filter_id}', json=data)
+
+    def delete_filter(self, filter_id: str, user_id: str = None) -> None:
+        """
+        Delete a user filter.
+
+        :param filter_id: ID of the filter.
+        :param user_id: ID of the user to create the filter for. Default: `my_access.whoami()['userId']`
+        :return: None.
+        """
+
+        if user_id is None:
+            user_id = self.whoami()['userId']
+
+        return self.britive.delete(f'{self.base_url}/{user_id}/filters/{filter_id}')
 
 
