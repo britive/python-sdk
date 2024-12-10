@@ -5,10 +5,14 @@ import time
 
 import requests
 
+from britive.exceptions.badrequest import bad_request_code_map
+from britive.exceptions.generic import generic_code_map
+from britive.exceptions.unauthorized import unauthorized_code_map
 from .access_broker import AccessBroker
 from .application_management import ApplicationManagement
 from .audit_logs import AuditLogs
 from .exceptions import (
+    BritiveException,
     InvalidFederationProvider,
     RootEnvironmentGroupNotFound,
     TenantMissingError,
@@ -369,14 +373,19 @@ class Britive:
     def __check_response_for_error(response) -> None:
         if response.status_code in allowed_exceptions:
             content = native_json.loads(response.content.decode('utf-8'))
+            error_code = content.get('errorCode', 'E0000')
             message = (
-                f"{response.status_code} - "
-                f"{content.get('errorCode', 'E0000')} -"
-                f" {content.get('message', 'no message available')}"
+                f"{response.status_code} - " f"{error_code} -" f" {content.get('message', 'no message available')}"
             )
             if content.get('details'):
                 message += f" - {content.get('details')}"
-            raise allowed_exceptions[response.status_code](message)
+            raise unauthorized_code_map.get(
+                error_code,
+                bad_request_code_map.get(
+                    error_code,
+                    generic_code_map.get(error_code, allowed_exceptions.get(response.status_code, BritiveException)),
+                ),
+            )(message)
 
     @staticmethod
     def __response_has_no_content(response) -> bool:

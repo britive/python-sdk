@@ -11,12 +11,18 @@ from .exceptions import (
     StepUpAuthFailed,
     StepUpAuthRequiredButNotProvided,
 )
+from .exceptions.generic import (
+    ApprovalPendingError,
+    ApprovalRequiredError,
+    EvaluationError,
+    StepUpAuthenticationRequiredError,
+)
 
 
 class MySecrets:
     """
-    This class is meant to be called by end users (as part of custom API integration work or pybritive CLI).
-    It is an API layer on top of the actions that can be performed on the "My Secrets" page of the Britive UI.
+    This class is meant to be called by end users. It is an API layer on top of the actions that can be performed on
+    the "My Secrets" page of the Britive UI.
 
     No "administrative" access is required by the methods in this class. Each method will only return resources/allow
     actions which are permitted to be performed by the user/service identity, as identified by an API token or
@@ -101,23 +107,21 @@ class MySecrets:
                 return self.britive.post(
                     f'{self.base_url}/vault/{vault_id}/accesssecrets', params=params, json=data if first else None
                 )['value']
-
-            # 403 will be returned when approval or stepup auth are required or pending, or access is denied
-            except ForbiddenRequest as e:
-                if 'PE-0002' in str(e):
-                    raise AccessDenied() from e
-                if 'PE-0010' in str(e):  # approval to view the secret is pending...
-                    first = False
-                    time.sleep(wait_time)
-                if 'PE-0011' in str(e) and not justification:
+            except EvaluationError as e:
+                raise AccessDenied(e) from e
+            except ApprovalPendingError:  # approval to view the secret is pending...
+                first = False
+                time.sleep(wait_time)
+            except ApprovalRequiredError as e:
+                if not justification:
                     if first:
-                        raise ApprovalRequiredButNoJustificationProvided() from e
+                        raise ApprovalRequiredButNoJustificationProvided(e) from e
                     else:
-                        raise ApprovalWorkflowRejected() from e
-                if 'PE-0028' in str(e):  # Check for stepup totp
-                    raise StepUpAuthRequiredButNotProvided() from e
-                else:
-                    raise e
+                        raise ApprovalWorkflowRejected(e) from e
+            except StepUpAuthenticationRequiredError as e:
+                raise StepUpAuthRequiredButNotProvided(e) from e
+            except ForbiddenRequest as e:
+                raise e
 
     def download(
         self, path: str, justification: str = None, otp: str = None, wait_time: int = 60, max_wait_time: int = 600
@@ -158,19 +162,17 @@ class MySecrets:
             # attempt to get the secret file and return it
             return self.britive.get(f'{self.base_url}/vault/{vault_id}/downloadfile', params=params)
         # 403 will be returned when approval is required or access is denied
+        except EvaluationError as e:
+            raise AccessDenied(e) from e
+        except ApprovalRequiredError:
+            # justification is required which means we have an approval workflow to deal with
+            # lets call view so we can go through the full approval process
+            self.view(
+                path=path, justification=justification, otp=otp, wait_time=wait_time, max_wait_time=max_wait_time
+            )
+            # and then we can get the file again
+            return self.britive.get(f'{self.base_url}/vault/{vault_id}/downloadfile', params=params)
+        except StepUpAuthenticationRequiredError as e:
+            raise StepUpAuthRequiredButNotProvided(e) from e
         except ForbiddenRequest as e:
-            if 'PE-0002' in str(e):
-                raise AccessDenied() from e
-            if 'PE-0011' in str(e):  # justification is required which means we have an approval workflow to deal with
-                # lets call view so we can go through the full approval process
-                self.view(
-                    path=path, justification=justification, otp=otp, wait_time=wait_time, max_wait_time=max_wait_time
-                )
-
-                # and then we can get the file again
-                return self.britive.get(f'{self.base_url}/vault/{vault_id}/downloadfile', params=params)
-            if 'PE-0028' in str(e):  # Check for stepup totp
-                raise StepUpAuthRequiredButNotProvided() from e
-
-            else:
-                raise e
+            raise e
