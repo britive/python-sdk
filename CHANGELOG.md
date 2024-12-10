@@ -1,5 +1,37 @@
 # Change Log (v2.8.1+)
 
+## v3.2.0-alpha [2024-12-10]
+
+__What's New:__
+
+* Reorganized codebase to align with UI orginizational structure.
+* Decoupled `my_requests` and `my_approvals` from `my_access`.
+* Added `brokers` and `pools` functionality for `access_broker`.
+* Added `firewall` settings functionality.
+* Added Britive `managed_permissions` functionality.
+* Britive exceptions by type and error code.
+
+__Enhancements:__
+
+* Added `add_favorite` and `delete_favorite` to `my_resources`.
+* Added checkout approvals to `my_resources`.
+* Added ITSM to checkout approvals.
+* Added `include_approval_status` to `my_access.list_profiles`.
+* Added `(create|list|update|delete)_filter`) to `my_access`.
+* Added `response_templates` functionality for `access_broker` credentials.
+
+__Bug Fixes:__
+
+* Fixed missing `param_values` option for resource creation.
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v3.1.0 [2024-10-07]
 
 __What's New:__
