@@ -6,11 +6,11 @@ from time import time
 
 import pytest
 
-from britive import exceptions  # exceptions used in test files so including here for ease
-
 # don't worry about these invalid references - it will be fixed up if we are running local tests
 # vs running it through tox
 from britive.britive import Britive
+from britive.exceptions import InternalServerError
+from britive.exceptions.badrequest import UserCreationError
 
 britive = Britive()  # source details from environment variables
 scan_skip = bool(os.getenv('BRITIVE_TEST_IGNORE_SCAN'))
@@ -92,7 +92,10 @@ def cached_service_identity(pytestconfig, timestamp):
         'name': f'testpythonapiwrapperserviceidentity{timestamp}',
         'status': 'active',
     }
-    return britive.service_identities.create(**service_identity_to_create)
+    try:
+        return britive.service_identities.create(**service_identity_to_create)
+    except UserCreationError:
+        return britive.service_identities.get_by_name(service_identity_to_create['name'])[0]
 
 
 @pytest.fixture(scope='session')
@@ -102,8 +105,10 @@ def cached_service_identity_federated(pytestconfig, timestamp):
         'name': f'testpythonapiwrapperfederated{timestamp}',
         'status': 'active',
     }
-    return britive.service_identities.create(**service_identity_to_create)
-
+    try:
+        return britive.service_identities.create(**service_identity_to_create)
+    except UserCreationError:
+        return britive.service_identities.get_by_name(service_identity_to_create['name'])[0]
 
 @pytest.fixture(scope='session')
 @cached_resource(name='service-identity-token')
@@ -654,7 +659,7 @@ def cached_workload_identity_provider_aws(pytestconfig, timestamp, cached_identi
             name=f'python-sdk-aws-{timestamp}', attributes_map={'UserId': cached_identity_attribute['id']}
         )
         return response
-    except exceptions.InternalServerError as e:
+    except InternalServerError as e:
         raise Exception('AWS provider could not be created and none found') from e
 
 

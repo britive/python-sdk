@@ -12,7 +12,7 @@ class Users:
     def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/users'
-        self.custom_attributes = CustomAttributes(self)
+        self.custom_attributes = CustomAttributes(britive)
         self.enable_mfa = EnableMFA(britive)
 
     def list(self, filter_expression: str = None, include_tags: bool = False) -> list:
@@ -239,7 +239,7 @@ class Users:
         """
 
         user = self.get(user_id)
-        if not user['identityProvider']['mfaEnabled']:
+        if not user['identityProvider'].get('mfaEnabled'):
             raise UserDoesNotHaveMFAEnabled()
 
         return self.britive.patch(f'{self.base_url}/{user_id}/resetmfa')

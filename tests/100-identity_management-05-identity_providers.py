@@ -1,4 +1,4 @@
-from britive import exceptions
+from britive.exceptions.generic import BritiveGenericError
 
 from .cache import *  # will also import some globals like `britive`
 
@@ -93,7 +93,7 @@ def test_scim_tokens_update_attribute_mapping(cached_identity_provider):
 
 
 def test_configure_mfa(cached_identity_provider):
-    with pytest.raises(exceptions.InvalidRequest) as e:
+    with pytest.raises(BritiveGenericError) as e:
         britive.identity_providers.configure_mfa(
             identity_provider_id=cached_identity_provider['id'], root_user=False, non_root_user=True
         )

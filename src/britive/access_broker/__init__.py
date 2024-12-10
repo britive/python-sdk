@@ -6,7 +6,7 @@ from .response_templates import ResponseTemplates
 
 
 class AccessBroker:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.profiles = Profile(britive)
         self.resources = Resources(britive)
         self.response_templates = ResponseTemplates(britive)

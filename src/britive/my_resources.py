@@ -10,9 +10,10 @@ from .exceptions import (
     StepUpAuthRequiredButNotProvided,
     TransactionNotFound,
 )
-from .my_requests import MyRequests
 from .exceptions.badrequest import ApprovalJustificationRequiredError, ProfileApprovalRequiredError
 from .exceptions.generic import StepUpAuthenticationRequiredError
+from .helpers import HelperMethods
+from .my_requests import MyResourcesRequests
 
 approval_exceptions = {
     'rejected': ProfileApprovalRejected(),
@@ -37,6 +38,9 @@ class MyResources:
     def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/resource-manager/my-resources'
+        self._get_profile_and_resource_ids_given_names = HelperMethods(
+            self.britive
+        ).get_profile_and_resource_ids_given_names
 
     def list_profiles(self, list_type: str = None, search_text: str = None) -> list:
         """
@@ -409,19 +413,26 @@ class MyResources:
 
         return self.delete(f'{self.base_url}/favorites/{favorite_id}')
 
-    def _get_profile_and_resource_ids_given_names(self, profile_name: str, resource_name: str) -> dict:
-        resource_profile_map = {
-            f'{item["resourceName"].lower()}|{item["profileName"].lower()}': {
-                'profile_id': item['profileId'],
-                'resource_id': item['resourceId'],
-            }
-            for item in self.list_profiles()
-        }
+    def get_profile_settings(self, profile_id: str, resource_id: str) -> dict:
+        """
+        Retrieve settings of a profile.
 
-        item = resource_profile_map.get(f'{resource_name.lower()}|{profile_name.lower()}')
+        :param profile_id: The ID of the profile.
+        :param resource_id: The ID of the resource.
+        :return: Dict of the profile settings.
+        """
 
-        # do some error checking
-        if not item:
-            raise ValueError('resource and profile combination not found')
+        return self.britive.get(f'{self.base_url}/{profile_id}/resources/{resource_id}/settings')
 
-        return item
+    def get_profile_settings_by_name(self, profile_name: str, resource_name: str) -> dict:
+        """
+        Retrieve settings of a profile by name.
+
+        :param profile_name: The name of the profile.
+        :param resource_name: The name of the resource.
+        :return: Dict of the profile settings.
+        """
+
+        ids = self._get_profile_and_resource_ids_given_names(profile_name=profile_name, resource_name=resource_name)
+
+        return self.get_profile_settings(profile_id=ids['profile_id'], resource_id=ids['resource_id'])

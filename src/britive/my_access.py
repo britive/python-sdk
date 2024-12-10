@@ -16,8 +16,9 @@ from .exceptions.badrequest import (
     ProfileApprovalRequiredError,
 )
 from .exceptions.generic import BritiveGenericError, StepUpAuthenticationRequiredError
+from .helpers import HelperMethods
 from .my_approvals import MyApprovals
-from .my_requests import MyRequests
+from .my_requests import MyAccessRequests
 
 approval_exceptions = {
     'rejected': ProfileApprovalRejected(),
@@ -28,8 +29,7 @@ approval_exceptions = {
 
 class MyAccess:
     """
-    This class is meant to be called by end users (as part of custom API integration work or the yet to be built
-    Python based Britive CLI tooling). It is an API layer on top of the actions that can be performed on the
+    This class is meant to be called by end users, it is an API layer on top of the actions that can be performed on the
     "My Access" page of the Britive UI.
 
     No "administrative" access is required by the methods in this class. Each method will only return resources/allow
@@ -43,20 +43,24 @@ class MyAccess:
     def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/access'
+        self._get_profile_and_environment_ids_given_names = HelperMethods(
+            self.britive
+        ).get_profile_and_environment_ids_given_names
 
-        # MyApprovals backwards compatibility
-        self.__my_approvals = MyApprovals(self.britive)
-        self.approve_request = self.__my_approvals.approve_request
-        self.list_approvals = self.__my_approvals.list_approvals
-        self.reject_request = self.__my_approvals.reject_request
+        if os.getenv('FUTURE_BRITIVE_SDK', 'false').lower() != 'true':
+            # MyApprovals backwards compatibility
+            self.__my_approvals = MyApprovals(self.britive)
+            self.approve_request = self.__my_approvals.approve_request
+            self.list_approvals = self.__my_approvals.list_approvals
+            self.reject_request = self.__my_approvals.reject_request
 
-        # MyRequests backwards compatibility
-        self.__my_requests = MyRequests(self.britive)
-        self.approval_request_status = self.__my_requests.approval_request_status
-        self.request_approval = self.__my_requests.request_approval
-        self.request_approval_by_name = self.__my_requests.request_approval_by_name
-        self.withdraw_approval_request = self.__my_requests.withdraw_approval_request
-        self.withdraw_approval_request_by_name = self.__my_requests.withdraw_approval_request_by_name
+            # MyRequests backwards compatibility
+            self.__my_requests = MyAccessRequests(self.britive)
+            self.approval_request_status = self.__my_requests.approval_request_status
+            self.request_approval = self.__my_requests.request_approval
+            self.request_approval_by_name = self.__my_requests.request_approval_by_name
+            self.withdraw_approval_request = self.__my_requests.withdraw_approval_request
+            self.withdraw_approval_request_by_name = self.__my_requests.withdraw_approval_request_by_name
 
     def list_profiles(self, include_approval_status: bool = False) -> list:
         """
@@ -69,23 +73,41 @@ class MyAccess:
         profiles = self.britive.get(self.base_url)
 
         if include_approval_status:
-            approval_status_list = {
-                a['papId']: a['status'] for a in self.britive.get(self.base_url, params={'type': 'ui'})
+            access_type_details = {
+                (a['papId'], a['environmentId'], a['accessType'].lower()): a['myAccessDetails']
+                for a in self.britive.get(self.base_url, params={'type': 'ui'})
             }
             for app in profiles:
                 for profile in app['profiles']:
-                    profile['approval_status'] = approval_status_list[profile['profileId']]
+                    for environment in profile['environments']:
+                        for access_type in ('console', 'programmatic'):
+                            if profile.get(f'{access_type}Access'):
+                                environment[f'{access_type}_access_details'] = access_type_details[
+                                    (profile['profileId'], environment['environmentId'], access_type)
+                                ]
 
         return profiles
 
-    def list_checked_out_profiles(self) -> list:
+    def list_checked_out_profiles(self, include_profile_details: bool = False) -> list:
         """
         Return list of details on currently checked out profiles for the user.
 
+        :param include_profile_details: Include `details` for each checked out profile.
         :return: List of checked out profiles.
         """
 
-        return self.britive.get(f'{self.base_url}/app-access-status')
+        checked_out_profiles = self.britive.get(f'{self.base_url}/app-access-status')
+
+        if include_profile_details:
+            for profile in checked_out_profiles:
+                profile['details'] = [
+                    a
+                    for a in self.list_profiles()
+                    if profile['appContainerId'] == a['appContainerId']
+                    and [p for p in a['profiles'] if profile['papId'] == p['profileId']]
+                ]
+
+        return checked_out_profiles
 
     def get_checked_out_profile(self, transaction_id: str) -> dict:
         """
@@ -99,6 +121,35 @@ class MyAccess:
             if t['transactionId'] == transaction_id:
                 return t
         raise TransactionNotFound()
+
+    def get_profile_settings(self, profile_id: str, environment_id: str) -> dict:
+        """
+        Retrieve settings of a profile.
+
+        :param profile_id: The ID of the profile.
+        :param environment_id: The ID of the environment.
+        :return: Dict of the profile settings.
+        """
+
+        return self.britive.get(f'{self.base_url}/{profile_id}/environments/{environment_id}/settings')
+
+    def get_profile_settings_by_name(
+        self, profile_name: str, environment_name: str, application_name: str = None
+    ) -> dict:
+        """
+        Retrieve settings of a profile by name.
+
+        :param profile_name: The name of the profile.
+        :param environment_name: The name of the environment.
+        :param application_name: Optionally, the name of the application.
+        :return: Dict of the profile settings.
+        """
+
+        ids = self._get_profile_and_environment_ids_given_names(
+            profile_name=profile_name, environment_name=environment_name, application_name=application_name
+        )
+
+        return self.get_profile_settings(profile_id=ids['profile_id'], environment_id=ids['environment_id'])
 
     def extend_checkout(self, transaction_id: str) -> dict:
         """
@@ -258,25 +309,6 @@ class MyAccess:
                 raise e
 
         transaction_id = transaction['transactionId']
-
-        # this approval workflow logic is for the legacy workflow when approval and checkout were coupled together
-        # this logic can be removed once the new approval logic is deployed to production.
-        if transaction['status'] == 'checkOutInApproval':  # wait for approval or until timeout occurs
-            quit_time = time.time() + max_wait_time
-            while True:
-                try:
-                    transaction = self.get_checked_out_profile(transaction_id=transaction_id)
-                except TransactionNotFound as e:
-                    raise ApprovalWorkflowRejected() from e
-                if transaction['status'] == 'checkOutInApproval':  # we have an approval workflow occurring
-                    if time.time() >= quit_time:
-                        raise ApprovalWorkflowTimedOut()
-                    if progress_func:
-                        progress_func('awaiting approval')
-                    time.sleep(wait_time)
-                    continue
-                # status == checkedOut
-                break
 
         # inject credentials if asked
         if include_credentials:
@@ -494,9 +526,18 @@ class MyAccess:
 
         return self.checkin(transaction_id=transaction_id)
 
+    def whoami(self) -> dict:
+        """
+        Return details about the currently authenticated identity (user or service).
+
+        :return: Details of the currently authenticated identity.
+        """
+
+        return self.britive.post(f'{self.britive.base_url}/auth/validate')['authenticationResult']
+
     def frequents(self) -> list:
         """
-        Return list of frequently used profiles for the user.
+        Return list of frequently used profiles for the current user.
 
         :return: List of profiles.
         """
@@ -512,58 +553,8 @@ class MyAccess:
 
         return self.britive.get(f'{self.base_url}/favorites')
 
-    def whoami(self) -> dict:
-        """
-        Return details about the currently authenticated identity (user or service).
-
-        :return: Details of the currently authenticated identity.
         """
 
-        return self.britive.post(f'{self.britive.base_url}/auth/validate')['authenticationResult']
+        """
 
-    def _get_profile_and_environment_ids_given_names(
-        self, profile_name: str, environment_name: str, application_name: str = None
-    ) -> dict:
-        ids = None
-        profile_found = False
-        environment_found = False
 
-        # collect relevant profile/environment combinations to which the identity is entitled
-        for app in self.list_profiles():
-            app_name = app['appName'].lower()
-            if application_name and app_name != application_name.lower():  # restrict to one app if provided
-                continue
-            for profile in app['profiles']:
-                prof_name = profile['profileName'].lower()
-                prof_id = profile['profileId']
-
-                if prof_name == profile_name.lower():
-                    profile_found = True
-                    for env in profile['environments']:
-                        env_name = env['environmentName'].lower()
-                        env_id = env['environmentId']
-
-                        if env_name == environment_name.lower():
-                            environment_found = True
-                            # lets check to see if `ids` has already been set
-                            # if so we should error because we don't know which name combo to use
-                            if ids:
-                                raise ValueError(
-                                    f'multiple combinations of profile `{profile_name}` and environment '
-                                    f'`{environment_name}` exist so no unique combination can be determined. Please '
-                                    f'provide the optional parameter `application_name` to clarify which application '
-                                    f'the environment belongs to.'
-                                )
-                            # set the IDs the first time
-                            ids = {'profile_id': prof_id, 'environment_id': env_id}
-
-        # do some error checking
-        if not profile_found:
-            raise ValueError(f'profile `{profile_name}` not found.')
-
-        if profile_found and not environment_found:
-            raise ValueError(f'profile `{profile_name}` found but not in environment `{environment_name}`.')
-
-        # if we get here we found both the profile and environment and they are unique so
-        # we can use the `ids` dict with confidence
-        return ids

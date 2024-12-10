@@ -10,7 +10,7 @@ from .scans import Scans
 
 
 class ApplicationManagement:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.access_builder = AccessBuilderSettings(britive)
         self.accounts = Accounts(britive)
         self.applications = Applications(britive)

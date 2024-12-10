@@ -8,6 +8,8 @@ import requests
 from britive.exceptions.badrequest import bad_request_code_map
 from britive.exceptions.generic import generic_code_map
 from britive.exceptions.unauthorized import unauthorized_code_map
+
+from . import __version__
 from .access_broker import AccessBroker
 from .application_management import ApplicationManagement
 from .audit_logs import AuditLogs
@@ -30,7 +32,7 @@ from .federation_providers import (
     SpaceliftFederationProvider,
 )
 from .global_settings import GlobalSettings
-from .helpers import methods as helper_methods
+from .helpers import HelperMethods as helper_methods
 from .identity_management import IdentityManagement
 from .my_access import MyAccess
 from .my_approvals import MyApprovals
@@ -81,12 +83,12 @@ class Britive:
 
     def __init__(
         self,
-        tenant=None,
-        token=None,
-        query_features=True,
-        token_federation_provider=None,
-        token_duration=900,
-    ):
+        tenant: str = None,
+        token: str = None,
+        query_features: bool = True,
+        token_federation_provider: str = None,
+        token_duration: int = 900,
+    ) -> None:
         """
         Instantiate an authenticated interface that can be used to communicate with the Britive API.
 
@@ -119,12 +121,12 @@ class Britive:
 
         self._initialize_components(query_features)
 
-    def _initialize_token(self, token, provider, duration):
+    def _initialize_token(self, token: str, provider: str, duration: int) -> str:
         if provider:
             return self.source_federation_token_from(provider, self.tenant, duration)
         return token or os.getenv('BRITIVE_API_TOKEN') or TokenMissingError('Token not provided.')
 
-    def _setup_session(self):
+    def _setup_session(self) -> requests.Session:
         session = requests.Session()
 
         # if PYBRITIVE_CA_BUNDLE set, in pybritive most likely, use it
@@ -137,7 +139,7 @@ class Britive:
             self._disable_ssl_verification_warnings()
 
         token_type = self._determine_token_type()
-        version = self._get_version()
+        version = __version__
 
         session.headers.update(
             {
@@ -148,7 +150,7 @@ class Britive:
         )
         return session
 
-    def _disable_ssl_verification_warnings(self):
+    def _disable_ssl_verification_warnings(self) -> None:
         # wipe these due to this bug: https://github.com/psf/requests/issues/3829
         os.environ['CURL_CA_BUNDLE'] = ''
         os.environ['REQUESTS_CA_BUNDLE'] = ''
@@ -156,66 +158,68 @@ class Britive:
 
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    def _determine_token_type(self):
+    def _determine_token_type(self) -> str:
         if len(self.__token) < 50:
             return 'TOKEN'
         if len(self.__token.split('::')) > 1:
             return 'WorkloadToken'
         return 'Bearer'
 
-    def _get_version(self):
-        try:
-            import britive
-
-            return britive.__version__
-        except ImportError:
-            return 'unknown'
-
-    def _initialize_components(self, query_features):
-        application_management = ApplicationManagement(self)
-        identity_management = IdentityManagement(self)
-        global_settings = GlobalSettings(self)
-        security = Security(self)
-        workflows = Workflows(self)
-
-        self.access_builder = application_management.access_builder
-        self.accounts = application_management.accounts
+    def _initialize_components(self, query_features: bool) -> None:
+        self.access_broker = AccessBroker(self)
         self.api_tokens = ApiTokens(self)
-        self.applications = application_management.applications
-        self.audit_logs = AuditLogs(self).audit_logs
-        self.environment_groups = application_management.environment_groups
-        self.environments = application_management.environments
         self.feature_flags = self.features() if query_features else {}
-        self.groups = application_management.groups
-        self.identity_attributes = identity_management.identity_attributes
-        self.identity_providers = identity_management.identity_providers
         self.my_access = MyAccess(self)
         self.my_approvals = MyApprovals(self)
         self.my_requests = MyRequests(self)
         self.my_resources = MyResources(self)
         self.my_secrets = MySecrets(self)
-        self.notification_mediums = global_settings.notification_mediums
-        self.notifications = workflows.notifications
-        self.permissions = application_management.permissions
-        self.profiles = application_management.profiles
         self.reports = Reports(self)
-        self.saml = security.saml
-        self.scans = application_management.scans
         self.secrets_manager = SecretsManager(self)
-        self.security_policies = security.security_policies
-        self.service_identities = identity_management.service_identities
-        self.service_identity_tokens = identity_management.service_identity_tokens
-        self.settings = GlobalSettings(self)
-        self.step_up = security.step_up_auth
         self.system = System(self)
-        self.tags = identity_management.tags
-        self.task_services = workflows.task_services
-        self.tasks = workflows.tasks
-        self.users = identity_management.users
-        self.workload = identity_management.workload
 
-        # depends on my_access
-        self.access_broker = AccessBroker(self)
+        application_management = ApplicationManagement(self)
+        audit_logs = AuditLogs(self)
+        identity_management = IdentityManagement(self)
+        global_settings = GlobalSettings(self)
+        security = Security(self)
+        workflows = Workflows(self)
+
+        # FUTURE_BRITIVE_SDK == 'true' will remove backwards compatibility
+        if os.getenv('FUTURE_BRITIVE_SDK', 'false').lower() == 'true':
+            self.application_management = application_management
+            self.audit_logs = audit_logs
+            self.identity_management = identity_management
+            self.global_settings = global_settings
+            self.security = security
+            self.workflows = workflows
+        else:
+            self.access_builder = application_management.access_builder
+            self.accounts = application_management.accounts
+            self.applications = application_management.applications
+            self.audit_logs = audit_logs.logs
+            self.audit_logs.webhooks = audit_logs.webhooks
+            self.environment_groups = application_management.environment_groups
+            self.environments = application_management.environments
+            self.groups = application_management.groups
+            self.identity_attributes = identity_management.identity_attributes
+            self.identity_providers = identity_management.identity_providers
+            self.notification_mediums = global_settings.notification_mediums
+            self.notifications = workflows.notifications
+            self.permissions = application_management.permissions
+            self.profiles = application_management.profiles
+            self.saml = security.saml
+            self.scans = application_management.scans
+            self.security_policies = security.security_policies
+            self.service_identities = identity_management.service_identities
+            self.service_identity_tokens = identity_management.service_identity_tokens
+            self.step_up = security.step_up_auth
+            self.tags = identity_management.tags
+            self.task_services = workflows.task_services
+            self.tasks = workflows.tasks
+            self.users = identity_management.users
+            self.workload = identity_management.workload
+            self.settings = global_settings
 
     @staticmethod
     def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:
@@ -234,12 +238,12 @@ class Britive:
         Six federation providers are currently supported by this method.
 
         * AWS IAM/STS, with optional profile specified - (aws)
-        * Github Actions (github)
-        * Bitbucket Pipelines (bitbucket)
         * Azure System Assigned Managed Identities (azuresmi)
         * Azure User Assigned Managed Identities (azureumi)
-        * spacelift.io (spacelift)
+        * Bitbucket Pipelines (bitbucket)
+        * Github Actions (github)
         * Gitlab (gitlab)
+        * spacelift.io (spacelift)
 
         Any other OIDC federation provider can be used and tokens can be provided to this class for authentication
         to a Britive tenant. Details of how to construct these tokens can be found at https://docs.britive.com.
@@ -252,9 +256,6 @@ class Britive:
             the order provided here:
             https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html#configuring-credentials
 
-            For the Github provider it is possible to provide an OIDC audience value via `github-<audience>`. If no
-            audience is provided the default Github audience value will be used.
-
             For Azure User Assigned Managed Identities (azureumi) a client id is required. It must be
             provided in the form `azureumi-<client-id>`. From the Azure documentation...a user-assigned identity's
             client ID or, when using Pod Identity, the client ID of an Azure AD app registration. This argument
@@ -263,6 +264,9 @@ class Britive:
             For both Azure Managed Identity options it is possible to provide an OIDC audience value via
             `azuresmi-<audience>` and `azureumi-<client-id>|<audience>`. If no audience is provided the default audience
              of `https://management.azure.com/` will be used.
+
+            For the Github provider it is possible to provide an OIDC audience value via `github-<audience>`. If no
+            audience is provided the default Github audience value will be used.
 
             For the Gitlab provider a token environment variable name can optionally be specified via `gitlab-ENV_VAR`.
             Anything after `gitlab-` will be interpreted to represent the name of the environment variable specified
@@ -280,12 +284,8 @@ class Britive:
         provider_name = helper[0]
 
         federation_providers = {
-            'aws': lambda: AwsFederationProvider(profile=helper_methods.safe_list_get(helper, 1)).get_token(),
-            'azuresmi': lambda: AzureSystemAssignedManagedIdentityFederationProvider(
-                audience=helper_methods.safe_list_get(helper, 1)
-            ).get_token(),
-            'azureumi': lambda: AzureUserAssignedManagedIdentityFederationProvider(
-                client_id=helper[1].split('|')[0], audience=helper_methods.safe_list_get(helper[1].split('|'), 1)
+            'aws': lambda: AwsFederationProvider(
+                profile=helper_methods.safe_list_get(helper, 1), tenant=tenant, duration=duration_seconds
             ).get_token(),
             'bitbucket': lambda: BitbucketFederationProvider().get_token(),
             'github': lambda: GithubFederationProvider(audience=helper_methods.safe_list_get(helper, 1)).get_token(),
@@ -297,6 +297,16 @@ class Britive:
 
         if provider_name in federation_providers:
             return federation_providers[provider_name]()
+
+        if provider_name == 'azuresmi':
+            return AzureSystemAssignedManagedIdentityFederationProvider(
+                audience=helper_methods.safe_list_get(helper, 1)
+            ).get_token()
+
+        if provider_name == 'azureumi':
+            return AzureUserAssignedManagedIdentityFederationProvider(
+                client_id=helper[1].split('|')[0], audience=helper_methods.safe_list_get(helper[1].split('|'), 1)
+            ).get_token()
 
         raise InvalidFederationProvider(f'federation provider {provider_name} not supported')
 
@@ -370,20 +380,22 @@ class Britive:
             return response.content.decode('utf-8')
 
     @staticmethod
-    def __check_response_for_error(response) -> None:
-        if response.status_code in allowed_exceptions:
-            content = native_json.loads(response.content.decode('utf-8'))
-            error_code = content.get('errorCode', 'E0000')
-            message = (
-                f"{response.status_code} - " f"{error_code} -" f" {content.get('message', 'no message available')}"
-            )
-            if content.get('details'):
-                message += f" - {content.get('details')}"
+    def __check_response_for_error(status_code, content) -> None:
+        if status_code in allowed_exceptions:
+            if isinstance(content, dict):
+                error_code = content.get('errorCode', 'E0000')
+                message = (
+                    f"{status_code} - {error_code} - {content.get('message', 'no message available')}"
+                )
+                if content.get('details'):
+                    message += f" - {content.get('details')}"
+            else:
+                message = f'{status_code} - {content}'
             raise unauthorized_code_map.get(
                 error_code,
                 bad_request_code_map.get(
                     error_code,
-                    generic_code_map.get(error_code, allowed_exceptions.get(response.status_code, BritiveException)),
+                    generic_code_map.get(error_code, allowed_exceptions.get(status_code, BritiveException)),
                 ),
             )(message)
 
@@ -397,13 +409,13 @@ class Britive:
         is_dict = isinstance(result, dict)
         has_next_page_header = 'next-page' in headers
 
-        if is_dict and all(x in result for x in ['count', 'page', 'size', 'data']):
+        if is_dict and all(x in result for x in ('count', 'page', 'size', 'data')):
             return 'inline'
-        if is_dict and has_next_page_header and all(x in result for x in ['data', 'reportId']):  # reports
+        if is_dict and has_next_page_header and all(x in result for x in ('data', 'reportId')):  # reports
             return 'report'
         if has_next_page_header:  # this interesting way of paginating is how audit_logs.query() does it
             return 'audit'
-        if is_dict and all(x in result for x in ['result', 'pagination']):
+        if is_dict and all(x in result for x in ('result', 'pagination')):
             return 'secmgr'
         return 'none'
 
@@ -427,7 +439,7 @@ class Britive:
                 time.sleep((2**num_retries) * self.retry_backoff_factor)
                 num_retries += 1
             else:
-                self.__check_response_for_error(response)
+                self.__check_response_for_error(response.status_code, self._handle_response(response))
                 return response
 
     def __request(self, method, url, params=None, data=None, json=None) -> dict:
@@ -460,7 +472,7 @@ class Britive:
                     break
                 params['page'] = result['page'] + 1
             elif pagination_type in ('audit', 'report'):
-                return_data += result['data']
+                return_data += result if pagination_type == 'audit' else result['data']
                 if 'next-page' not in response.headers:
                     break
                 url = response.headers['next-page']
@@ -479,7 +491,10 @@ class Britive:
     def get_root_environment_group(self, application_id: str) -> str:
         """Internal use only."""
 
-        app = self.applications.get(application_id=application_id)
+        if os.getenv('FUTURE_BRITIVE_SDK', 'false').lower() == 'true':
+            app = self.application_management.applications.get(application_id=application_id)
+        else:
+            app = self.applications.get(application_id=application_id)
         root_env_group = app.get('rootEnvironmentGroup', {}).get('environmentGroups', [])
         for group in root_env_group:
             if not group['parentId']:

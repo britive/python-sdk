@@ -1,4 +1,4 @@
-from britive import exceptions
+from britive.exceptions.generic import BritiveGenericException
 
 from .cache import *  # will also import some globals like `britive`
 
@@ -82,7 +82,7 @@ def test_generate_attribute_map(cached_identity_attribute):
 
 
 def test_service_identity_get_when_nothing_associated(cached_service_identity_federated):
-    with pytest.raises(exceptions.NotFound):
+    with pytest.raises(BritiveGenericException):
         britive.workload.service_identities.get(service_identity_id=cached_service_identity_federated['userId'])
 
 

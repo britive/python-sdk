@@ -355,11 +355,9 @@ def test_workload_identity_provider_oidc_delete(cached_workload_identity_provide
 def test_service_identities_delete(cached_service_identity, cached_service_identity_federated):
     try:
         for si in [cached_service_identity, cached_service_identity_federated]:
-            print(si)
             response = britive.service_identities.delete(service_identity_id=si['userId'])
             assert response is None
-            with pytest.raises(exceptions.NotFound):
-                britive.service_identities.get_by_name(name=si['name'])
+            assert not britive.service_identities.get_by_name(name=si['name'])
     except exceptions.NotFound:
         pass
     finally:

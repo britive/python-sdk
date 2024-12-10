@@ -12,7 +12,7 @@ class ServiceIdentities:
     def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/users'
-        self.custom_attributes = CustomAttributes(self)
+        self.custom_attributes = CustomAttributes(britive)
 
     def list(self, filter_expression: str = None, include_tags: bool = False) -> list:
         """

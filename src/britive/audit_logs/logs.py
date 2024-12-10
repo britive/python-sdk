@@ -58,8 +58,8 @@ class Logs:
             raise ValueError('from_time must occur before to_time.')
 
         params = {
-            'from': from_time.isoformat(sep='T', timespec='seconds') + 'Z',
-            'to': to_time.isoformat(sep='T', timespec='seconds') + 'Z',
+            'from': from_time.isoformat(sep='T', timespec='seconds').split("+")[0] + 'Z',
+            'to': to_time.isoformat(sep='T', timespec='seconds').split("+")[0] + 'Z',
         }
         if filter_expression:
             params['filter'] = filter_expression

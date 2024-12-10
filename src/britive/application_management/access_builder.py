@@ -1,5 +1,5 @@
 class AccessBuilderSettings:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
 
@@ -50,7 +50,7 @@ class AccessBuilderSettings:
 
 
 class AccessBuilderApproversGroups:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
 
@@ -134,7 +134,7 @@ class AccessBuilderApproversGroups:
 
 
 class AccessBuilderAssociations:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
 
@@ -227,7 +227,7 @@ class AccessBuilderAssociations:
 
 
 class AccessBuilderNotifications:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
 
@@ -274,7 +274,7 @@ class AccessBuilderNotifications:
 
 
 class AccessBuilderRequesters:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
 
