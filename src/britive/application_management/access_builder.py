@@ -319,3 +319,75 @@ class AccessBuilderRequesters:
         data = {'memberRules': user_tag_members}
 
         return self.britive.patch(f'{self.base_url}/{application_id}/access-request-settings', json=data)
+
+
+class AccessBuilderManagedPermissions:
+    def __init__(self, britive) -> None:
+        self.britive = britive
+        self.base_url = f'{self.britive.base_url}/profile-requests/apps'
+
+    def create(
+        self,
+        application_id: str,
+        name: str,
+        permissions: list,
+        description: str = '',
+        type: str = 'role',
+        tags: list = None,
+    ) -> dict:
+        """
+        Add managed permission to the application, from Access Builder.
+
+        :param application_id: The ID of the application.
+        :param name: The name of the new managed permission.
+        :param permissions: The policies of the new managed permission.
+        :param description: The description of the new managed permission.
+        :param type: The type of the new managed permission.
+        :param tags: The tags of the new managed permission.
+        :return: Dict containing details of the new managed permission.
+        """
+
+        data = {
+            'childPermissions': permissions,
+            'description': description,
+            'name': name,
+            'tags': [] if tags is None else tags,
+            'type': type,
+        }
+
+        return self.britive.get(f'{self.base_url}/{application_id}/britive-managed/permissions', json=data)
+
+    def get(self, application_id: str, permission_id: str) -> dict:
+        """
+        Return details of the managed permission, from Access Builder.
+
+        :param application_id: The ID of the application.
+        :param permission_id: The ID of the managed permission.
+        :return: Dict containing details of the managed permission.
+        """
+
+        return self.britive.get(f'{self.base_url}/{application_id}/britive-managed/permissions/{permission_id}')
+
+    def validate_policy(self, application_id: str, policy: dict) -> dict:
+        """
+        Validate the provided permission policy, from Access Builder.
+
+        :param application_id:
+        :param policy: The policy, in JSON format, to validate.
+        :return: Dict of findings.
+        """
+
+        return self.britive.post(f'{self.base_url}/{application_id}/britive-managed/permissions/validate', json=policy)
+
+    def findings(self, application_id: str, permission_id: str) -> dict:
+        """
+        Permission and policy validation findings, from Access Builder.
+
+        :param application_id: The ID of the application.
+        :param permission_id: The ID of the managed permission.
+        :return: Dict of findings.
+        """
+
+        return self.britive.get(
+            f'{self.base_url}/{application_id}/britive-managed/permissions/{permission_id}/findings'
+        )
