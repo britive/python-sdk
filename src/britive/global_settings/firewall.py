@@ -1,9 +1,18 @@
 class Firewall:
-    def __init__(self, britive):
+    def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/settings/firewall'
 
-    def save(self, rules: list, default_action: str = 'DENY', antilockout: bool = False) -> dict:
+    def list_rules(self) -> list:
+        """
+        Get the firewall rules.
+
+        :returns: List of the firewall rules.
+        """
+
+        return self.britive.get(self.base_url)
+
+    def save_rules(self, rules: list, default_action: str = 'DENY', antilockout: bool = False) -> dict:
         """
         Save firewall rules.
 
@@ -40,10 +49,39 @@ class Firewall:
 
         return self.britive.post(self.base_url, json=data)
 
-    def list(self): ...
+    def save_fields(self, fields: dict) -> None:
+        """
+        Save firewall fields.
 
-    def get(self): ...
+        :param fields: Dict of firewall fields.
+            Key:
+                type: str
+                desc: Name of the firewall field, e.g. `country` or `client_ip`.
+            Value:
+                type: dict
+                desc: key: value pairs containing requisite values for [`header`, `field_type`, `info`, `operators`]
+                header:
+                    type: str
+                    desc: The rules are executed as per the priority number
+                field_type:
+                    type: str
+                    desc: `ip` or `string`.
+                info:
+                    type: str
+                    desc: Information about, or description of, the field.
+                operators:
+                    type: str
+                    desc: Options: `EQUALS`|`CONTAINS`|`STARTSWITH`|`ENDSWITH`
+        :returns: Details of the saved firewall fields.
+        """
 
-    def updated(self): ...
+        return self.britive.post(f'{self.base_url}/fields', json={'fields': fields})
 
-    def delete(self): ...
+    def list_fields(self) -> list:
+        """
+        Get the firewall fields.
+
+        :returns: List of the firewall fields.
+        """
+
+        return self.britive.get(f'{self.base_url}/fields')
