@@ -98,6 +98,7 @@ class MyResources:
         max_wait_time: int = 600,
         otp: str = None,
         progress_func: Callable = None,
+        response_template: str = None,
         ticket_id: str = None,
         ticket_type: str = None,
         wait_time: int = 60,
@@ -175,9 +176,10 @@ class MyResources:
             # if the transaction is not in status of checkedOut here it will be after the
             # return of this call and we update the transaction object accordingly
             credentials, transaction = self.credentials(
+                response_template=response_template,
+                return_transaction_details=True,
                 transaction_id=transaction_id,
                 transaction=transaction,
-                return_transaction_details=True,
                 progress_func=progress_func,
             )
             transaction['credentials'] = credentials
@@ -195,6 +197,7 @@ class MyResources:
         max_wait_time: int = 600,
         otp: str = None,
         progress_func: Callable = None,
+        response_template: str = None,
         ticket_id: str = None,
         ticket_type: str = None,
         wait_time: int = 60,
@@ -220,6 +223,7 @@ class MyResources:
             an exception.
         :param otp: Optional time based one-time passcode use for step up authentication.
         :param progress_func: An optional callback that will be invoked as the checkout process progresses.
+        :param response_template: Optional response template to use in conjunction with `include_credentials`.
         :param ticket_id: Optional ITSM ticket ID
         :param ticket_type: Optional ITSM ticket type or category
         :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
@@ -240,6 +244,7 @@ class MyResources:
             profile_id=profile_id,
             progress_func=progress_func,
             resource_id=resource_id,
+            response_template=response_template,
             ticket_id=ticket_id,
             ticket_type=ticket_type,
             wait_time=wait_time,
@@ -254,6 +259,7 @@ class MyResources:
         max_wait_time: int = 600,
         otp: str = None,
         progress_func: Callable = None,
+        response_template: str = None,
         ticket_id: str = None,
         ticket_type: str = None,
         wait_time: int = 60,
@@ -272,6 +278,7 @@ class MyResources:
             call `credentials()` at a later time. If True, the `credentials` key will be included in the response which
             contains the response from `credentials()`. Setting this parameter to `True` will result in a synchronous
             call vs. setting to `False` will allow for an async call.
+        :param response_template: Optional response template to use in conjunction with `include_credentials`.
         :param justification: Optional justification if checking out the profile requires approval.
         :param max_wait_time: The maximum number of seconds to wait for an approval before throwing
             an exception.
@@ -292,20 +299,22 @@ class MyResources:
         ids = self._get_profile_and_resource_ids_given_names(profile_name, resource_name)
 
         return self._checkout(
-            profile_id=ids['profile_id'],
-            resource_id=ids['resource_id'],
             include_credentials=include_credentials,
             justification=justification,
-            otp=otp,
-            wait_time=wait_time,
             max_wait_time=max_wait_time,
+            otp=otp,
+            profile_id=ids['profile_id'],
             progress_func=progress_func,
+            resource_id=ids['resource_id'],
+            response_template=response_template,
+            wait_time=wait_time,
         )
 
     def credentials(
         self,
         transaction_id: str,
         transaction: dict = None,
+        response_template: str = None,
         return_transaction_details: bool = False,
         progress_func: Callable = None,
     ) -> Any:
@@ -314,6 +323,7 @@ class MyResources:
 
         :param transaction_id: The ID of the transaction.
         :param transaction: Optional - the details of the transaction. Primary use is for internal purposes.
+        :param response_template: Optional - return the string value of a given response template.
         :param return_transaction_details: Optional - whether to return the details of the transaction. Primary use is
             for internal purposes.
         :param progress_func: An optional callback that will be invoked as the checkout process progresses.
@@ -335,7 +345,10 @@ class MyResources:
                 break
 
         # step 2: make the proper API call
-        creds = self.britive.post(f'{self.base_url}/{transaction_id}/credentials')
+        creds = self.britive.post(
+            f'{self.base_url}/{transaction_id}/credentials',
+            params={'templateName': response_template} if response_template else {},
+        )
 
         if return_transaction_details:
             return creds, transaction
