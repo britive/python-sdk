@@ -3,8 +3,8 @@ from typing import Any
 
 class CustomAttributes:
     def __init__(self, principal) -> None:
-        self.britive = principal.britive
-        self.base_url: str = principal.britive.base_url + '/users/{id}/custom-attributes'  # will .format(id=...) later
+        self.britive = principal
+        self.base_url: str = principal.base_url + '/users/{id}/custom-attributes'  # will .format(id=...) later
 
     def get(self, principal_id: str, as_dict: bool = False) -> Any:
         """

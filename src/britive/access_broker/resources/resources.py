@@ -27,20 +27,25 @@ class Resources:
 
         return self.britive.get(f'{self.base_url}', params=params)
 
-    def create(self, name: str, resource_type_id: str, description: str = '') -> dict:
+    def create(self, name: str, resource_type_id: str, description: str = '', param_values: dict = None) -> dict:
         """
         Create a new resource.
 
         :param name: Name of the resource.
         :param description: Description of the resource.
         :param resource_type_id: ID of the resource type.
+        :param param_values: Dict of param values.
         :return: Created resource.
         """
+
+        if param_values is None:
+            param_values = {}
 
         params = {
             'name': name,
             'description': description,
             'resourceType': {'id': resource_type_id},
+            'paramValues': param_values,
         }
 
         return self.britive.post(self.base_url, json=params)

@@ -19,6 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Internet",
     "Topic :: Security",
 ]
@@ -29,6 +30,9 @@ dependencies = [
 ]
 dynamic = ["version"]
 keywords = ["britive", "cpam", "identity", "jit"]
+
+[project.optional-dependencies]
+azure = ["azure-identity"]
 
 [project.urls]
 Homepage = "https://www.britive.com"
@@ -92,7 +96,7 @@ select = [
 
 [tool.ruff.lint.pylint]
 allow-magic-value-types = ["int", "str"]
-max-args = 10
+max-args = 12
 max-branches = 30
 max-returns = 8
 max-statements = 72

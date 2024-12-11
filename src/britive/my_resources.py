@@ -1,12 +1,24 @@
 import time
 from typing import Any, Callable
 
-from . import exceptions
+from .exceptions import (
+    ApprovalRequiredButNoJustificationProvided,
+    ProfileApprovalRejected,
+    ProfileApprovalTimedOut,
+    ProfileApprovalWithdrawn,
+    StepUpAuthFailed,
+    StepUpAuthRequiredButNotProvided,
+    TransactionNotFound,
+)
+from .exceptions.badrequest import ApprovalJustificationRequiredError, ProfileApprovalRequiredError
+from .exceptions.generic import StepUpAuthenticationRequiredError
+from .helpers import HelperMethods
+from .my_requests import MyResourcesRequests
 
 approval_exceptions = {
-    'rejected': exceptions.ProfileApprovalRejected(),
-    'cancelled': exceptions.ProfileApprovalWithdrawn(),
-    'timeout': exceptions.ProfileApprovalTimedOut(),
+    'rejected': ProfileApprovalRejected(),
+    'cancelled': ProfileApprovalWithdrawn(),
+    'timeout': ProfileApprovalTimedOut(),
 }
 
 
@@ -26,6 +38,9 @@ class MyResources:
     def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/resource-manager/my-resources'
+        self._get_profile_and_resource_ids_given_names = HelperMethods(
+            self.britive
+        ).get_profile_and_resource_ids_given_names
 
     def list_profiles(self, list_type: str = None, search_text: str = None) -> list:
         """
@@ -72,7 +87,7 @@ class MyResources:
         for t in self.list_checked_out_profiles():
             if t['transactionId'] == transaction_id:
                 return t
-        raise exceptions.TransactionNotFound()
+        raise TransactionNotFound()
 
     def _checkout(
         self,
@@ -80,10 +95,13 @@ class MyResources:
         resource_id: str,
         include_credentials: bool = False,
         justification: str = None,
-        otp: str = None,
-        wait_time: int = 60,
         max_wait_time: int = 600,
+        otp: str = None,
         progress_func: Callable = None,
+        response_template: str = None,
+        ticket_id: str = None,
+        ticket_type: str = None,
+        wait_time: int = 60,
     ) -> dict:
         data = {'justification': justification}
 
@@ -117,40 +135,38 @@ class MyResources:
             if otp:
                 response = self.britive.step_up.authenticate(otp=otp)
                 if response.get('result') == 'FAILED':
-                    raise exceptions.StepUpAuthFailed()
+                    raise StepUpAuthFailed()
 
             try:
                 transaction = self.britive.post(
                     f'{self.base_url}/profiles/{profile_id}/resources/{resource_id}/checkout', json=data
                 )
-            except exceptions.ForbiddenRequest as e:
-                if 'PE-0028' in str(e):  # Check for stepup totp
-                    raise exceptions.StepUpAuthRequiredButNotProvided() from e
-            # except exceptions.InvalidRequest as e:
-            #     if 'MA-0010' in str(e):  # new approval process that de-couples approval from checkout
-            #         # if the caller has not provided a justification we know for sure the call will fail
-            #         # so raise the exception
-            #         if not justification:
-            #             raise exceptions.ApprovalRequiredButNoJustificationProvided()
-            #
-            #         # request approval
-            #         status = self.request_approval(
-            #             profile_id=profile_id,
-            #             environment_id=environment_id,
-            #             justification=justification,
-            #             wait_time=wait_time,
-            #             max_wait_time=max_wait_time,
-            #             block_until_disposition=True,
-            #             progress_func=progress_func,
-            #         )
-            #
-            #         # handle the response based on the value of status
-            #         if status == 'approved':
-            #             transaction = self.britive.post(
-            #                 f'{self.base_url}/{profile_id}/environments/{environment_id}', params=params, json=data
-            #             )
-            #         else:
-            #             raise approval_exceptions[status]
+            except StepUpAuthenticationRequiredError as e:
+                raise StepUpAuthRequiredButNotProvided(e) from e
+            except (ApprovalJustificationRequiredError, ProfileApprovalRequiredError) as e:
+                if not justification:
+                    raise ApprovalRequiredButNoJustificationProvided() from e
+
+                # request approval
+                status = MyResourcesRequests(self.britive).request_approval(
+                    block_until_disposition=True,
+                    justification=justification,
+                    max_wait_time=max_wait_time,
+                    profile_id=profile_id,
+                    progress_func=progress_func,
+                    resource_id=resource_id,
+                    ticket_id=ticket_id,
+                    ticket_type=ticket_type,
+                    wait_time=wait_time,
+                )
+
+                # handle the response based on the value of status
+                if status == 'approved':
+                    transaction = self.britive.post(
+                        f'{self.base_url}/{profile_id}/resources/{resource_id}/checkout', json=data
+                    )
+                else:
+                    raise approval_exceptions[status](e) from e
                 raise e
 
         transaction_id = transaction['transactionId']
@@ -160,9 +176,10 @@ class MyResources:
             # if the transaction is not in status of checkedOut here it will be after the
             # return of this call and we update the transaction object accordingly
             credentials, transaction = self.credentials(
+                response_template=response_template,
+                return_transaction_details=True,
                 transaction_id=transaction_id,
                 transaction=transaction,
-                return_transaction_details=True,
                 progress_func=progress_func,
             )
             transaction['credentials'] = credentials
@@ -177,10 +194,13 @@ class MyResources:
         resource_id: str,
         include_credentials: bool = False,
         justification: str = None,
-        otp: str = None,
-        wait_time: int = 60,
         max_wait_time: int = 600,
+        otp: str = None,
         progress_func: Callable = None,
+        response_template: str = None,
+        ticket_id: str = None,
+        ticket_type: str = None,
+        wait_time: int = 60,
     ) -> dict:
         """
         Checkout a profile.
@@ -199,31 +219,35 @@ class MyResources:
             contains the response from `credentials()`. Setting this parameter to `True` will result in a synchronous
             call vs. setting to `False` will allow for an async call.
         :param justification: Optional justification if checking out the profile requires approval.
-        :param otp: Optional time based one-time passcode use for step up authentication.
-        :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
-            was approved.
         :param max_wait_time: The maximum number of seconds to wait for an approval before throwing
             an exception.
+        :param otp: Optional time based one-time passcode use for step up authentication.
         :param progress_func: An optional callback that will be invoked as the checkout process progresses.
+        :param response_template: Optional response template to use in conjunction with `include_credentials`.
+        :param ticket_id: Optional ITSM ticket ID
+        :param ticket_type: Optional ITSM ticket type or category
+        :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
+            was approved.
         :return: Details about the checked out profile, and optionally the credentials generated by the checkout.
         :raises ApprovalRequiredButNoJustificationProvided: if approval is required but no justification is provided.
-        :raises ApprovalWorkflowTimedOut: if max_wait_time has been reached while waiting for approval.
-        :raises ApprovalWorkflowRejected: if the request to check out the profile was rejected.
+        :raises ProfileApprovalRejected: if the approval request was rejected by the approver.
         :raises ProfileApprovalTimedOut: if the approval request timed out exceeded the max time as specified by the
             profile policy.
-        :raises ProfileApprovalRejected: if the approval request was rejected by the approver.
         :raises ProfileApprovalWithdrawn: if the approval request was withdrawn by the requester.
         """
 
         return self._checkout(
-            profile_id=profile_id,
-            resource_id=resource_id,
             include_credentials=include_credentials,
             justification=justification,
-            wait_time=wait_time,
             max_wait_time=max_wait_time,
-            progress_func=progress_func,
             otp=otp,
+            profile_id=profile_id,
+            progress_func=progress_func,
+            resource_id=resource_id,
+            response_template=response_template,
+            ticket_id=ticket_id,
+            ticket_type=ticket_type,
+            wait_time=wait_time,
         )
 
     def checkout_by_name(
@@ -232,10 +256,13 @@ class MyResources:
         resource_name: str,
         include_credentials: bool = False,
         justification: str = None,
-        otp: str = None,
-        wait_time: int = 60,
         max_wait_time: int = 600,
+        otp: str = None,
         progress_func: Callable = None,
+        response_template: str = None,
+        ticket_id: str = None,
+        ticket_type: str = None,
+        wait_time: int = 60,
     ) -> dict:
         """
         Checkout a profile by supplying the names of entities vs. the IDs of those entities.
@@ -251,36 +278,43 @@ class MyResources:
             call `credentials()` at a later time. If True, the `credentials` key will be included in the response which
             contains the response from `credentials()`. Setting this parameter to `True` will result in a synchronous
             call vs. setting to `False` will allow for an async call.
+        :param response_template: Optional response template to use in conjunction with `include_credentials`.
         :param justification: Optional justification if checking out the profile requires approval.
-        :param otp: Optional time based one-time passcode use for step up authentication.
-        :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
-            was approved.
         :param max_wait_time: The maximum number of seconds to wait for an approval before throwing
             an exception.
+        :param otp: Optional time based one-time passcode use for step up authentication.
         :param progress_func: An optional callback that will be invoked as the checkout process progresses.
+        :param ticket_id: Optional ITSM ticket ID
+        :param ticket_type: Optional ITSM ticket type or category
+        :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
+            was approved.
         :return: Details about the checked out profile, and optionally the credentials generated by the checkout.
         :raises ApprovalRequiredButNoJustificationProvided: if approval is required but no justification is provided.
-        :raises ApprovalWorkflowTimedOut: if max_wait_time has been reached while waiting for approval.
-        :raises ApprovalWorkflowRejected: if the request to check out the profile was rejected.
+        :raises ProfileApprovalRejected: if the approval request was rejected by the approver.
+        :raises ProfileApprovalTimedOut: if the approval request timed out exceeded the max time as specified by the
+            profile policy.
+        :raises ProfileApprovalWithdrawn: if the approval request was withdrawn by the requester.
         """
 
         ids = self._get_profile_and_resource_ids_given_names(profile_name, resource_name)
 
         return self._checkout(
-            profile_id=ids['profile_id'],
-            resource_id=ids['resource_id'],
             include_credentials=include_credentials,
             justification=justification,
-            otp=otp,
-            wait_time=wait_time,
             max_wait_time=max_wait_time,
+            otp=otp,
+            profile_id=ids['profile_id'],
             progress_func=progress_func,
+            resource_id=ids['resource_id'],
+            response_template=response_template,
+            wait_time=wait_time,
         )
 
     def credentials(
         self,
         transaction_id: str,
         transaction: dict = None,
+        response_template: str = None,
         return_transaction_details: bool = False,
         progress_func: Callable = None,
     ) -> Any:
@@ -289,6 +323,7 @@ class MyResources:
 
         :param transaction_id: The ID of the transaction.
         :param transaction: Optional - the details of the transaction. Primary use is for internal purposes.
+        :param response_template: Optional - return the string value of a given response template.
         :param return_transaction_details: Optional - whether to return the details of the transaction. Primary use is
             for internal purposes.
         :param progress_func: An optional callback that will be invoked as the checkout process progresses.
@@ -310,7 +345,10 @@ class MyResources:
                 break
 
         # step 2: make the proper API call
-        creds = self.britive.post(f'{self.base_url}/{transaction_id}/credentials')
+        creds = self.britive.post(
+            f'{self.base_url}/{transaction_id}/credentials',
+            params={'templateName': response_template} if response_template else {},
+        )
 
         if return_transaction_details:
             return creds, transaction
@@ -365,19 +403,49 @@ class MyResources:
 
         return self.list_profiles(list_type='favorites')
 
-    def _get_profile_and_resource_ids_given_names(self, profile_name: str, resource_name: str) -> dict:
-        resource_profile_map = {
-            f'{item["resourceName"].lower()}|{item["profileName"].lower()}': {
-                'profile_id': item['profileId'],
-                'resource_id': item['resourceId'],
-            }
-            for item in self.list_profiles()
-        }
+    def add_favorite(self, resource_id: str, profile_id: str) -> dict:
+        """
+        Add a resource favorite.
 
-        item = resource_profile_map.get(f'{resource_name.lower()}|{profile_name.lower()}')
+        :param resource_id: The resource ID of the resource favorite to add.
+        :param profile_id: The profile ID of the resource favorite to add.
+        :return: Details of the favorite resource.
+        """
 
-        # do some error checking
-        if not item:
-            raise ValueError('resource and profile combination not found')
+        data = {'resource-id': resource_id, 'profile-id': profile_id}
 
-        return item
+        return self.post(f'{self.base_url}/favorites', json=data)
+
+    def delete_favorite(self, favorite_id: str) -> None:
+        """
+        Delete a resource favorite.
+
+        :param favorite_id: The ID of the resource favorite to delete.
+        :return: None
+        """
+
+        return self.delete(f'{self.base_url}/favorites/{favorite_id}')
+
+    def get_profile_settings(self, profile_id: str, resource_id: str) -> dict:
+        """
+        Retrieve settings of a profile.
+
+        :param profile_id: The ID of the profile.
+        :param resource_id: The ID of the resource.
+        :return: Dict of the profile settings.
+        """
+
+        return self.britive.get(f'{self.base_url}/{profile_id}/resources/{resource_id}/settings')
+
+    def get_profile_settings_by_name(self, profile_name: str, resource_name: str) -> dict:
+        """
+        Retrieve settings of a profile by name.
+
+        :param profile_name: The name of the profile.
+        :param resource_name: The name of the resource.
+        :return: Dict of the profile settings.
+        """
+
+        ids = self._get_profile_and_resource_ids_given_names(profile_name=profile_name, resource_name=resource_name)
+
+        return self.get_profile_settings(profile_id=ids['profile_id'], resource_id=ids['resource_id'])
