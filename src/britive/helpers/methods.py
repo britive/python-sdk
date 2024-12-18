@@ -51,7 +51,7 @@ class HelperMethods:
                 'profile_id': item['profileId'],
                 'resource_id': item['resourceId'],
             }
-            for item in self.list_profiles()
+            for item in self.britive.get(f'{self.britive.base_url}/resource-manager/my-resources')
         }
 
         item = resource_profile_map.get(f'{resource_name.lower()}|{profile_name.lower()}')
