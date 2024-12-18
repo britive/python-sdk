@@ -47,20 +47,21 @@ class MyAccess:
             self.britive
         ).get_profile_and_environment_ids_given_names
 
+        # MyRequests
+        __my_requests = MyAccessRequests(self.britive)
+        self.request_approval = __my_requests.request_approval
+        self.request_approval_by_name = __my_requests.request_approval_by_name
+        self.withdraw_approval_request = __my_requests.withdraw_approval_request
+        self.withdraw_approval_request_by_name = __my_requests.withdraw_approval_request_by_name
+
         if os.getenv('FUTURE_BRITIVE_SDK', 'false').lower() != 'true':
+            # MyAccess backwards compatibility
+            self.approval_request_status = __my_requests.approval_request_status
             # MyApprovals backwards compatibility
-            self.__my_approvals = MyApprovals(self.britive)
+            __my_approvals = MyApprovals(self.britive)
             self.approve_request = self.__my_approvals.approve_request
             self.list_approvals = self.__my_approvals.list_approvals
             self.reject_request = self.__my_approvals.reject_request
-
-            # MyRequests backwards compatibility
-            self.__my_requests = MyAccessRequests(self.britive)
-            self.approval_request_status = self.__my_requests.approval_request_status
-            self.request_approval = self.__my_requests.request_approval
-            self.request_approval_by_name = self.__my_requests.request_approval_by_name
-            self.withdraw_approval_request = self.__my_requests.withdraw_approval_request
-            self.withdraw_approval_request_by_name = self.__my_requests.withdraw_approval_request_by_name
 
     def list_profiles(self, include_approval_status: bool = False) -> list:
         """
@@ -266,10 +267,7 @@ class MyAccess:
                     ticket_type=ticket_type,
                     wait_time=wait_time,
                 )
-                if os.getenv('FUTURE_BRITIVE_SDK', 'false').lower() == 'true':
-                    status = MyAccessRequests(self.britive).request_approval(**approval_request)
-                else:
-                    status = self.request_approval(**approval_request)
+                status = self.request_approval(**approval_request)
 
                 # handle the response based on the value of status
                 if status == 'approved':
