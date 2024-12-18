@@ -47,20 +47,21 @@ class MyAccess:
             self.britive
         ).get_profile_and_environment_ids_given_names
 
-        if os.getenv('FUTURE_BRITIVE_SDK', 'false').lower() != 'true':
-            # MyApprovals backwards compatibility
-            self.__my_approvals = MyApprovals(self.britive)
-            self.approve_request = self.__my_approvals.approve_request
-            self.list_approvals = self.__my_approvals.list_approvals
-            self.reject_request = self.__my_approvals.reject_request
+        # MyRequests
+        __my_requests = MyAccessRequests(self.britive)
+        self.request_approval = __my_requests.request_approval
+        self.request_approval_by_name = __my_requests.request_approval_by_name
+        self.withdraw_approval_request = __my_requests.withdraw_approval_request
+        self.withdraw_approval_request_by_name = __my_requests.withdraw_approval_request_by_name
 
-            # MyRequests backwards compatibility
-            self.__my_requests = MyAccessRequests(self.britive)
-            self.approval_request_status = self.__my_requests.approval_request_status
-            self.request_approval = self.__my_requests.request_approval
-            self.request_approval_by_name = self.__my_requests.request_approval_by_name
-            self.withdraw_approval_request = self.__my_requests.withdraw_approval_request
-            self.withdraw_approval_request_by_name = self.__my_requests.withdraw_approval_request_by_name
+        if os.getenv('FUTURE_BRITIVE_SDK', 'false').lower() != 'true':
+            # MyAccess backwards compatibility
+            self.approval_request_status = __my_requests.approval_request_status
+            # MyApprovals backwards compatibility
+            __my_approvals = MyApprovals(self.britive)
+            self.approve_request = __my_approvals.approve_request
+            self.list_approvals = __my_approvals.list_approvals
+            self.reject_request = __my_approvals.reject_request
 
     def list_profiles(self, include_approval_status: bool = False) -> list:
         """
@@ -266,10 +267,7 @@ class MyAccess:
                     ticket_type=ticket_type,
                     wait_time=wait_time,
                 )
-                if os.getenv('FUTURE_BRITIVE_SDK', 'false').lower() == 'true':
-                    status = MyAccessRequests(self.britive).request_approval(**approval_request)
-                else:
-                    status = self.request_approval(**approval_request)
+                status = self.request_approval(**approval_request)
 
                 # handle the response based on the value of status
                 if status == 'approved':
@@ -553,9 +551,9 @@ class MyAccess:
 
         return self.britive.get(f'{self.base_url}/favorites')
 
-    def create_filter(self, filter_name: str, filter_properties: str, user_id: str = None) -> dict:
+    def create_filter(self, filter_name: str, filter_properties: str) -> dict:
         """
-        Create a user filter.
+        Create a filter for the current user.
 
         :param filter_name: Name of the filter.
         :param filter_properties: Dict of the filter properties.
@@ -575,39 +573,29 @@ class MyAccess:
                 application_types:
                     type: list
                     desc: Application Type(s)
-        :param user_id: ID of the user to create the filter for. Default: `my_access.whoami()['userId']`
         :return: Details of the created filter.
         """
-
-        if user_id is None:
-            user_id = self.whoami()['userId']
 
         if application_types := filter_properties.pop('application_types', None):
             filter_properties['applicationTypes'] = application_types
 
-        data = {
-            "name": filter_name,
-            "filter": filter_properties
-        }
+        data = {'name': filter_name, 'filter': filter_properties}
 
-        return self.britive.post(f'{self.base_url}/{user_id}/filters', json=data)
+        return self.britive.post(f"{self.base_url}/{self.whoami()['userId']}/filters", json=data)
 
     def list_filters(self, user_id: str = None) -> list:
         """
-        Return list of filters for a user.
+        Return list of filters for the current user.
 
         :param user_id: ID of the user to list filters for. Default: `my_access.whoami()['userId']`
         :return: List of filters.
         """
 
-        if user_id is None:
-            user_id = self.whoami()['userId']
+        return self.britive.get(f"{self.base_url}/{self.whoami()['userId']}/filters")
 
-        return self.britive.get(f'{self.base_url}/{user_id}/filters')
-
-    def update_filter(self, filter_id: str, filter_name: str, filter_properties: str, user_id: str = None) -> dict:
+    def update_filter(self, filter_id: str, filter_name: str, filter_properties: str) -> dict:
         """
-        Update a user filter.
+        Update a filter for the current user.
 
         :param filter_id: ID of the filter.
         :param filter_name: Name of the filter.
@@ -628,35 +616,22 @@ class MyAccess:
                 application_types:
                     type: list
                     desc: Application Type(s)
-        :param user_id: ID of the user to create the filter for. Default: `my_access.whoami()['userId']`
-        :return: Details of the created filter.
+        :return: Details of the updated filter.
         """
-
-        if user_id is None:
-            user_id = self.whoami()['userId']
 
         if application_types := filter_properties.pop('application_types', None):
             filter_properties['applicationTypes'] = application_types
 
-        data = {
-            "name": filter_name,
-            "filter": filter_properties
-        }
+        data = {'name': filter_name, 'filter': filter_properties}
 
-        return self.britive.put(f'{self.base_url}/{user_id}/filters/{filter_id}', json=data)
+        return self.britive.put(f"{self.base_url}/{self.whoami()['userId']}/filters/{filter_id}", json=data)
 
     def delete_filter(self, filter_id: str, user_id: str = None) -> None:
         """
-        Delete a user filter.
+        Delete a filter for the current user.
 
         :param filter_id: ID of the filter.
-        :param user_id: ID of the user to create the filter for. Default: `my_access.whoami()['userId']`
         :return: None.
         """
 
-        if user_id is None:
-            user_id = self.whoami()['userId']
-
-        return self.britive.delete(f'{self.base_url}/{user_id}/filters/{filter_id}')
-
-
+        return self.britive.delete(f"{self.base_url}/{self.whoami()['userId']}/filters/{filter_id}")

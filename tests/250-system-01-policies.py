@@ -1,3 +1,5 @@
+from britive.exceptions import NotFound
+
 from .cache import *  # will also import some globals like `britive`
 
 
@@ -205,7 +207,7 @@ def test_delete(cached_system_level_policy):
             britive.system.policies.delete(policy_identifier=cached_system_level_policy['id'], identifier_type='id')
             is None
         )
-        with pytest.raises(exceptions.NotFound):
+        with pytest.raises(NotFound):
             britive.system.policies.get(cached_system_level_policy['id'])
     finally:
         cleanup('policy-system-level')

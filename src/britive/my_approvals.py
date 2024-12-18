@@ -50,6 +50,6 @@ class MyApprovals:
         :return: List of approval requests.
         """
 
-        params = {'requestType': 'myApprovals', 'consumer': 'papservice'}
+        params = {'requestType': 'myApprovals'}
 
         return self.britive.get(f'{self.base_url}/', params=params)

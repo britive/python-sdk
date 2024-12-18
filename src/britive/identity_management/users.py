@@ -3,7 +3,7 @@ from ..exceptions import (
     UserNotAllowedToChangePassword,
     UserNotAssociatedWithDefaultIdentityProvider,
 )
-from ..helpers.custom_attributes import CustomAttributes
+from .identity_attributes import CustomAttributes
 
 valid_statues = ['active', 'inactive']
 

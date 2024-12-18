@@ -42,6 +42,13 @@ class MyResources:
             self.britive
         ).get_profile_and_resource_ids_given_names
 
+        # MyRequests
+        __my_requests = MyResourcesRequests(self.britive)
+        self.request_approval = __my_requests.request_approval
+        self.request_approval_by_name = __my_requests.request_approval_by_name
+        self.withdraw_approval_request = __my_requests.withdraw_approval_request
+        self.withdraw_approval_request_by_name = __my_requests.withdraw_approval_request_by_name
+
     def list_profiles(self, list_type: str = None, search_text: str = None) -> list:
         """
         List the profiles for which the user has access.
@@ -148,7 +155,7 @@ class MyResources:
                     raise ApprovalRequiredButNoJustificationProvided() from e
 
                 # request approval
-                status = MyResourcesRequests(self.britive).request_approval(
+                status = self.request_approval(
                     block_until_disposition=True,
                     justification=justification,
                     max_wait_time=max_wait_time,

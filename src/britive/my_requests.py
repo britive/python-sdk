@@ -38,13 +38,23 @@ class MyRequests:
 
     def approval_request_status(self, request_id: str) -> dict:
         """
-        Provides details on and approval request.
+        Get the details of an approval request.
 
         :param request_id: The ID of the approval request.
         :return: Details of the approval request.
         """
 
         return self.britive.get(f'{self.base_url}/{request_id}')
+
+    def withdraw_approval_request(self, request_id: str) -> None:
+        """
+        Withdraws a pending approval request.
+
+        :param request_id: The ID of the approval request.
+        :return: None
+        """
+
+        return self._withdraw_approval_request(request_id=request_id)
 
     def _request_approval(
         self,
@@ -149,12 +159,9 @@ class MyRequests:
     def _withdraw_approval_request(
         self, request_id: str = None, profile_id: str = None, entity_id: str = None, entity_type: str = None
     ) -> None:
-        if request_id:
-            return self.britive.delete(f'{self.base_url}/{request_id}')
+        url = request_id if request_id else f'consumer/{entity_type}/resource?resourceId={profile_id}/{entity_id}'
 
-        url = f'{self.base_url}/consumer/{entity_type}/resource?resourceId={profile_id}/{entity_id}'
-
-        return self.britive.delete(url)
+        return self.britive.delete(f'{self.base_url}/{url}')
 
 
 class MyAccessRequests(MyRequests):

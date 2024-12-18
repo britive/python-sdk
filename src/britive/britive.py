@@ -178,48 +178,41 @@ class Britive:
         self.secrets_manager = SecretsManager(self)
         self.system = System(self)
 
-        application_management = ApplicationManagement(self)
-        audit_logs = AuditLogs(self)
-        identity_management = IdentityManagement(self)
-        global_settings = GlobalSettings(self)
-        security = Security(self)
-        workflows = Workflows(self)
+        self.application_management = ApplicationManagement(self)
+        self.audit_logs = AuditLogs(self)
+        self.identity_management = IdentityManagement(self)
+        self.global_settings = GlobalSettings(self)
+        self.security = Security(self)
+        self.workflows = Workflows(self)
 
         # FUTURE_BRITIVE_SDK == 'true' will remove backwards compatibility
-        if os.getenv('FUTURE_BRITIVE_SDK', 'false').lower() == 'true':
-            self.application_management = application_management
-            self.audit_logs = audit_logs
-            self.identity_management = identity_management
-            self.global_settings = global_settings
-            self.security = security
-            self.workflows = workflows
-        else:
-            self.access_builder = application_management.access_builder
-            self.accounts = application_management.accounts
-            self.applications = application_management.applications
-            self.audit_logs = audit_logs.logs
-            self.audit_logs.webhooks = audit_logs.webhooks
-            self.environment_groups = application_management.environment_groups
-            self.environments = application_management.environments
-            self.groups = application_management.groups
-            self.identity_attributes = identity_management.identity_attributes
-            self.identity_providers = identity_management.identity_providers
-            self.notification_mediums = global_settings.notification_mediums
-            self.notifications = workflows.notifications
-            self.permissions = application_management.permissions
-            self.profiles = application_management.profiles
-            self.saml = security.saml
-            self.scans = application_management.scans
-            self.security_policies = security.security_policies
-            self.service_identities = identity_management.service_identities
-            self.service_identity_tokens = identity_management.service_identity_tokens
-            self.step_up = security.step_up_auth
-            self.tags = identity_management.tags
-            self.task_services = workflows.task_services
-            self.tasks = workflows.tasks
-            self.users = identity_management.users
-            self.workload = identity_management.workload
-            self.settings = global_settings
+        if os.getenv('FUTURE_BRITIVE_SDK', 'false').lower() != 'true':
+            self.access_builder = self.application_management.access_builder
+            self.accounts = self.application_management.accounts
+            self.applications = self.application_management.applications
+            self.audit_logs.logs.webhooks = self.audit_logs.webhooks
+            self.audit_logs = self.audit_logs.logs
+            self.environment_groups = self.application_management.environment_groups
+            self.environments = self.application_management.environments
+            self.groups = self.application_management.groups
+            self.identity_attributes = self.identity_management.identity_attributes
+            self.identity_providers = self.identity_management.identity_providers
+            self.notification_mediums = self.global_settings.notification_mediums
+            self.notifications = self.workflows.notifications
+            self.permissions = self.application_management.permissions
+            self.profiles = self.application_management.profiles
+            self.saml = self.security.saml
+            self.scans = self.application_management.scans
+            self.security_policies = self.security.security_policies
+            self.service_identities = self.identity_management.service_identities
+            self.service_identity_tokens = self.identity_management.service_identity_tokens
+            self.step_up = self.security.step_up_auth
+            self.tags = self.identity_management.tags
+            self.task_services = self.workflows.task_services
+            self.tasks = self.workflows.tasks
+            self.users = self.identity_management.users
+            self.workload = self.identity_management.workload
+            self.settings = self.global_settings
 
     @staticmethod
     def source_federation_token_from(provider: str, tenant: str = None, duration_seconds: int = 900) -> str:
@@ -384,9 +377,7 @@ class Britive:
         if status_code in allowed_exceptions:
             if isinstance(content, dict):
                 error_code = content.get('errorCode', 'E0000')
-                message = (
-                    f"{status_code} - {error_code} - {content.get('message', 'no message available')}"
-                )
+                message = f"{status_code} - {error_code} - {content.get('message', 'no message available')}"
                 if content.get('details'):
                     message += f" - {content.get('details')}"
             else:
