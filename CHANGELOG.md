@@ -1,5 +1,28 @@
 # Change Log (v2.8.1+)
 
+## v3.2.0-alpha.1 [2024-12-18]
+
+__What's New:__
+
+* `my_resources` improvements.
+
+__Enhancements:__
+
+* Added `request_approval[_by_name]|withdraw_approval_request[_by_name]` to `my_resources`.
+
+__Bug Fixes:__
+
+* `my_requests.list_approvals ` now includes `my_resources` requests.
+* `my_access.*_filter[s]` are only valid for the current user.
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* Additional code alignment cleanup.
+
 ## v3.2.0-alpha [2024-12-10]
 
 __What's New:__
