@@ -551,9 +551,9 @@ class MyAccess:
 
         return self.britive.get(f'{self.base_url}/favorites')
 
-    def create_filter(self, filter_name: str, filter_properties: str, user_id: str = None) -> dict:
+    def create_filter(self, filter_name: str, filter_properties: str) -> dict:
         """
-        Create a user filter.
+        Create a filter for the current user.
 
         :param filter_name: Name of the filter.
         :param filter_properties: Dict of the filter properties.
@@ -573,36 +573,29 @@ class MyAccess:
                 application_types:
                     type: list
                     desc: Application Type(s)
-        :param user_id: ID of the user to create the filter for. Default: `my_access.whoami()['userId']`
         :return: Details of the created filter.
         """
-
-        if user_id is None:
-            user_id = self.whoami()['userId']
 
         if application_types := filter_properties.pop('application_types', None):
             filter_properties['applicationTypes'] = application_types
 
         data = {'name': filter_name, 'filter': filter_properties}
 
-        return self.britive.post(f'{self.base_url}/{user_id}/filters', json=data)
+        return self.britive.post(f"{self.base_url}/{self.whoami()['userId']}/filters", json=data)
 
     def list_filters(self, user_id: str = None) -> list:
         """
-        Return list of filters for a user.
+        Return list of filters for the current user.
 
         :param user_id: ID of the user to list filters for. Default: `my_access.whoami()['userId']`
         :return: List of filters.
         """
 
-        if user_id is None:
-            user_id = self.whoami()['userId']
+        return self.britive.get(f"{self.base_url}/{self.whoami()['userId']}/filters")
 
-        return self.britive.get(f'{self.base_url}/{user_id}/filters')
-
-    def update_filter(self, filter_id: str, filter_name: str, filter_properties: str, user_id: str = None) -> dict:
+    def update_filter(self, filter_id: str, filter_name: str, filter_properties: str) -> dict:
         """
-        Update a user filter.
+        Update a filter for the current user.
 
         :param filter_id: ID of the filter.
         :param filter_name: Name of the filter.
@@ -623,30 +616,22 @@ class MyAccess:
                 application_types:
                     type: list
                     desc: Application Type(s)
-        :param user_id: ID of the user to create the filter for. Default: `my_access.whoami()['userId']`
-        :return: Details of the created filter.
+        :return: Details of the updated filter.
         """
-
-        if user_id is None:
-            user_id = self.whoami()['userId']
 
         if application_types := filter_properties.pop('application_types', None):
             filter_properties['applicationTypes'] = application_types
 
         data = {'name': filter_name, 'filter': filter_properties}
 
-        return self.britive.put(f'{self.base_url}/{user_id}/filters/{filter_id}', json=data)
+        return self.britive.put(f"{self.base_url}/{self.whoami()['userId']}/filters/{filter_id}", json=data)
 
     def delete_filter(self, filter_id: str, user_id: str = None) -> None:
         """
-        Delete a user filter.
+        Delete a filter for the current user.
 
         :param filter_id: ID of the filter.
-        :param user_id: ID of the user to create the filter for. Default: `my_access.whoami()['userId']`
         :return: None.
         """
 
-        if user_id is None:
-            user_id = self.whoami()['userId']
-
-        return self.britive.delete(f'{self.base_url}/{user_id}/filters/{filter_id}')
+        return self.britive.delete(f"{self.base_url}/{self.whoami()['userId']}/filters/{filter_id}")
