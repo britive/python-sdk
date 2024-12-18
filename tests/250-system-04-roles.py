@@ -1,3 +1,5 @@
+from britive.exceptions import NotFound
+
 from .cache import *  # will also import some globals like `britive`
 
 
@@ -78,7 +80,7 @@ def test_delete(cached_system_level_role):
     try:
         assert britive.system.roles.delete(role_identifier=cached_system_level_role['id'], identifier_type='id') is None
 
-        with pytest.raises(exceptions.NotFound):
+        with pytest.raises(NotFound):
             britive.system.roles.get(cached_system_level_role['id'])
     finally:
         cleanup('role-system-level')

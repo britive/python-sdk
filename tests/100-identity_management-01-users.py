@@ -1,5 +1,7 @@
 import pyotp
 
+from britive.exceptions import UserDoesNotHaveMFAEnabled
+
 from .cache import *  # will also import some globals like `britive`
 
 user_keys = {
@@ -105,7 +107,7 @@ def test_reset_password(cached_user):
 
 
 def test_reset_mfa(cached_user):
-    with pytest.raises(exceptions.UserDoesNotHaveMFAEnabled):
+    with pytest.raises(UserDoesNotHaveMFAEnabled):
         britive.users.reset_mfa(cached_user['userId'])
 
 

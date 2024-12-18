@@ -1,3 +1,5 @@
+from britive.exceptions import NotFound
+
 from .cache import *  # will also import some globals like `britive`
 
 
@@ -82,7 +84,7 @@ def test_delete(cached_system_level_permission):
             is None
         )
 
-        with pytest.raises(exceptions.NotFound):
+        with pytest.raises(NotFound):
             britive.system.permissions.get(cached_system_level_permission['id'])
     finally:
         cleanup('permission-system-level')
