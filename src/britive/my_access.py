@@ -54,13 +54,14 @@ class MyAccess:
         self.withdraw_approval_request = __my_requests.withdraw_approval_request
         self.withdraw_approval_request_by_name = __my_requests.withdraw_approval_request_by_name
 
+        # FUTURE_BRITIVE_SDK == 'true' will remove backwards compatibility
         if os.getenv('FUTURE_BRITIVE_SDK', 'false').lower() != 'true':
             # MyAccess backwards compatibility
             self.approval_request_status = __my_requests.approval_request_status
             # MyApprovals backwards compatibility
             __my_approvals = MyApprovals(self.britive)
             self.approve_request = __my_approvals.approve_request
-            self.list_approvals = __my_approvals.list_approvals
+            self.list_approvals = __my_approvals.list
             self.reject_request = __my_approvals.reject_request
 
     def list_profiles(self, include_approval_status: bool = False) -> list:

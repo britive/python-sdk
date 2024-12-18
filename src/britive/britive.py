@@ -482,10 +482,7 @@ class Britive:
     def get_root_environment_group(self, application_id: str) -> str:
         """Internal use only."""
 
-        if os.getenv('FUTURE_BRITIVE_SDK', 'false').lower() == 'true':
-            app = self.application_management.applications.get(application_id=application_id)
-        else:
-            app = self.applications.get(application_id=application_id)
+        app = self.application_management.applications.get(application_id=application_id)
         root_env_group = app.get('rootEnvironmentGroup', {}).get('environmentGroups', [])
         for group in root_env_group:
             if not group['parentId']:

@@ -7,7 +7,7 @@ def test_request(cached_profile_checkout_request):
 
     request_id = request['requestId']
 
-    approvals = britive.my_access.list_approvals()
+    approvals = britive.my_requests.list()
     for approval in approvals:
         if approval['requestId'] == request_id:
             assert approval['status'] == 'PENDING'
