@@ -1,11 +1,6 @@
-from ..helpers import CustomAttributes
+from .identity_attributes import CustomAttributes
 
 valid_statues = ['active', 'inactive']
-
-
-def validate_token_expiration(days) -> None:
-    if not (1 <= days <= 90):
-        raise ValueError('invalid token expiration value - must ust be between 1 and 90')
 
 
 class ServiceIdentities:
@@ -198,6 +193,10 @@ class ServiceIdentityTokens:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}'
 
+    def __validate_token_expiration(days) -> None:
+        if not (1 <= days <= 90):
+            raise ValueError('invalid token expiration value - must ust be between 1 and 90')
+
     def create(self, service_identity_id: str, token_expiration_days: int = 90) -> dict:
         """
         Create a token for a given service identity.
@@ -212,7 +211,7 @@ class ServiceIdentityTokens:
         :return:
         """
 
-        validate_token_expiration(token_expiration_days)
+        self.__validate_token_expiration(token_expiration_days)
 
         data = {'tokenExpirationDays': token_expiration_days}
 
@@ -228,7 +227,7 @@ class ServiceIdentityTokens:
         :return: None
         """
 
-        validate_token_expiration(token_expiration_days)
+        self.__validate_token_expiration(token_expiration_days)
 
         data = {'tokenExpirationDays': token_expiration_days}
 

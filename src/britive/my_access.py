@@ -59,9 +59,9 @@ class MyAccess:
             self.approval_request_status = __my_requests.approval_request_status
             # MyApprovals backwards compatibility
             __my_approvals = MyApprovals(self.britive)
-            self.approve_request = self.__my_approvals.approve_request
-            self.list_approvals = self.__my_approvals.list_approvals
-            self.reject_request = self.__my_approvals.reject_request
+            self.approve_request = __my_approvals.approve_request
+            self.list_approvals = __my_approvals.list_approvals
+            self.reject_request = __my_approvals.reject_request
 
     def list_profiles(self, include_approval_status: bool = False) -> list:
         """
@@ -583,10 +583,7 @@ class MyAccess:
         if application_types := filter_properties.pop('application_types', None):
             filter_properties['applicationTypes'] = application_types
 
-        data = {
-            "name": filter_name,
-            "filter": filter_properties
-        }
+        data = {'name': filter_name, 'filter': filter_properties}
 
         return self.britive.post(f'{self.base_url}/{user_id}/filters', json=data)
 
@@ -636,10 +633,7 @@ class MyAccess:
         if application_types := filter_properties.pop('application_types', None):
             filter_properties['applicationTypes'] = application_types
 
-        data = {
-            "name": filter_name,
-            "filter": filter_properties
-        }
+        data = {'name': filter_name, 'filter': filter_properties}
 
         return self.britive.put(f'{self.base_url}/{user_id}/filters/{filter_id}', json=data)
 
@@ -656,5 +650,3 @@ class MyAccess:
             user_id = self.whoami()['userId']
 
         return self.britive.delete(f'{self.base_url}/{user_id}/filters/{filter_id}')
-
-
