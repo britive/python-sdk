@@ -76,13 +76,12 @@ class MyRequests:
 
         url = (
             f'{self.britive.base_url}/access/{profile_id}/{entity_type}/{entity_id}/approvalRequest'
-            if entity_type == 'environment'
+            if entity_type == 'environments'
             else (
                 f'{self.britive.base_url}/resource-manager/my-resources/profiles/'
                 f'{profile_id}/resources/{entity_id}/approvalRequest'
             )
         )
-
         request = self.britive.post(url, json=data)
 
         if request is None:
@@ -128,7 +127,7 @@ class MyRequests:
         ticket_type: str = None,
         wait_time: int = 60,
     ) -> Any:
-        if entity_type == 'environment':
+        if entity_type == 'environments':
             ids = self._helper.get_profile_and_environment_ids_given_names(profile_name, entity_name)
             return self._request_approval(
                 profile_id=ids['profile_id'],
@@ -210,7 +209,7 @@ class MyAccessRequests(MyRequests):
             justification=justification,
             profile_name=profile_name,
             entity_name=environment_name,
-            entity_type='environment',
+            entity_type='environments',
             block_until_disposition=block_until_disposition,
             max_wait_time=max_wait_time,
             progress_func=progress_func,
@@ -262,7 +261,7 @@ class MyAccessRequests(MyRequests):
             justification=justification,
             profile_name=profile_id,
             entity_name=environment_id,
-            entity_type='environment',
+            entity_type='environments',
             block_until_disposition=block_until_disposition,
             max_wait_time=max_wait_time,
             progress_func=progress_func,
