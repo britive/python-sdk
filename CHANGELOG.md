@@ -1,5 +1,27 @@
 # Change Log (v2.8.1+)
 
+## v3.2.0-alpha.3 [2024-12-19]
+
+__What's New:__
+
+* None
+
+__Enhancements:__
+
+* None
+
+__Bug Fixes:__
+
+* Missing `s` in `environments` for `my_requests`.
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* Additional code alignment cleanup.
+
 ## v3.2.0-alpha.2 [2024-12-18]
 
 __What's New:__
