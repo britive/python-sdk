@@ -1,73 +1,6 @@
 # Change Log (v2.8.1+)
 
-## v3.2.0-alpha.3 [2024-12-19]
-
-__What's New:__
-
-* None
-
-__Enhancements:__
-
-* None
-
-__Bug Fixes:__
-
-* Missing `s` in `environments` for `my_requests`.
-
-__Dependencies:__
-
-* None
-
-__Other:__
-
-* Additional code alignment cleanup.
-
-## v3.2.0-alpha.2 [2024-12-18]
-
-__What's New:__
-
-* None
-
-__Enhancements:__
-
-* None
-
-__Bug Fixes:__
-
-* Make `get` call in helper method instead `list_approvals`.
-
-__Dependencies:__
-
-* None
-
-__Other:__
-
-* Additional code alignment cleanup.
-
-## v3.2.0-alpha.1 [2024-12-18]
-
-__What's New:__
-
-* `my_resources` improvements.
-
-__Enhancements:__
-
-* Added `request_approval[_by_name]|withdraw_approval_request[_by_name]` to `my_resources`.
-
-__Bug Fixes:__
-
-* `my_requests.list_approvals` now includes `my_resources` requests.
-* `my_access.*_filter[s]` are only valid for the current user.
-
-__Dependencies:__
-
-* None
-
-__Other:__
-
-* Additional code alignment cleanup.
-
-## v3.2.0-alpha [2024-12-10]
+## v3.2.0-alpha.* [2024-12-23]
 
 __What's New:__
 
@@ -77,6 +10,7 @@ __What's New:__
 * Added `firewall` settings functionality.
 * Added Britive `managed_permissions` functionality.
 * Britive exceptions by type and error code.
+* `my_resources` improvements.
 
 __Enhancements:__
 
@@ -86,14 +20,20 @@ __Enhancements:__
 * Added `include_approval_status` to `my_access.list_profiles`.
 * Added `(create|list|update|delete)_filter`) to `my_access`.
 * Added `response_templates` functionality for `access_broker` credentials.
+* Added `request_approval[_by_name]|withdraw_approval_request[_by_name]` to `my_resources`.
 
 __Bug Fixes:__
 
 * Fixed missing `param_values` option for resource creation.
+* `my_requests.list_approvals` now includes `my_resources` requests.
+* `my_access.*_filter[s]` are only valid for the current user.
+* Make `get` call in helper method instead `list_approvals`.
+* Missing `s` in `environments` for `my_requests`.
+* Catch `requests.exceptions.JSONDecodeError` in `_handle_response`.
 
 __Dependencies:__
 
-* None
+* `requests >= 2.32.0`
 
 __Other:__
 
