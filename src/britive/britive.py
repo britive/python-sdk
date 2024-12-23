@@ -369,7 +369,8 @@ class Britive:
     def _handle_response(response):
         try:
             return response.json()
-        except native_json.decoder.JSONDecodeError:
+        # Can likely drop to just the `requests` exception, with `>=2.32.0`, but leaving both for now.
+        except (native_json.decoder.JSONDecodeError, requests.exceptions.JSONDecodeError):
             return response.content.decode('utf-8')
 
     @staticmethod
