@@ -64,31 +64,31 @@ class MyAccess:
             self.list_approvals = __my_approvals.list
             self.reject_request = __my_approvals.reject_request
 
-    def list_profiles(self, include_approval_status: bool = False) -> list:
+    def list(self, filter_text: str = None, search_text: str = None) -> list:
         """
-        List the profiles for which the user has access.
+        List the access details for the current user.
 
-        :param include_approval_status: Include `approval_status` of each profile
+        :param filter_text: filter details by key, using eq|co|sw operators, e.g. `filter_text='key co text'`
+        :param search_text: filter details by search text.
         :return: List of profiles.
         """
 
-        profiles = self.britive.get(self.base_url)
+        params = {'type': 'sdk'}
+        if filter_text:
+            params['filter'] = filter_text
+        if search_text:
+            params['search'] = search_text
 
-        if include_approval_status:
-            access_type_details = {
-                (a['papId'], a['environmentId'], a['accessType'].lower()): a['myAccessDetails']
-                for a in self.britive.get(self.base_url, params={'type': 'ui'})
-            }
-            for app in profiles:
-                for profile in app['profiles']:
-                    for environment in profile['environments']:
-                        for access_type in ('console', 'programmatic'):
-                            if profile.get(f'{access_type}Access'):
-                                environment[f'{access_type}_access_details'] = access_type_details[
-                                    (profile['profileId'], environment['environmentId'], access_type)
-                                ]
+        return self.britive.get(self.base_url, params=params)
 
-        return profiles
+    def list_profiles(self) -> list:
+        """
+        List the profiles for which the user has access.
+
+        :return: List of profiles.
+        """
+
+        return self.britive.get(self.base_url)
 
     def list_checked_out_profiles(self, include_profile_details: bool = False) -> list:
         """
