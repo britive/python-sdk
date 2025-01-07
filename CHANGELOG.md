@@ -1,6 +1,6 @@
 # Change Log (v2.8.1+)
 
-## v3.2.0-alpha.* [2024-12-23]
+## v3.2.0-alpha.* [2025-01-07]
 
 __What's New:__
 
@@ -17,10 +17,10 @@ __Enhancements:__
 * Added `add_favorite` and `delete_favorite` to `my_resources`.
 * Added checkout approvals to `my_resources`.
 * Added ITSM to checkout approvals.
-* Added `include_approval_status` to `my_access.list_profiles`.
 * Added `(create|list|update|delete)_filter`) to `my_access`.
 * Added `response_templates` functionality for `access_broker` credentials.
 * Added `request_approval[_by_name]|withdraw_approval_request[_by_name]` to `my_resources`.
+* Added `my_access.list` to retrieve access details with new `type=sdk` option.
 
 __Bug Fixes:__
 

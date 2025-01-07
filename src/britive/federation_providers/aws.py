@@ -5,20 +5,22 @@ import hmac
 import json
 import os
 
-from ..exceptions import TenantMissingError
+from britive.exceptions import TenantMissingError
+
 from .federation_provider import FederationProvider
 
 
 class AwsFederationProvider(FederationProvider):
     def __init__(self, profile: str, tenant: str, duration: int = 900) -> None:
-        from ..britive import Britive  # doing import here to avoid circular dependency
+        from britive.britive import Britive  # doing import here to avoid circular dependency
 
         self.profile = profile
         self.duration = duration
         temp_tenant = tenant or os.getenv('BRITIVE_TENANT')
         if not temp_tenant:
-            print('Error: the aws federation provider requires the britive tenant as part of the signing algorithm')
-            raise TenantMissingError()
+            raise TenantMissingError(
+                'Error: the aws federation provider requires the britive tenant as part of the signing algorithm'
+            )
         self.tenant = Britive.parse_tenant(temp_tenant).split(':')[0]  # remove the port if it exists
         super().__init__()
 
@@ -31,8 +33,7 @@ class AwsFederationProvider(FederationProvider):
         k_date = AwsFederationProvider.sign(('AWS4' + key).encode('utf-8'), date_stamp)
         k_region = AwsFederationProvider.sign(k_date, region_name)
         k_service = AwsFederationProvider.sign(k_region, service_name)
-        k_signing = AwsFederationProvider.sign(k_service, 'aws4_request')
-        return k_signing
+        return AwsFederationProvider.sign(k_service, 'aws4_request')
 
     def get_token(self) -> str:
         # boto3 is not a hard requirement of this SDK but is required for the
@@ -48,7 +49,7 @@ class AwsFederationProvider(FederationProvider):
         try:
             session = boto3.Session(profile_name=self.profile)
         except botoexceptions.ProfileNotFound as e:
-            raise Exception(f'Error: {str(e)}') from e
+            raise Exception(f'Error: {e!s}') from e
 
         creds = session.get_credentials()
         access_key_id = creds.access_key

@@ -317,7 +317,7 @@ class WorkloadIdentityProviders:
                     break
             if not found:
                 raise ValueError(
-                    f'custom_identity_attribute_name value of {custom_identity_attribute_name} ' f'not found.'
+                    f'custom_identity_attribute_name value of {custom_identity_attribute_name} not found.'
                 )
 
         return {'idpAttr': idp_attribute_name, 'userAttr': custom_identity_attribute_id}

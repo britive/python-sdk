@@ -1,6 +1,7 @@
 import os
 
-from ..exceptions import NotExecutingInBitbucketEnvironment
+from britive.exceptions import NotExecutingInBitbucketEnvironment
+
 from .federation_provider import FederationProvider
 
 

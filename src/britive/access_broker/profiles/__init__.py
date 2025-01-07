@@ -2,7 +2,7 @@ from .permissions import Permissions
 from .policies import Policies
 
 
-class Profile:
+class Profiles:
     def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/resource-manager/profiles'

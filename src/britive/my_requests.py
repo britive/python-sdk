@@ -85,7 +85,7 @@ class MyRequests:
         request = self.britive.post(url, json=data)
 
         if request is None:
-            raise ProfileCheckoutAlreadyApproved()
+            raise ProfileCheckoutAlreadyApproved
 
         request_id = request['requestId']
 
@@ -101,7 +101,7 @@ class MyRequests:
                         continue
                     # status == timeout or approved or rejected or cancelled
                     return status
-                raise ProfileApprovalMaxBlockTimeExceeded()
+                raise ProfileApprovalMaxBlockTimeExceeded
             except KeyboardInterrupt:  # handle Ctrl+C (^C)
                 # the first ^C we get we will try to withdraw the request
                 try:
@@ -120,6 +120,7 @@ class MyRequests:
         profile_name: str,
         entity_name: str,
         entity_type: str,
+        application_name: str = None,
         block_until_disposition: bool = False,
         max_wait_time: int = 600,
         progress_func: Callable = None,
@@ -128,7 +129,7 @@ class MyRequests:
         wait_time: int = 60,
     ) -> Any:
         if entity_type == 'environments':
-            ids = self._helper.get_profile_and_environment_ids_given_names(profile_name, entity_name)
+            ids = self._helper.get_profile_and_environment_ids_given_names(profile_name, entity_name, application_name)
             return self._request_approval(
                 profile_id=ids['profile_id'],
                 justification=justification,
@@ -166,9 +167,9 @@ class MyRequests:
 class MyAccessRequests(MyRequests):
     def request_approval_by_name(
         self,
-        profile_name: str,
         environment_name: str,
         justification: str,
+        profile_name: str,
         application_name: str = None,
         block_until_disposition: bool = False,
         max_wait_time: int = 600,
@@ -206,11 +207,12 @@ class MyAccessRequests(MyRequests):
         """
 
         return self._request_approval_by_name(
+            entity_name=environment_name,
             justification=justification,
             profile_name=profile_name,
-            entity_name=environment_name,
-            entity_type='environments',
+            application_name=application_name,
             block_until_disposition=block_until_disposition,
+            entity_type='environments',
             max_wait_time=max_wait_time,
             progress_func=progress_func,
             ticket_id=ticket_id,
@@ -226,7 +228,6 @@ class MyAccessRequests(MyRequests):
         environment_id: str = None,
         max_wait_time: int = 600,
         progress_func: Callable = None,
-        resource_id: str = None,
         ticket_id: str = None,
         ticket_type: str = None,
         wait_time: int = 60,
@@ -413,9 +414,7 @@ class MyResourcesRequests(MyRequests):
             wait_time=wait_time,
         )
 
-    def withdraw_approval_request_by_name(
-        self, profile_name: str, environment_name: str = None, resource_name: str = None
-    ) -> None:
+    def withdraw_approval_request_by_name(self, profile_name: str, resource_name: str = None) -> None:
         """
         Withdraws a pending approval request, using names of entities instead of IDs.
 

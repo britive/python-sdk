@@ -1,4 +1,3 @@
-import json as native_json
 import os
 import socket
 import time
@@ -39,8 +38,8 @@ from .my_approvals import MyApprovals
 from .my_requests import MyRequests
 from .my_resources import MyResources
 from .my_secrets import MySecrets
-from .reports.reports import Reports
-from .secrets_manager.secrets_manager import SecretsManager
+from .reports import Reports
+from .secrets_manager import SecretsManager
 from .security import ApiTokens, Security
 from .system import System
 from .workflows import Workflows
@@ -370,7 +369,7 @@ class Britive:
         try:
             return response.json()
         # Can likely drop to just the `requests` exception, with `>=2.32.0`, but leaving both for now.
-        except (native_json.decoder.JSONDecodeError, requests.exceptions.JSONDecodeError):
+        except requests.exceptions.JSONDecodeError:
             return response.content.decode('utf-8')
 
     @staticmethod
@@ -432,7 +431,9 @@ class Britive:
                 num_retries += 1
             else:
                 self.__check_response_for_error(response.status_code, self._handle_response(response))
-                return response
+                break
+
+        return response
 
     def __request(self, method, url, params=None, data=None, json=None) -> dict:
         return_data = []
@@ -488,4 +489,4 @@ class Britive:
         for group in root_env_group:
             if not group['parentId']:
                 return group['id']
-        raise RootEnvironmentGroupNotFound()
+        raise RootEnvironmentGroupNotFound

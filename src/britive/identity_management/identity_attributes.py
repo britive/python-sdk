@@ -71,8 +71,7 @@ class CustomAttributes:
                 else:
                     attrs[current_attr_id] = attribute['attributeValue']
             return attrs
-        else:
-            return response
+        return response
 
     def add(self, principal_id: str, custom_attributes: dict) -> None:
         """

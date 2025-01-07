@@ -23,8 +23,7 @@ class Scans:
 
         if environment_id:
             return self.britive.post(f'{self.base_url}/{application_id}/environments/{environment_id}/scans')
-        else:
-            return self.britive.post(f'{self.base_url}/{application_id}/scan')
+        return self.britive.post(f'{self.base_url}/{application_id}/scan')
 
     def status(self, task_id: str) -> dict:
         """

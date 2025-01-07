@@ -47,7 +47,7 @@ class Banner:
 
         if not all_schedule_fields_present and not no_schedule_fields_present:
             raise ValueError(
-                'if providing schedule information then start_datetime, ' 'end_datetime, and time_zone are required'
+                'if providing schedule information then start_datetime, end_datetime, and time_zone are required'
             )
 
         if all_schedule_fields_present:

@@ -1,6 +1,7 @@
 import os
 
-from ..exceptions import NotExecutingInSpaceliftEnvironment
+from britive.exceptions import NotExecutingInSpaceliftEnvironment
+
 from .federation_provider import FederationProvider
 
 

@@ -107,8 +107,7 @@ class Accounts:
         if map_user_to_account_in_all_application_environments:
             url += f'/{user_id}'
             return self.britive.post(url, json={'saveToAllEnvs': True})
-        else:
-            return self.britive.post(url, json=[user_id])
+        return self.britive.post(url, json=[user_id])
 
     def unmap(
         self,

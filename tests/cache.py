@@ -110,6 +110,7 @@ def cached_service_identity_federated(pytestconfig, timestamp):
     except UserCreationError:
         return britive.service_identities.get_by_name(service_identity_to_create['name'])[0]
 
+
 @pytest.fixture(scope='session')
 @cached_resource(name='service-identity-token')
 def cached_service_identity_token(pytestconfig, cached_service_identity):
@@ -655,10 +656,9 @@ def cached_workload_identity_provider_aws(pytestconfig, timestamp, cached_identi
             return idp
 
     try:
-        response = britive.workload.identity_providers.create_aws(
+        return britive.workload.identity_providers.create_aws(
             name=f'python-sdk-aws-{timestamp}', attributes_map={'UserId': cached_identity_attribute['id']}
         )
-        return response
     except InternalServerError as e:
         raise Exception('AWS provider could not be created and none found') from e
 
@@ -666,12 +666,11 @@ def cached_workload_identity_provider_aws(pytestconfig, timestamp, cached_identi
 @pytest.fixture(scope='session')
 @cached_resource(name='workload-identity-provider-oidc')
 def cached_workload_identity_provider_oidc(pytestconfig, timestamp, cached_identity_attribute):
-    response = britive.workload.identity_providers.create_oidc(
+    return britive.workload.identity_providers.create_oidc(
         name=f'python-sdk-oidc-{timestamp}',
         attributes_map={'sub': cached_identity_attribute['name']},
         issuer_url='https://id.fakedomain.com',
     )
-    return response
 
 
 @pytest.fixture(scope='session')
@@ -680,8 +679,7 @@ def cached_system_level_policy(pytestconfig, timestamp, cached_tag):
     policy = britive.system.policies.build(
         name=f'python-sdk-{timestamp}', tags=[cached_tag['name']], roles=['UserViewRole']
     )
-    response = britive.system.policies.create(policy=policy)
-    return response
+    return britive.system.policies.create(policy=policy)
 
 
 @pytest.fixture(scope='session')
@@ -694,8 +692,7 @@ def cached_system_level_policy_condition_as_default_json_str(pytestconfig, times
         ips=['11.11.11.11', '12.12.12.12'],
         condition_as_dict=False,
     )
-    response = britive.system.policies.create(policy=policy)
-    return response
+    return britive.system.policies.create(policy=policy)
 
 
 @pytest.fixture(scope='session')
@@ -708,16 +705,14 @@ def cached_system_level_policy_condition_as_dictionary(pytestconfig, timestamp, 
         ips=['11.11.11.11', '12.12.12.12'],
         condition_as_dict=True,
     )
-    response = britive.system.policies.create(policy=policy)
-    return response
+    return britive.system.policies.create(policy=policy)
 
 
 @pytest.fixture(scope='session')
 @cached_resource(name='role-system-level')
 def cached_system_level_role(pytestconfig, timestamp):
     role = britive.system.roles.build(name=f'python-sdk-{timestamp}', permissions=['NMAdminPermission'])
-    response = britive.system.roles.create(role=role)
-    return response
+    return britive.system.roles.create(role=role)
 
 
 @pytest.fixture(scope='session')
@@ -726,8 +721,7 @@ def cached_system_level_permission(pytestconfig, timestamp):
     permission = britive.system.permissions.build(
         name=f'python-sdk-{timestamp}', consumer='apps', actions=['apps.app.view']
     )
-    response = britive.system.permissions.create(permission=permission)
-    return response
+    return britive.system.permissions.create(permission=permission)
 
 
 @pytest.fixture(scope='session')
@@ -765,13 +759,11 @@ def cached_gcp_profile_storage(pytestconfig, timestamp):
 @pytest.fixture(scope='session')
 @cached_resource(name='audit-logs-webhook')
 def cached_audit_logs_webhook_create(pytestconfig, timestamp, cached_notification_medium_webhook):
-    response = britive.audit_logs.webhooks.create_or_update(
+    return britive.audit_logs.webhooks.create_or_update(
         notification_medium_id=cached_notification_medium_webhook['id'],
         jmespath_filter="contains('event.eventType', 'checkout')",
         description=f'python-sdk-aws-audit-log-webhook-{timestamp}',
     )
-
-    return response
 
 
 @pytest.fixture(scope='session')
@@ -816,7 +808,7 @@ def cached_access_broker_resource_permission_id(
     list_perms = britive.access_broker.resources.permissions.list(
         resource_type_id=cached_access_broker_resource_type['resourceTypeId']
     )
-    return [p['permissionId'] for p in list_perms if p['name'] == cached_access_broker_resource_permission['name']][0]
+    return next(p['permissionId'] for p in list_perms if p['name'] == cached_access_broker_resource_permission['name'])
 
 
 @pytest.fixture(scope='session')
@@ -867,11 +859,11 @@ def cached_access_broker_profile_permission(pytestconfig, cached_access_broker_p
     available_permissions = britive.access_broker.profiles.permissions.list_available_permissions(
         profile_id=cached_access_broker_profile['profileId']
     )
-    resource_type_id = [
+    resource_type_id = next(
         r['resourceTypeId']
         for r in britive.access_broker.resources.types.list()
         if r['name'] == available_permissions[0]['resourceTypeName']
-    ][0]
+    )
     return britive.access_broker.profiles.permissions.add_permissions(
         profile_id=cached_access_broker_profile['profileId'],
         permission_id=available_permissions[0]['permissionId'],

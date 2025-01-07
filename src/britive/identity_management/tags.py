@@ -17,7 +17,7 @@ class TagMembershipRules:
             raise ValueError('invalid operator provided.')
 
         # first get list of existing identity attributes and build some helpers
-        existing_attrs = [attr for attr in self.britive.identity_attributes.list()]
+        existing_attrs = self.britive.identity_attributes.list()
         existing_attr_ids = [attr['id'] for attr in existing_attrs]
         attrs_by_name = {attr['name']: attr['id'] for attr in existing_attrs}
 

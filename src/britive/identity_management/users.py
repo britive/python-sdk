@@ -1,8 +1,9 @@
-from ..exceptions import (
+from britive.exceptions import (
     UserDoesNotHaveMFAEnabled,
     UserNotAllowedToChangePassword,
     UserNotAssociatedWithDefaultIdentityProvider,
 )
+
 from .identity_attributes import CustomAttributes
 
 valid_statues = ['active', 'inactive']
@@ -114,8 +115,7 @@ class Users:
         if not all(x in kwargs for x in required_fields):
             raise ValueError('Not all required keyword arguments were provided.')
 
-        response = self.britive.post(self.base_url, json=kwargs)
-        return response
+        return self.britive.post(self.base_url, json=kwargs)
 
     def update(self, user_id: str, **kwargs) -> dict:
         """
@@ -221,10 +221,10 @@ class Users:
 
         user = self.get(user_id)
         if not user['canChangeOrResetPassword']:
-            raise UserNotAllowedToChangePassword()
+            raise UserNotAllowedToChangePassword
 
         if user['identityProvider']['type'] != 'DEFAULT':
-            raise UserNotAssociatedWithDefaultIdentityProvider()
+            raise UserNotAssociatedWithDefaultIdentityProvider
 
         return self.britive.post(f'{self.base_url}/{user_id}/resetpassword', json={'password': password})
 
@@ -240,7 +240,7 @@ class Users:
 
         user = self.get(user_id)
         if not user['identityProvider'].get('mfaEnabled'):
-            raise UserDoesNotHaveMFAEnabled()
+            raise UserDoesNotHaveMFAEnabled
 
         return self.britive.patch(f'{self.base_url}/{user_id}/resetmfa')
 

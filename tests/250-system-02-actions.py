@@ -18,7 +18,7 @@ def test_list():
 
     assert len(response2) < len(response1)
 
-    consumers = list(set([c['consumer'] for c in response2]))
+    consumers = {c['consumer'] for c in response2}
 
     assert len(consumers) == 1
     assert consumers[0] == 'apps'

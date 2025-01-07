@@ -1,4 +1,5 @@
-from ..exceptions import MissingAzureDependency, NotExecutingInAzureEnvironment
+from britive.exceptions import MissingAzureDependency, NotExecutingInAzureEnvironment
+
 from .federation_provider import FederationProvider
 
 
