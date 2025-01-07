@@ -39,8 +39,8 @@ from .my_approvals import MyApprovals
 from .my_requests import MyRequests
 from .my_resources import MyResources
 from .my_secrets import MySecrets
-from .reports.reports import Reports
-from .secrets_manager.secrets_manager import SecretsManager
+from .reports import Reports
+from .secrets_manager import SecretsManager
 from .security import ApiTokens, Security
 from .system import System
 from .workflows import Workflows
