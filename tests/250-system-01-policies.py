@@ -219,4 +219,4 @@ def test_evaluate():
     )
     assert isinstance(response, dict)
     assert len(response) == 1
-    assert 'PolicyEvalRequest' in list(response)[0]
+    assert 'PolicyEvalRequest' in next(iter(response))
