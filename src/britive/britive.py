@@ -431,7 +431,9 @@ class Britive:
                 num_retries += 1
             else:
                 self.__check_response_for_error(response.status_code, self._handle_response(response))
-                return response
+                break
+
+        return response
 
     def __request(self, method, url, params=None, data=None, json=None) -> dict:
         return_data = []
@@ -487,4 +489,4 @@ class Britive:
         for group in root_env_group:
             if not group['parentId']:
                 return group['id']
-        raise RootEnvironmentGroupNotFound()
+        raise RootEnvironmentGroupNotFound

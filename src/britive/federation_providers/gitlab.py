@@ -1,6 +1,7 @@
 import os
 
-from ..exceptions import NotExecutingInGitlabEnvironment
+from britive.exceptions import NotExecutingInGitlabEnvironment
+
 from .federation_provider import FederationProvider
 
 

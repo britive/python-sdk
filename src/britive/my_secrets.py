@@ -42,7 +42,7 @@ class MySecrets:
             return self.britive.get(f'{self.base_url}/vault')['id']
         except KeyError as e:
             if 'id' in str(e):
-                raise NoSecretsVaultFound() from e
+                raise NoSecretsVaultFound from e
 
     def list(self, path: str = '/', search: str = None) -> list:
         """
@@ -95,13 +95,13 @@ class MySecrets:
             try:
                 # handle when the time has expired waiting for approval
                 if datetime.now(timezone.utc) >= quit_time:
-                    raise ApprovalWorkflowTimedOut()
+                    raise ApprovalWorkflowTimedOut
 
                 # handle stepup totp
                 if otp:
                     response = self.britive.step_up.authenticate(otp=otp)
                     if response.get('result') == 'FAILED':
-                        raise StepUpAuthFailed()
+                        raise StepUpAuthFailed
 
                 # attempt to get the secret value and return it
                 return self.britive.post(
@@ -116,8 +116,7 @@ class MySecrets:
                 if not justification:
                     if first:
                         raise ApprovalRequiredButNoJustificationProvided(e) from e
-                    else:
-                        raise ApprovalWorkflowRejected(e) from e
+                    raise ApprovalWorkflowRejected(e) from e
             except StepUpAuthenticationRequiredError as e:
                 raise StepUpAuthRequiredButNotProvided(e) from e
             except ForbiddenRequest as e:
@@ -157,7 +156,7 @@ class MySecrets:
             if otp:
                 response = self.britive.step_up.authenticate(otp=otp)
                 if response.get('result') == 'FAILED':
-                    raise StepUpAuthFailed()
+                    raise StepUpAuthFailed
 
             # attempt to get the secret file and return it
             return self.britive.get(f'{self.base_url}/vault/{vault_id}/downloadfile', params=params)
@@ -167,9 +166,7 @@ class MySecrets:
         except ApprovalRequiredError:
             # justification is required which means we have an approval workflow to deal with
             # lets call view so we can go through the full approval process
-            self.view(
-                path=path, justification=justification, otp=otp, wait_time=wait_time, max_wait_time=max_wait_time
-            )
+            self.view(path=path, justification=justification, otp=otp, wait_time=wait_time, max_wait_time=max_wait_time)
             # and then we can get the file again
             return self.britive.get(f'{self.base_url}/vault/{vault_id}/downloadfile', params=params)
         except StepUpAuthenticationRequiredError as e:

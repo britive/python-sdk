@@ -1,7 +1,7 @@
 import json
 from typing import Union
 
-from .. import exceptions
+from britive import exceptions
 
 creation_defaults = {
     'expirationDuration': 3600000,
@@ -127,7 +127,7 @@ class Profiles:
             for profile in self.list(application_id=application_id):
                 if profile['papId'] == profile_id:
                     return profile
-            raise exceptions.ProfileNotFound()
+            raise exceptions.ProfileNotFound
         params = {}
         if summary:
             params['view'] = 'summary'
@@ -382,7 +382,7 @@ class ProfilePermissionConstraints:
         :returns: Results of the lint operation.
         """
 
-        url = f'{self.base_url}/{profile_id}/permissions/{permission_name}/' f'{permission_type}/constraints/condition'
+        url = f'{self.base_url}/{profile_id}/permissions/{permission_name}/{permission_type}/constraints/condition'
 
         params = {'operation': 'validate'}
 

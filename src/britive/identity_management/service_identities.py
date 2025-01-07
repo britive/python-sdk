@@ -46,8 +46,7 @@ class ServiceIdentities:
         :return: Details of the specified service identities. If no service identity is found will return an empty list.
         """
 
-        service_identities = self.list(filter_expression=f'name co "{name}"')
-        return service_identities
+        return self.list(filter_expression=f'name co "{name}"')
 
     def get_by_status(self, status: str) -> list:
         """
@@ -98,8 +97,7 @@ class ServiceIdentities:
         if not all(x in kwargs for x in required_fields):
             raise ValueError('Not all required keyword arguments were provided.')
 
-        response = self.britive.post(self.base_url, json=kwargs)
-        return response
+        return self.britive.post(self.base_url, json=kwargs)
 
     def update(self, service_identity_id: str, **kwargs) -> dict:
         """

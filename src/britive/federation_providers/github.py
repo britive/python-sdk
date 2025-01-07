@@ -2,7 +2,8 @@ import os
 
 import requests
 
-from ..exceptions import NotExecutingInGithubEnvironment
+from britive.exceptions import NotExecutingInGithubEnvironment
+
 from .federation_provider import FederationProvider
 
 

@@ -122,7 +122,7 @@ class MyAccess:
         for t in self.list_checked_out_profiles():
             if t['transactionId'] == transaction_id:
                 return t
-        raise TransactionNotFound()
+        raise TransactionNotFound
 
     def get_profile_settings(self, profile_id: str, environment_id: str) -> dict:
         """
@@ -191,7 +191,7 @@ class MyAccess:
                 transaction_id = transaction['transactionId']
                 break
         if not transaction_id:
-            raise TransactionNotFound()
+            raise TransactionNotFound
         return self.extend_checkout(transaction_id=transaction_id)
 
     def _checkout(
@@ -244,7 +244,7 @@ class MyAccess:
             if otp:
                 response = self.britive.step_up.authenticate(otp=otp)
                 if response.get('result') == 'FAILED':
-                    raise StepUpAuthFailed()
+                    raise StepUpAuthFailed
 
             try:
                 transaction = self.britive.post(
@@ -257,17 +257,17 @@ class MyAccess:
                     raise ApprovalRequiredButNoJustificationProvided(e) from e
 
                 # request approval
-                approval_request = dict(
-                    block_until_disposition=True,
-                    environment_id=environment_id,
-                    justification=justification,
-                    max_wait_time=max_wait_time,
-                    profile_id=profile_id,
-                    progress_func=progress_func,
-                    ticket_id=ticket_id,
-                    ticket_type=ticket_type,
-                    wait_time=wait_time,
-                )
+                approval_request = {
+                    'block_until_disposition': True,
+                    'environment_id': environment_id,
+                    'justification': justification,
+                    'max_wait_time': max_wait_time,
+                    'profile_id': profile_id,
+                    'progress_func': progress_func,
+                    'ticket_id': ticket_id,
+                    'ticket_type': ticket_type,
+                    'wait_time': wait_time,
+                }
                 status = self.request_approval(**approval_request)
 
                 # handle the response based on the value of status
@@ -376,13 +376,15 @@ class MyAccess:
         return self._checkout(
             profile_id=profile_id,
             environment_id=environment_id,
-            programmatic=programmatic,
             include_credentials=include_credentials,
             justification=justification,
-            wait_time=wait_time,
             max_wait_time=max_wait_time,
-            progress_func=progress_func,
             otp=otp,
+            programmatic=programmatic,
+            progress_func=progress_func,
+            ticket_id=ticket_id,
+            ticket_type=ticket_type,
+            wait_time=wait_time,
         )
 
     def checkout_by_name(
@@ -439,13 +441,15 @@ class MyAccess:
         return self._checkout(
             profile_id=ids['profile_id'],
             environment_id=ids['environment_id'],
-            programmatic=programmatic,
             include_credentials=include_credentials,
             justification=justification,
-            wait_time=wait_time,
             max_wait_time=max_wait_time,
-            progress_func=progress_func,
             otp=otp,
+            programmatic=programmatic,
+            progress_func=progress_func,
+            ticket_id=ticket_id,
+            ticket_type=ticket_type,
+            wait_time=wait_time,
         )
 
     def credentials(
@@ -584,11 +588,10 @@ class MyAccess:
 
         return self.britive.post(f"{self.base_url}/{self.whoami()['userId']}/filters", json=data)
 
-    def list_filters(self, user_id: str = None) -> list:
+    def list_filters(self) -> list:
         """
         Return list of filters for the current user.
 
-        :param user_id: ID of the user to list filters for. Default: `my_access.whoami()['userId']`
         :return: List of filters.
         """
 
@@ -627,7 +630,7 @@ class MyAccess:
 
         return self.britive.put(f"{self.base_url}/{self.whoami()['userId']}/filters/{filter_id}", json=data)
 
-    def delete_filter(self, filter_id: str, user_id: str = None) -> None:
+    def delete_filter(self, filter_id: str) -> None:
         """
         Delete a filter for the current user.
 

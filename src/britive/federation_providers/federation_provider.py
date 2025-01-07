@@ -3,4 +3,4 @@ class FederationProvider:
         pass
 
     def get_token(self) -> None:
-        raise NotImplementedError()
+        raise NotImplementedError

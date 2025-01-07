@@ -61,7 +61,7 @@ class SystemPermissions:
 
         self._validate_identifier_type(identifier_type)
 
-        if permission.pop('isInline', False): # InvalidRequest: 400 - PA-0059 - isInline is not allowed to update
+        if permission.pop('isInline', False):  # InvalidRequest: 400 - PA-0059 - isInline is not allowed to update
             raise ValueError('attribute isInline is set to True - cannot update an inline permission.')
 
         permission.pop('isReadOnly', None)
@@ -109,7 +109,7 @@ class SystemPermissions:
             resources = []
 
         # put it all together
-        permission = {
+        return {
             'name': name,
             'description': description,
             'isReadOnly': read_only,
@@ -118,5 +118,3 @@ class SystemPermissions:
             'actions': actions,
             'resources': resources if len(resources) > 0 else ['*'],
         }
-
-        return permission

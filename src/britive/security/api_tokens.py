@@ -1,4 +1,4 @@
-from ..exceptions import ApiTokenNotFound
+from britive.exceptions import ApiTokenNotFound
 
 
 class ApiTokens:
@@ -19,7 +19,7 @@ class ApiTokens:
         for token in self.list():
             if token['id'] == token_id:
                 return token
-        raise ApiTokenNotFound()
+        raise ApiTokenNotFound
 
     def create(self, name: str = None, expiration_days: int = 90) -> dict:
         """
@@ -52,10 +52,11 @@ class ApiTokens:
         """
 
         response = self.britive.delete(f'{self.base_url}/{token_id}')
+
         if response == 'Successfully revoked token':
-            return None
-        else:
-            raise Exception(str(response))
+            return
+
+        raise Exception(str(response))
 
     def delete(self, token_id: str) -> None:
         """
