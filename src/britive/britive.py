@@ -1,4 +1,3 @@
-import json as native_json
 import os
 import socket
 import time
@@ -370,7 +369,7 @@ class Britive:
         try:
             return response.json()
         # Can likely drop to just the `requests` exception, with `>=2.32.0`, but leaving both for now.
-        except (native_json.decoder.JSONDecodeError, requests.exceptions.JSONDecodeError):
+        except requests.exceptions.JSONDecodeError:
             return response.content.decode('utf-8')
 
     @staticmethod
