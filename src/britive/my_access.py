@@ -64,12 +64,13 @@ class MyAccess:
             self.list_approvals = __my_approvals.list
             self.reject_request = __my_approvals.reject_request
 
-    def list(self, filter_text: str = None, search_text: str = None) -> list:
+    def list(self, filter_text: str = None, search_text: str = None, size: int = None) -> list:
         """
         List the access details for the current user.
 
         :param filter_text: filter details by key, using eq|co|sw operators, e.g. `filter_text='key co text'`
         :param search_text: filter details by search text.
+        :param size: reduce the size of the response to the specified limit.
         :return: List of profiles.
         """
 
@@ -78,6 +79,8 @@ class MyAccess:
             params['filter'] = filter_text
         if search_text:
             params['search'] = search_text
+        if size:
+            params['size'] = size
 
         return self.britive.get(self.base_url, params=params)
 
