@@ -1,6 +1,6 @@
 # Change Log (v2.8.1+)
 
-## v3.2.0-alpha.* [2025-01-07]
+## v3.2.0-beta.0 [2025-01-13]
 
 __What's New:__
 
@@ -26,9 +26,7 @@ __Bug Fixes:__
 
 * Fixed missing `param_values` option for resource creation.
 * `my_requests.list_approvals` now includes `my_resources` requests.
-* `my_access.*_filter[s]` are only valid for the current user.
 * Make `get` call in helper method instead `list_approvals`.
-* Missing `s` in `environments` for `my_requests`.
 * Catch `requests.exceptions.JSONDecodeError` in `_handle_response`.
 
 __Dependencies:__
