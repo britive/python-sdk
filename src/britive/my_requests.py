@@ -260,8 +260,8 @@ class MyAccessRequests(MyRequests):
 
         return self._request_approval(
             justification=justification,
-            profile_name=profile_id,
-            entity_name=environment_id,
+            profile_id=profile_id,
+            entity_id=environment_id,
             entity_type='environments',
             block_until_disposition=block_until_disposition,
             max_wait_time=max_wait_time,
@@ -352,8 +352,8 @@ class MyResourcesRequests(MyRequests):
 
         return self._request_approval(
             justification=justification,
-            profile_name=profile_id,
-            entity_name=resource_id,
+            profile_id=profile_id,
+            entity_id=resource_id,
             entity_type='resource',
             block_until_disposition=block_until_disposition,
             max_wait_time=max_wait_time,
