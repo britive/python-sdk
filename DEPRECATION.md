@@ -1,6 +1,48 @@
 # Deprecation Notices
 
-This document holds the items which are deprecated and will be retired in the next major release.
+This document holds the items which are deprecated and/or warrant specific call out with each major release.
+
+
+## Moved methods in `v4.0.0`
+
+### `my_access` methods have moved:
+
+| Old location                           | New location                                  |
+| -------------------------------------- | --------------------------------------------- |
+| `my_access.approval_request_status`    | `my_requests.approval_request_status`         |
+| `my_access.approve_request`            | `my_approvals.approve_request`                |
+| `my_access.list_approvals`             | `my_approvals.list`                           |
+| `my_access.reject_request`             | `my_approvals.reject_request`                 |
+
+### `britive` methods have moved:
+
+| Old location                           | New location                                  |
+| -------------------------------------- | --------------------------------------------- |
+| `access_builder`                       | `application_management.access_builder`       |
+| `accounts`                             | `application_management.accounts`             |
+| `applications`                         | `application_management.applications`         |
+| `audit_logs`                           | `audit_logs.logs`                             |
+| `environment_groups`                   | `application_management.environment_groups`   |
+| `environments`                         | `application_management.environments`         |
+| `groups`                               | `application_management.groups`               |
+| `identity_attributes`                  | `identity_management.identity_attributes`     |
+| `identity_providers`                   | `identity_management.identity_providers`      |
+| `notification_mediums`                 | `global_settings.notification_mediums`        |
+| `notifications`                        | `workflows.notifications`                     |
+| `permissions`                          | `application_management.permissions`          |
+| `profiles`                             | `application_management.profiles`             |
+| `saml`                                 | `security.saml`                               |
+| `scans`                                | `application_management.scans`                |
+| `security_policies`                    | `security.security_policies`                  |
+| `service_identities`                   | `identity_management.service_identities`      |
+| `service_identity_tokens`              | `identity_management.service_identity_tokens` |
+| `settings`                             | `global_settings`                             |
+| `step_up`                              | `security.step_up_auth`                       |
+| `tags`                                 | `identity_management.tags`                    |
+| `task_services`                        | `workflows.task_services`                     |
+| `tasks`                                | `workflows.tasks`                             |
+| `users`                                | `identity_management.users`                   |
+| `workload`                             | `identity_management.workload`                |
 
 ## Removed in Major Release 3.0.0
 
