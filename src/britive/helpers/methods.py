@@ -1,16 +1,7 @@
-from typing import Union
-
-
 class HelperMethods:
     def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/access'
-
-    def safe_list_get(lst: list, idx: int, default: str = None) -> Union[str, None]:
-        try:
-            return lst[idx]
-        except IndexError:
-            return default
 
     def get_profile_and_environment_ids_given_names(
         self, profile_name: str, environment_name: str, application_name: str = None
@@ -43,7 +34,6 @@ class HelperMethods:
         if profile_found and not environment_found:
             raise ValueError(f'profile `{profile_name}` found but not in environment `{environment_name}`.')
         return ids
-
 
     def get_profile_and_resource_ids_given_names(self, profile_name: str, resource_name: str) -> dict:
         resource_profile_map = {
