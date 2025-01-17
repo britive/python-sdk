@@ -7,7 +7,7 @@ can consume a native Python library.
 
 ## Python Version Support
 
-_CURRENT SUPPORTED VERSION(S):_ `>= 3.8`
+_CURRENT SUPPORTED VERSION(S):_ `>= 3.9`
 
 We use [typing](https://docs.python.org/3/library/typing.html) and dictionary unpacking, e.g. `{**dict1, **dict2}`,
 which requires Python 3.5 or greater.
