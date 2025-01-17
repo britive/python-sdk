@@ -7,12 +7,12 @@ from .cache import britive  # will also import some globals like `britive`
 
 
 def test_get():
-    banner = britive.settings.banner.get()
+    banner = britive.global_settings.banner.get()
     assert isinstance(banner, dict)
 
 
 def test_set_no_schedule():
-    banner = britive.settings.banner.set(message='test', display_banner=True, message_type='INFO')
+    banner = britive.global_settings.banner.set(message='test', display_banner=True, message_type='INFO')
     assert isinstance(banner, dict)
     for key in ['status', 'messageType', 'message']:
         assert key in banner
@@ -21,7 +21,7 @@ def test_set_no_schedule():
 
 def test_set_with_schedule():
     start_datetime = datetime.datetime.today()
-    banner = britive.settings.banner.set(
+    banner = britive.global_settings.banner.set(
         message='test',
         display_banner=True,
         message_type='INFO',
@@ -38,7 +38,7 @@ def test_set_with_schedule():
 
 def test_set_with_incorrect_schedule():
     with pytest.raises(ValueError):
-        britive.settings.banner.set(
+        britive.global_settings.banner.set(
             message='test',
             display_banner=True,
             message_type='INFO',
@@ -47,7 +47,7 @@ def test_set_with_incorrect_schedule():
         )
 
     with pytest.raises(ValueError):
-        britive.settings.banner.set(
+        britive.global_settings.banner.set(
             message='test',
             display_banner=True,
             message_type='INFO',
@@ -56,7 +56,7 @@ def test_set_with_incorrect_schedule():
         )
 
     with pytest.raises(ValueError):
-        britive.settings.banner.set(
+        britive.global_settings.banner.set(
             message='test',
             display_banner=True,
             message_type='INFO',
@@ -65,7 +65,7 @@ def test_set_with_incorrect_schedule():
         )
 
     with pytest.raises(ValueError):
-        britive.settings.banner.set(
+        britive.global_settings.banner.set(
             message='test',
             display_banner=True,
             message_type='INFO',
@@ -73,7 +73,7 @@ def test_set_with_incorrect_schedule():
         )
 
     with pytest.raises(ValueError):
-        britive.settings.banner.set(
+        britive.global_settings.banner.set(
             message='test',
             display_banner=True,
             message_type='INFO',
@@ -81,7 +81,7 @@ def test_set_with_incorrect_schedule():
         )
 
     with pytest.raises(ValueError):
-        britive.settings.banner.set(message='test', display_banner=True, message_type='INFO', time_zone='UTC')
+        britive.global_settings.banner.set(message='test', display_banner=True, message_type='INFO', time_zone='UTC')
 
 
 def test_banner_end_user():
@@ -92,7 +92,7 @@ def test_banner_end_user():
 
 
 def test_banner_off():
-    banner = britive.settings.banner.set(display_banner=False, message='dont care', message_type='INFO')
+    banner = britive.global_settings.banner.set(display_banner=False, message='dont care', message_type='INFO')
     assert 'status' in banner
     assert banner['status'] == 'OFF'
     sleep(5)

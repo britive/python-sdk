@@ -7,19 +7,19 @@ def test_create(cached_notification):
 
 
 def test_list():
-    notifications = britive.notifications.list()
+    notifications = britive.workflows.notifications.list()
     assert isinstance(notifications, list)
     assert len(notifications) > 0
 
 
 def test_get(cached_notification):
-    notification = britive.notifications.get(notification_id=cached_notification['notificationId'])
+    notification = britive.workflows.notifications.get(notification_id=cached_notification['notificationId'])
     assert isinstance(notification, dict)
     assert notification['notificationId'] == cached_notification['notificationId']
 
 
 def test_update(cached_notification):
-    notification = britive.notifications.update(
+    notification = britive.workflows.notifications.update(
         notification_id=cached_notification['notificationId'], description='test2'
     )
     assert isinstance(notification, dict)
@@ -27,13 +27,13 @@ def test_update(cached_notification):
 
 
 def test_disable(cached_notification):
-    notification = britive.notifications.disable(notification_id=cached_notification['notificationId'])
+    notification = britive.workflows.notifications.disable(notification_id=cached_notification['notificationId'])
     assert isinstance(notification, dict)
     assert notification['status'] == 'Inactive'
 
 
 def test_enable(cached_notification):
-    notification = britive.notifications.enable(notification_id=cached_notification['notificationId'])
+    notification = britive.workflows.notifications.enable(notification_id=cached_notification['notificationId'])
     assert isinstance(notification, dict)
     assert notification['status'] == 'Active'
 
@@ -60,7 +60,7 @@ def test_configure(cached_notification, cached_notification_rules, cached_notifi
         if rule['predicate'] in ['AccountsCreated', 'AccountsDeleted']:
             rules.append(rule)
 
-    response = britive.notifications.configure(
+    response = britive.workflows.notifications.configure(
         notification_id=cached_notification['notificationId'],
         users=[cached_user['userId']],
         rules=rules,
@@ -74,7 +74,7 @@ def test_configure(cached_notification, cached_notification_rules, cached_notifi
 
 
 def test_delete(cached_notification):
-    response = britive.notifications.delete(notification_id=cached_notification['notificationId'])
+    response = britive.workflows.notifications.delete(notification_id=cached_notification['notificationId'])
     assert response is None
     cleanup('notification')
     cleanup('notification-available-rules')

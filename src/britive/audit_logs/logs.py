@@ -43,7 +43,7 @@ class Logs:
             `datetime.datetime.utcnow()`. `to_time` will be interpreted as if in UTC timezone so it is up to the caller
             to ensure that the datetime object represents UTC. No timezone manipulation will occur.
         :param filter_expression: The expression used to filter the results. A list of available fields and operators
-            can be found by querying `britive.audit_logs.fields()` and `britive.audit_logs.operators`, respectively.
+            can be found using `britive.audit_logs.logs.fields` and `britive.audit_logs.logs.operators`, respectively.
             Multiple filter expressions must be joined together by `and`. No other join operator is support.
             Example: actor.displayName co "bob" and event.displayName eq "application"
         :param csv: Will result in a CSV string of the audit events being returned instead of a python list of events.

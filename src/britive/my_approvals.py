@@ -1,6 +1,3 @@
-import os
-
-
 class MyApprovals:
     """
     This class is meant to be called by end users. It is an API layer on top of the actions that can be performed on the
@@ -56,15 +53,3 @@ class MyApprovals:
         params = {'requestType': 'myApprovals'}
 
         return self.britive.get(f'{self.base_url}/', params=params)
-
-    # FUTURE_BRITIVE_SDK == 'true' will remove backwards compatibility
-    if os.getenv('FUTURE_BRITIVE_SDK', 'false').lower() != 'true':
-
-        def list_approvals(self) -> dict:
-            """
-            Lists approval requests.
-
-            :return: List of approval requests.
-            """
-
-            return self.list()

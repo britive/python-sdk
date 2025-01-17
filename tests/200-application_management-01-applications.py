@@ -20,19 +20,19 @@ def test_create(cached_application):
 
 
 def test_disable(cached_application):
-    response = britive.applications.disable(application_id=cached_application['appContainerId'])
+    response = britive.application_management.applications.disable(application_id=cached_application['appContainerId'])
     assert isinstance(response, dict)
     assert response['status'] == 'inactive'
 
 
 def test_enable(cached_application):
-    response = britive.applications.enable(application_id=cached_application['appContainerId'])
+    response = britive.application_management.applications.enable(application_id=cached_application['appContainerId'])
     assert isinstance(response, dict)
     assert response['status'] == 'active'
 
 
 def test_list(cached_application):
-    apps = britive.applications.list()
+    apps = britive.application_management.applications.list()
     assert isinstance(apps, list)
     assert len(apps) > 0
     assert isinstance(apps[0], dict)
@@ -40,13 +40,13 @@ def test_list(cached_application):
 
 
 def test_get(cached_application):
-    app = britive.applications.get(application_id=cached_application['appContainerId'])
+    app = britive.application_management.applications.get(application_id=cached_application['appContainerId'])
     assert app['appContainerId'] == cached_application['appContainerId']
     assert app['catalogAppDisplayName'] == cached_application['catalogAppDisplayName']
 
 
 def test_test_failure(cached_application):
-    response = britive.applications.test(application_id=cached_application['appContainerId'])
+    response = britive.application_management.applications.test(application_id=cached_application['appContainerId'])
     assert isinstance(response, dict)
     assert 'success' in response
     assert 'message' in response
@@ -58,7 +58,7 @@ def test_update(cached_application):
     idp = os.environ.get('BRITIVE_IDP_NAME_OVERRIDE') or f'BritivePythonApiWrapperTesting-{tenant}'
     role = os.environ.get('BRITIVE_INTEGRATION_ROLE_NAME_OVERRIDE') or f'britive-integration-role-{tenant}'
 
-    app = britive.applications.update(
+    app = britive.application_management.applications.update(
         application_id=cached_application['appContainerId'],
         showAwsAccountNumber=True,
         identityProvider=idp,
@@ -74,7 +74,9 @@ def test_update(cached_application):
 
 
 def test_set_user_account_mapping(cached_application):
-    app = britive.applications.set_user_account_mapping(cached_application['appContainerId'], 'email')
+    app = britive.application_management.applications.set_user_account_mapping(
+        cached_application['appContainerId'], 'email'
+    )
     assert isinstance(app['userAccountMappings'], list)
     assert len(app['userAccountMappings']) == 1
     assert app['userAccountMappings'][0]['name'] == 'email'

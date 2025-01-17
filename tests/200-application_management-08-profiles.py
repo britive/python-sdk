@@ -11,7 +11,7 @@ def test_create(cached_profile):
 
 
 def test_list(cached_profile):
-    profiles = britive.profiles.list(application_id=cached_profile['appContainerId'])
+    profiles = britive.application_management.profiles.list(application_id=cached_profile['appContainerId'])
     assert isinstance(profiles, list)
     assert len(profiles) > 0
     assert isinstance(profiles[0], dict)
@@ -19,13 +19,15 @@ def test_list(cached_profile):
 
 
 def test_get(cached_profile):
-    profile = britive.profiles.get(application_id=cached_profile['appContainerId'], profile_id=cached_profile['papId'])
+    profile = britive.application_management.profiles.get(
+        application_id=cached_profile['appContainerId'], profile_id=cached_profile['papId']
+    )
     assert isinstance(profile, dict)
     assert profile['name'].startswith('test')
 
 
 def test_update(cached_profile):
-    profile = britive.profiles.update(
+    profile = britive.application_management.profiles.update(
         application_id=cached_profile['appContainerId'], profile_id=cached_profile['papId'], description='test desc'
     )
     assert isinstance(profile, dict)
@@ -33,7 +35,7 @@ def test_update(cached_profile):
 
 
 def test_set_scopes(cached_profile, cached_environment):
-    scopes = britive.profiles.set_scopes(
+    scopes = britive.application_management.profiles.set_scopes(
         profile_id=cached_profile['papId'], scopes=[{'type': 'Environment', 'value': cached_environment['id']}]
     )
     assert isinstance(scopes, list)
@@ -43,7 +45,7 @@ def test_set_scopes(cached_profile, cached_environment):
 
 
 def test_get_scopes(cached_profile, cached_environment):
-    scopes = britive.profiles.get_scopes(profile_id=cached_profile['papId'])
+    scopes = britive.application_management.profiles.get_scopes(profile_id=cached_profile['papId'])
     assert isinstance(scopes, list)
     assert len(scopes) == 1
     assert isinstance(scopes[0], dict)
@@ -51,21 +53,21 @@ def test_get_scopes(cached_profile, cached_environment):
 
 
 def test_remove_single_environment_scope(cached_profile, cached_environment):
-    response = britive.profiles.remove_single_environment_scope(
+    response = britive.application_management.profiles.remove_single_environment_scope(
         profile_id=cached_profile['papId'], environment_id=cached_environment['id']
     )
     assert response is None
 
 
 def test_add_single_environment_scope(cached_profile, cached_environment):
-    response = britive.profiles.add_single_environment_scope(
+    response = britive.application_management.profiles.add_single_environment_scope(
         profile_id=cached_profile['papId'], environment_id=cached_environment['id']
     )
     assert response is None
 
 
 def test_disable(cached_profile):
-    profile = britive.profiles.disable(
+    profile = britive.application_management.profiles.disable(
         application_id=cached_profile['appContainerId'], profile_id=cached_profile['papId']
     )
     assert isinstance(profile, dict)
@@ -73,7 +75,7 @@ def test_disable(cached_profile):
 
 
 def test_enable(cached_profile):
-    profile = britive.profiles.enable(
+    profile = britive.application_management.profiles.enable(
         application_id=cached_profile['appContainerId'], profile_id=cached_profile['papId']
     )
     assert isinstance(profile, dict)
@@ -89,13 +91,13 @@ def test_session_attributes_add_dynamic(cached_dynamic_session_attribute):
 
 
 def test_session_attributes_list(cached_profile):
-    attributes = britive.profiles.session_attributes.list(profile_id=cached_profile['papId'])
+    attributes = britive.application_management.profiles.session_attributes.list(profile_id=cached_profile['papId'])
     assert isinstance(attributes, list)
     assert len(attributes) == 2
 
 
 def test_session_attributes_update_static(cached_profile, cached_static_session_attribute):
-    attribute = britive.profiles.session_attributes.update_static(
+    attribute = britive.application_management.profiles.session_attributes.update_static(
         profile_id=cached_profile['papId'],
         attribute_id=cached_static_session_attribute['id'],
         tag_name='test-static-2',
@@ -106,7 +108,7 @@ def test_session_attributes_update_static(cached_profile, cached_static_session_
 
 
 def test_session_attributes_update_dynamic(cached_profile, cached_dynamic_session_attribute):
-    attribute = britive.profiles.session_attributes.update_dynamic(
+    attribute = britive.application_management.profiles.session_attributes.update_dynamic(
         profile_id=cached_profile['papId'],
         attribute_id=cached_dynamic_session_attribute['id'],
         identity_attribute_id='w2zQ4R9xoyrkWY4phEV9',
@@ -118,12 +120,12 @@ def test_session_attributes_update_dynamic(cached_profile, cached_dynamic_sessio
 
 def test_session_attributes_remove(cached_profile, cached_static_session_attribute, cached_dynamic_session_attribute):
     try:
-        static = britive.profiles.session_attributes.remove(
+        static = britive.application_management.profiles.session_attributes.remove(
             profile_id=cached_profile['papId'], attribute_id=cached_static_session_attribute['id']
         )
         assert static is None
 
-        dynamic = britive.profiles.session_attributes.remove(
+        dynamic = britive.application_management.profiles.session_attributes.remove(
             profile_id=cached_profile['papId'], attribute_id=cached_dynamic_session_attribute['id']
         )
         assert dynamic is None
@@ -140,7 +142,9 @@ def test_policies_create(cached_profile_policy):
 
 
 def test_list_include_policies(cached_profile):
-    profiles = britive.profiles.list(application_id=cached_profile['appContainerId'], include_policies=True)
+    profiles = britive.application_management.profiles.list(
+        application_id=cached_profile['appContainerId'], include_policies=True
+    )
     assert isinstance(profiles, list)
     assert len(profiles) > 0
     assert isinstance(profiles[0], dict)
@@ -149,33 +153,37 @@ def test_list_include_policies(cached_profile):
 
 
 def test_disable_mfa(cached_profile, cached_tag, cached_profile_policy):
-    profile_policy = britive.profiles.policies.build(
+    profile_policy = britive.application_management.profiles.policies.build(
         name=cached_profile['papId'],
         description=cached_tag['name'],
         active=False,
         stepup_auth=False,
         always_prompt_stepup_auth=False,
     )
-    response = britive.profiles.policies.update(
+    response = britive.application_management.profiles.policies.update(
         profile_id=cached_profile['papId'], policy_id=cached_profile_policy['id'], policy=profile_policy
     )
-    response = britive.profiles.policies.get(profile_id=cached_profile['papId'], policy_id=cached_profile_policy['id'])
+    response = britive.application_management.profiles.policies.get(
+        profile_id=cached_profile['papId'], policy_id=cached_profile_policy['id']
+    )
     assert isinstance(json.loads(response.get('condition')), dict)
     assert json.loads(response.get('condition')).get('stepUpCondition', '') == ''
 
 
 def test_enable_mfa(cached_profile, cached_tag, cached_profile_policy):
-    profile_policy = britive.profiles.policies.build(
+    profile_policy = britive.application_management.profiles.policies.build(
         name=cached_profile['papId'],
         description=cached_tag['name'],
         active=False,
         stepup_auth=True,
         always_prompt_stepup_auth=False,
     )
-    response = britive.profiles.policies.update(
+    response = britive.application_management.profiles.policies.update(
         profile_id=cached_profile['papId'], policy_id=cached_profile_policy['id'], policy=profile_policy
     )
-    response = britive.profiles.policies.get(profile_id=cached_profile['papId'], policy_id=cached_profile_policy['id'])
+    response = britive.application_management.profiles.policies.get(
+        profile_id=cached_profile['papId'], policy_id=cached_profile_policy['id']
+    )
     assert isinstance(json.loads(response.get('condition')), dict)
     assert json.loads(response.get('condition')).get('stepUpCondition').get('factor') == 'TOTP'
 
@@ -188,7 +196,7 @@ def test_policies_create_with_approval_single_notification_medium(cached_profile
 def test_policies_create_with_approval_multiple_notification_medium(
     cached_profile, cached_service_identity, cached_user
 ):
-    policy = britive.profiles.policies.build(
+    policy = britive.application_management.profiles.policies.build(
         name=f"{cached_profile['papId']}-2",
         description='',
         service_identities=[cached_service_identity['username']],
@@ -199,19 +207,21 @@ def test_policies_create_with_approval_multiple_notification_medium(
 
 
 def test_policies_list(cached_profile):
-    policies = britive.profiles.policies.list(profile_id=cached_profile['papId'])
+    policies = britive.application_management.profiles.policies.list(profile_id=cached_profile['papId'])
     assert isinstance(policies, list)
 
 
 def test_policies_get(cached_profile, cached_profile_policy):
-    policy = britive.profiles.policies.get(profile_id=cached_profile['papId'], policy_id=cached_profile_policy['id'])
+    policy = britive.application_management.profiles.policies.get(
+        profile_id=cached_profile['papId'], policy_id=cached_profile_policy['id']
+    )
     assert isinstance(policy, dict)
 
 
 def test_policies_condition_created_as_json_get_formatted_json(
     cached_profile, cached_profile_policy_condition_as_json_str
 ):
-    policy = britive.profiles.policies.get(
+    policy = britive.application_management.profiles.policies.get(
         profile_id=cached_profile['papId'],
         policy_id=cached_profile_policy_condition_as_json_str['id'],
         condition_as_dict=False,
@@ -222,7 +232,7 @@ def test_policies_condition_created_as_json_get_formatted_json(
 def test_policies_condition_created_as_json_get_formatted_dict(
     cached_profile, cached_profile_policy_condition_as_json_str
 ):
-    policy = britive.profiles.policies.get(
+    policy = britive.application_management.profiles.policies.get(
         profile_id=cached_profile['papId'],
         policy_id=cached_profile_policy_condition_as_json_str['id'],
         condition_as_dict=True,
@@ -231,7 +241,7 @@ def test_policies_condition_created_as_json_get_formatted_dict(
 
 
 def test_policies_condition_created_as_dict_get_formatted_json(cached_profile, cached_profile_policy_condition_as_dict):
-    policy = britive.profiles.policies.get(
+    policy = britive.application_management.profiles.policies.get(
         profile_id=cached_profile['papId'],
         policy_id=cached_profile_policy_condition_as_dict['id'],
         condition_as_dict=False,
@@ -240,7 +250,7 @@ def test_policies_condition_created_as_dict_get_formatted_json(cached_profile, c
 
 
 def test_policies_condition_created_as_dict_get_formatted_dict(cached_profile, cached_profile_policy_condition_as_dict):
-    policy = britive.profiles.policies.get(
+    policy = britive.application_management.profiles.policies.get(
         profile_id=cached_profile['papId'],
         policy_id=cached_profile_policy_condition_as_dict['id'],
         condition_as_dict=True,
@@ -251,7 +261,7 @@ def test_policies_condition_created_as_dict_get_formatted_dict(cached_profile, c
 def test_policies_update(cached_profile, cached_profile_policy):
     policy = {'members': {'tags': [{'id': tag['id']} for tag in cached_profile_policy['members']['tags']]}}
     assert (
-        britive.profiles.policies.update(
+        britive.application_management.profiles.policies.update(
             profile_id=cached_profile['papId'], policy_id=cached_profile_policy['id'], policy=policy
         )
         is None
@@ -261,7 +271,9 @@ def test_policies_update(cached_profile, cached_profile_policy):
 def test_policies_delete(cached_profile, cached_profile_policy):
     try:
         assert (
-            britive.profiles.policies.delete(profile_id=cached_profile['papId'], policy_id=cached_profile_policy['id'])
+            britive.application_management.profiles.policies.delete(
+                profile_id=cached_profile['papId'], policy_id=cached_profile_policy['id']
+            )
             is None
         )
     finally:
@@ -270,13 +282,13 @@ def test_policies_delete(cached_profile, cached_profile_policy):
 
 @pytest.mark.skipif(constraints, reason=constraints_skip)
 def test_constraints_list_supported_types(cached_gcp_profile_big_query, cached_gcp_profile_storage):
-    response = britive.profiles.permissions.constraints.list_supported_types(
+    response = britive.application_management.profiles.permissions.constraints.list_supported_types(
         profile_id=cached_gcp_profile_big_query['papId'], permission_name='BigQuery Admin', permission_type='role'
     )
     assert 'bigquery.datasets' in response
     assert 'bigquery.tables' in response
 
-    response = britive.profiles.permissions.constraints.list_supported_types(
+    response = britive.application_management.profiles.permissions.constraints.list_supported_types(
         profile_id=cached_gcp_profile_storage['papId'], permission_name='Storage Admin', permission_type='role'
     )
 
@@ -286,7 +298,7 @@ def test_constraints_list_supported_types(cached_gcp_profile_big_query, cached_g
 
 @pytest.mark.skipif(constraints, reason=constraints_skip)
 def test_constraints_get_before_add(cached_gcp_profile_big_query, cached_gcp_profile_storage):
-    response = britive.profiles.permissions.constraints.get(
+    response = britive.application_management.profiles.permissions.constraints.get(
         profile_id=cached_gcp_profile_big_query['papId'],
         permission_name='BigQuery Admin',
         permission_type='role',
@@ -295,7 +307,7 @@ def test_constraints_get_before_add(cached_gcp_profile_big_query, cached_gcp_pro
 
     assert response is None
 
-    response = britive.profiles.permissions.constraints.get(
+    response = britive.application_management.profiles.permissions.constraints.get(
         profile_id=cached_gcp_profile_big_query['papId'],
         permission_name='BigQuery Admin',
         permission_type='role',
@@ -304,7 +316,7 @@ def test_constraints_get_before_add(cached_gcp_profile_big_query, cached_gcp_pro
 
     assert response is None
 
-    response = britive.profiles.permissions.constraints.get(
+    response = britive.application_management.profiles.permissions.constraints.get(
         profile_id=cached_gcp_profile_storage['papId'],
         permission_name='Storage Admin',
         permission_type='role',
@@ -321,7 +333,7 @@ def test_constraints_lint_condition(cached_gcp_profile_storage):
         "resource.type != 'storage.googleapis.com/Object') || "
         "resource.name.startsWith('projects/_/buckets/my-first-project-demo-bucket-1')"
     )
-    response = britive.profiles.permissions.constraints.lint_condition(
+    response = britive.application_management.profiles.permissions.constraints.lint_condition(
         profile_id=cached_gcp_profile_storage['papId'],
         permission_name='Storage Admin',
         permission_type='role',
@@ -334,7 +346,7 @@ def test_constraints_lint_condition(cached_gcp_profile_storage):
 
 @pytest.mark.skipif(constraints, reason=constraints_skip)
 def test_constraints_add_big_query(cached_gcp_profile_big_query):
-    response = britive.profiles.permissions.constraints.add(
+    response = britive.application_management.profiles.permissions.constraints.add(
         profile_id=cached_gcp_profile_big_query['papId'],
         permission_name='BigQuery Admin',
         permission_type='role',
@@ -345,7 +357,7 @@ def test_constraints_add_big_query(cached_gcp_profile_big_query):
     assert response is None
 
     try:
-        britive.profiles.permissions.constraints.add(
+        britive.application_management.profiles.permissions.constraints.add(
             profile_id=cached_gcp_profile_big_query['papId'],
             permission_name='BigQuery Admin',
             permission_type='role',
@@ -366,7 +378,7 @@ def test_constraints_add_storage(cached_gcp_profile_storage):
 
     constraint = {'title': 'test', 'description': 'test', 'expression': expression}
 
-    response = britive.profiles.permissions.constraints.add(
+    response = britive.application_management.profiles.permissions.constraints.add(
         profile_id=cached_gcp_profile_storage['papId'],
         permission_name='Storage Admin',
         permission_type='role',
@@ -377,7 +389,7 @@ def test_constraints_add_storage(cached_gcp_profile_storage):
     assert response is None
 
     try:
-        britive.profiles.permissions.constraints.add(
+        britive.application_management.profiles.permissions.constraints.add(
             profile_id=cached_gcp_profile_storage['papId'],
             permission_name='Storage Admin',
             permission_type='role',
@@ -391,7 +403,7 @@ def test_constraints_add_storage(cached_gcp_profile_storage):
 @pytest.mark.skipif(constraints, reason=constraints_skip)
 def test_constraints_remove_big_query(cached_gcp_profile_big_query):
     try:
-        response = britive.profiles.permissions.constraints.remove(
+        response = britive.application_management.profiles.permissions.constraints.remove(
             profile_id=cached_gcp_profile_big_query['papId'],
             permission_name='BigQuery Admin',
             permission_type='role',
@@ -401,7 +413,7 @@ def test_constraints_remove_big_query(cached_gcp_profile_big_query):
 
         assert response is None
     finally:
-        britive.profiles.delete(
+        britive.application_management.profiles.delete(
             application_id=os.getenv('BRITIVE_GCP_TEST_APP_ID'), profile_id=cached_gcp_profile_big_query['papId']
         )
         cleanup('gcp-profile-bq')
@@ -410,7 +422,7 @@ def test_constraints_remove_big_query(cached_gcp_profile_big_query):
 @pytest.mark.skipif(constraints, reason=constraints_skip)
 def test_constraints_remove_storage(cached_gcp_profile_storage):
     try:
-        response = britive.profiles.permissions.constraints.remove(
+        response = britive.application_management.profiles.permissions.constraints.remove(
             profile_id=cached_gcp_profile_storage['papId'],
             permission_name='Storage Admin',
             permission_type='role',
@@ -420,7 +432,7 @@ def test_constraints_remove_storage(cached_gcp_profile_storage):
 
         assert response is None
     finally:
-        britive.profiles.delete(
+        britive.application_management.profiles.delete(
             application_id=os.getenv('BRITIVE_GCP_TEST_APP_ID'), profile_id=cached_gcp_profile_storage['papId']
         )
         cleanup('gcp-profile-storage')

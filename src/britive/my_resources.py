@@ -145,7 +145,7 @@ class MyResources:
         # if not check it out
         if not transaction:
             if otp:
-                response = self.britive.step_up.authenticate(otp=otp)
+                response = self.britive.security.step_up_auth.authenticate(otp=otp)
                 if response.get('result') == 'FAILED':
                     raise StepUpAuthFailed
 

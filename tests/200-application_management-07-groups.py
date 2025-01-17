@@ -3,7 +3,7 @@ from .cache import *  # will also import some globals like `britive`
 
 @pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_list(cached_application, cached_environment):
-    groups = britive.accounts.list(
+    groups = britive.application_management.accounts.list(
         application_id=cached_application['appContainerId'], environment_id=cached_environment['id']
     )
     assert isinstance(groups, list)
@@ -13,7 +13,7 @@ def test_list(cached_application, cached_environment):
 
 @pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_permissions(cached_application, cached_environment, cached_group):
-    permissions = britive.groups.permissions(
+    permissions = britive.application_management.groups.permissions(
         group_id=cached_group['appPermissionId'],
         application_id=cached_application['appContainerId'],
         environment_id=cached_environment['id'],
@@ -24,7 +24,7 @@ def test_permissions(cached_application, cached_environment, cached_group):
 
 @pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_accounts(cached_application, cached_environment, cached_group):
-    groups = britive.groups.accounts(
+    groups = britive.application_management.groups.accounts(
         group_id=cached_group['appPermissionId'],
         application_id=cached_application['appContainerId'],
         environment_id=cached_environment['id'],

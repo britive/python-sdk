@@ -137,7 +137,7 @@ class Applications:
         the accounts in the org and their place in the OU structure.
 
         Scans are asynchronous operations. The response will include a `taskId` which can be used to make calls
-        to `britive.scans.status()` to obtain the current status of the scan.
+        to `britive.application_management.scans.status()` to obtain the current status of the scan.
 
         Note that scans can also be initiated from the Scans class. The same type of scan will be performed no matter
         where it is initiated.
@@ -146,7 +146,7 @@ class Applications:
         :return: Details of the scan that was initiated.
         """
 
-        return self.britive.scans.scan(application_id=application_id)
+        return self.britive.application_management.scans.scan(application_id=application_id)
 
     def delete(self, application_id: str) -> None:
         """

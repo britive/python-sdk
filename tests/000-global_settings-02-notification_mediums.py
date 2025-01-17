@@ -7,13 +7,13 @@ def test_create(cached_notification_medium):
 
 
 def test_list():
-    response = britive.notification_mediums.list()
+    response = britive.global_settings.notification_mediums.list()
     assert isinstance(response, list)
     assert isinstance(response[0], dict)
 
 
 def test_get(cached_notification_medium):
-    response = britive.notification_mediums.get(cached_notification_medium['id'])
+    response = britive.global_settings.notification_mediums.get(cached_notification_medium['id'])
     assert isinstance(response, dict)
     assert response['name'] == cached_notification_medium['name']
 
@@ -21,6 +21,6 @@ def test_get(cached_notification_medium):
 def test_update(cached_notification_medium):
     r = str(random.randint(0, 1000000))
     new_name = f'pytest-nm-{r}'
-    britive.notification_mediums.update(cached_notification_medium['id'], parameters={'name': new_name})
-    response = britive.notification_mediums.get(cached_notification_medium['id'])
+    britive.global_settings.notification_mediums.update(cached_notification_medium['id'], parameters={'name': new_name})
+    response = britive.global_settings.notification_mediums.get(cached_notification_medium['id'])
     assert response['name'] == new_name

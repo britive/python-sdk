@@ -137,7 +137,7 @@ def test_system_level_policy_condition_as_dictionary_delete(cached_system_level_
 # 200-application_management
 def test_access_builder_associations_delete(cached_application, cached_access_builder_associations):
     try:
-        response = britive.access_builder.associations.delete(
+        response = britive.application_management.access_builder.associations.delete(
             application_id=cached_application['appContainerId'],
             association_id=cached_access_builder_associations['associationApproversSummary'][0]['id'],
         )
@@ -148,7 +148,7 @@ def test_access_builder_associations_delete(cached_application, cached_access_bu
 
 def test_access_builder_approvers_groups_delete(cached_application, cached_access_builder_approvers_groups):
     try:
-        response = britive.access_builder.approvers_groups.delete(
+        response = britive.application_management.access_builder.approvers_groups.delete(
             application_id=cached_application['appContainerId'],
             group_id=cached_access_builder_approvers_groups.get('id'),
         )
@@ -159,7 +159,7 @@ def test_access_builder_approvers_groups_delete(cached_application, cached_acces
 
 def test_add_notification_to_access_builder_delete(cached_application, cached_add_notification_to_access_builder):
     try:
-        response = britive.access_builder.notifications.update(
+        response = britive.application_management.access_builder.notifications.update(
             cached_application['appContainerId'], notification_mediums=[]
         )
         assert response is None
@@ -171,7 +171,7 @@ def test_add_notification_to_access_builder_delete(cached_application, cached_ad
 
 def test_profile_approval_policy_delete(cached_profile, cached_profile_approval_policy):
     try:
-        response = britive.profiles.policies.delete(
+        response = britive.application_management.profiles.policies.delete(
             profile_id=cached_profile['papId'], policy_id=cached_profile_approval_policy['id']
         )
         assert response is None
@@ -181,7 +181,7 @@ def test_profile_approval_policy_delete(cached_profile, cached_profile_approval_
 
 def test_profile_policy_condition_as_dict_delete(cached_profile, cached_profile_policy_condition_as_dict):
     try:
-        response = britive.profiles.policies.delete(
+        response = britive.application_management.profiles.policies.delete(
             profile_id=cached_profile['papId'], policy_id=cached_profile_policy_condition_as_dict['id']
         )
         assert response is None
@@ -191,7 +191,7 @@ def test_profile_policy_condition_as_dict_delete(cached_profile, cached_profile_
 
 def test_profile_policy_condition_as_json_str_delete(cached_profile, cached_profile_policy_condition_as_json_str):
     try:
-        response = britive.profiles.policies.delete(
+        response = britive.application_management.profiles.policies.delete(
             profile_id=cached_profile['papId'], policy_id=cached_profile_policy_condition_as_json_str['id']
         )
         assert response is None
@@ -201,7 +201,7 @@ def test_profile_policy_condition_as_json_str_delete(cached_profile, cached_prof
 
 def test_profile_policy_delete(cached_profile, cached_profile_policy):
     try:
-        response = britive.profiles.policies.delete(
+        response = britive.application_management.profiles.policies.delete(
             profile_id=cached_profile['papId'], policy_id=cached_profile_policy['id']
         )
         assert response is None
@@ -211,11 +211,11 @@ def test_profile_policy_delete(cached_profile, cached_profile_policy):
 
 def test_profile_delete(cached_profile):
     try:
-        response = britive.profiles.delete(
+        response = britive.application_management.profiles.delete(
             application_id=cached_profile['appContainerId'], profile_id=cached_profile['papId']
         )
 
-        profiles = britive.profiles.list(application_id=cached_profile['appContainerId'])
+        profiles = britive.application_management.profiles.list(application_id=cached_profile['appContainerId'])
 
         assert response is None
         assert cached_profile['papId'] not in [p['papId'] for p in profiles]
@@ -227,7 +227,7 @@ def test_profile_delete(cached_profile):
 
 def test_environment_delete(cached_application, cached_environment):
     try:
-        response = britive.environments.delete(
+        response = britive.application_management.environments.delete(
             application_id=cached_application['appContainerId'], environment_id=cached_environment['id']
         )
         assert response is None
@@ -238,18 +238,22 @@ def test_environment_delete(cached_application, cached_environment):
 
 def test_environment_group_delete(cached_application, cached_environment_group):
     try:
-        groups = britive.environment_groups.list(application_id=cached_application['appContainerId'])
+        groups = britive.application_management.environment_groups.list(
+            application_id=cached_application['appContainerId']
+        )
         num_root_groups = 0
         for group in groups:
             if group['parentId'] != '':  # cannot delete root groups - error A-0003 is thrown when attempting
-                response = britive.environment_groups.delete(
+                response = britive.application_management.environment_groups.delete(
                     application_id=cached_application['appContainerId'],
                     environment_group_id=cached_environment_group['id'],
                 )
                 assert response is None
             else:
                 num_root_groups += 1
-        groups = britive.environment_groups.list(application_id=cached_application['appContainerId'])
+        groups = britive.application_management.environment_groups.list(
+            application_id=cached_application['appContainerId']
+        )
         assert isinstance(groups, list)
         assert len(groups) == num_root_groups  # the root group will remain
         assert isinstance(groups[0], dict)
@@ -261,7 +265,9 @@ def test_application_delete(cached_application):
     try:
         while True:
             try:
-                response = britive.applications.delete(application_id=cached_application['appContainerId'])
+                response = britive.application_management.applications.delete(
+                    application_id=cached_application['appContainerId']
+                )
                 break
             except exceptions.InvalidRequest:
                 sleep(5)
@@ -338,7 +344,9 @@ def test_vault_delete(cached_vault):
 # 100-identity_management
 def test_workload_identity_provider_aws_delete(cached_workload_identity_provider_aws):
     try:
-        response = britive.workload.identity_providers.delete(cached_workload_identity_provider_aws['id'])
+        response = britive.identity_management.workload.identity_providers.delete(
+            cached_workload_identity_provider_aws['id']
+        )
         assert response is None
     finally:
         cleanup('workload-identity-provider-aws')
@@ -346,7 +354,9 @@ def test_workload_identity_provider_aws_delete(cached_workload_identity_provider
 
 def test_workload_identity_provider_oidc_delete(cached_workload_identity_provider_oidc):
     try:
-        response = britive.workload.identity_providers.delete(cached_workload_identity_provider_oidc['id'])
+        response = britive.identity_management.workload.identity_providers.delete(
+            cached_workload_identity_provider_oidc['id']
+        )
         assert response is None
     finally:
         cleanup('workload-identity-provider-oidc')
@@ -355,9 +365,9 @@ def test_workload_identity_provider_oidc_delete(cached_workload_identity_provide
 def test_service_identities_delete(cached_service_identity, cached_service_identity_federated):
     try:
         for si in [cached_service_identity, cached_service_identity_federated]:
-            response = britive.service_identities.delete(service_identity_id=si['userId'])
+            response = britive.identity_management.service_identities.delete(service_identity_id=si['userId'])
             assert response is None
-            assert not britive.service_identities.get_by_name(name=si['name'])
+            assert not britive.identity_management.service_identities.get_by_name(name=si['name'])
     except exceptions.NotFound:
         pass
     finally:
@@ -369,7 +379,7 @@ def test_service_identities_delete(cached_service_identity, cached_service_ident
 
 def test_tags_delete(cached_tag):
     try:
-        response = britive.tags.delete(cached_tag['userTagId'])
+        response = britive.identity_management.tags.delete(cached_tag['userTagId'])
         assert response is None
     finally:
         cleanup('tag')
@@ -377,9 +387,9 @@ def test_tags_delete(cached_tag):
 
 def test_user_delete(cached_user):
     try:
-        response = britive.users.delete(user_id=cached_user['userId'])
+        response = britive.identity_management.users.delete(user_id=cached_user['userId'])
         assert response is None
-        users = britive.users.get_by_name(name=cached_user['lastName'])
+        users = britive.identity_management.users.get_by_name(name=cached_user['lastName'])
         assert isinstance(users, list)
         assert len(users) == 0
     finally:
@@ -389,7 +399,7 @@ def test_user_delete(cached_user):
 # 000-global_settings
 def test_notification_medium_delete(cached_notification_medium):
     try:
-        response = britive.notification_mediums.delete(cached_notification_medium['id'])
+        response = britive.global_settings.notification_mediums.delete(cached_notification_medium['id'])
         assert response is None
     finally:
         cleanup('notification-medium')
@@ -397,7 +407,7 @@ def test_notification_medium_delete(cached_notification_medium):
 
 def test_notification_medium_webhook_delete(cached_notification_medium_webhook):
     try:
-        response = britive.notification_mediums.delete(cached_notification_medium_webhook['id'])
+        response = britive.global_settings.notification_mediums.delete(cached_notification_medium_webhook['id'])
         assert response is None
     finally:
         cleanup('notification-medium-webhook')
@@ -405,7 +415,7 @@ def test_notification_medium_webhook_delete(cached_notification_medium_webhook):
 
 def test_identity_attribute_delete(cached_identity_attribute):
     try:
-        response = britive.identity_attributes.delete(attribute_id=cached_identity_attribute['id'])
+        response = britive.identity_management.identity_attributes.delete(attribute_id=cached_identity_attribute['id'])
         assert response is None
     finally:
         cleanup('identity-attribute')

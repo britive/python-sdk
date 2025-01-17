@@ -258,12 +258,12 @@ class ScimAttributes:
             Each key is explained below in further detail.
 
             - scimAttributeName: The name of the SCIM attribute returned by
-                `britive.identity_providers.scim_attributes.list()`.
+                `britive.identity_management.identity_providers.scim_attributes.list()`.
             - builtIn: True if the identity attribute is from the built-in list, False if user generated.
             - attributeId: The ID of the identity attribute to be mapped with the identity provider. This can be
-                obtained by calling `britive.identity_attributes.list()`.
+                obtained by calling `britive.identity_management.identity_attributes.list()`.
             - attributeName: The name of the identity attribute to be mapped with the identity provider. This can be
-                obtained by calling `britive.identity_attributes.list()`.
+                obtained by calling `britive.identity_management.identity_attributes.list()`.
             - op: The operation to perform. Valid values are `add` and `remove`.
         :return: None
         """
