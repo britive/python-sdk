@@ -56,7 +56,7 @@ class Vaults:
             channels = []
 
         if default_notification_medium_id == '':
-            for medium in self.britive.notification_mediums.list():
+            for medium in self.britive.global_settings.notification_mediums.list():
                 if medium['name'] == 'Email':
                     default_notification_medium_id = medium['id']
         params = {

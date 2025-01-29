@@ -485,8 +485,8 @@ class ProfileSessionAttributes:
         The value will be sourced from the identity attribute specified.
 
         :param profile_id: The ID of the profile.
-        :param identity_attribute_id: The ID of the identity attribute.  Call `britive.identity_attributes.list()`
-            for details on which attributes can be provided.
+        :param identity_attribute_id: The ID of the identity attribute.
+            Call `britive.identity_management.identity_attributes.list()` for which attributes can be provided.
         :param tag_name: The name of the session tag to include in the AssumeRoleWithSAML call. The value will be
             dynamically determined based on the value of the specified identity attribute.
         :param transitive: Set to True to mark the session tag as transitive. Review AWS documentation on why you
@@ -538,8 +538,8 @@ class ProfileSessionAttributes:
 
         :param profile_id: The ID of the profile.
         :param attribute_id: The ID of the session attribute to update.
-        :param identity_attribute_id: The ID of the identity attribute.  Call `britive.identity_attributes.list()`
-            for details on which attributes can be provided.
+        :param identity_attribute_id: The ID of the identity attribute.
+            Call `britive.identity_management.identity_attributes.list()` for which attributes can be provided.
         :param tag_name: The name of the session tag to include in the AssumeRoleWithSAML call. The value will be
             dynamically determined based on the value of the specified identity attribute.
         :param transitive: Set to True to mark the session tag as transitive. Review AWS documentation on why you
@@ -699,9 +699,6 @@ class ProfilePolicies:
         """
         List all policies associated with the provided profile.
 
-        Only applicable to tenants using version 2 of profiles. If the tenant is on version 1 of profiles then use
-        `britive.profiles.tags.*` and `britive.profiles.identities.*` instead.
-
         :param profile_id: The ID of the profile.
         :return: List of policies.
         """
@@ -711,9 +708,6 @@ class ProfilePolicies:
     def get(self, profile_id: str, policy_id: str, condition_as_dict: bool = False) -> dict:
         """
         Retrieve details about a specific policy which is associated with the provided profile.
-
-        Only applicable to tenants using version 2 of profiles. If the tenant is on version 1 of profiles then use
-        `britive.profiles.tags.*` and `britive.profiles.identities.*` instead.
 
         :param profile_id: The ID of the profile.
         :param policy_id: The ID of the policy.
@@ -741,9 +735,6 @@ class ProfilePolicies:
         """
         Create a policy associated with the provided profile.
 
-        Only applicable to tenants using version 2 of profiles. If the tenant is on version 1 of profiles then use
-        `britive.profiles.tags.*` and `britive.profiles.identities.*` instead.
-
         :param profile_id: The ID of the profile.
         :param policy: The policy contents to create.
         :return: Details of the newly created policy.
@@ -754,9 +745,6 @@ class ProfilePolicies:
     def update(self, profile_id: str, policy_id: str, policy: dict) -> dict:
         """
         Update the contents of the provided policy associated with the provided profile.
-
-        Only applicable to tenants using version 2 of profiles. If the tenant is on version 1 of profiles then use
-        `britive.profiles.tags.*` and `britive.profiles.identities.*` instead.
 
         :param profile_id: The ID of the profile.
         :param policy_id: The ID of the policy.
@@ -769,9 +757,6 @@ class ProfilePolicies:
     def delete(self, profile_id: str, policy_id: str) -> None:
         """
         Delete the provided policy associated with the provided profile.
-
-        Only applicable to tenants using version 2 of profiles. If the tenant is on version 1 of profiles then use
-        `britive.profiles.tags.*` and `britive.profiles.identities.*` instead.
 
         :param profile_id: The ID of the profile.
         :param policy_id: The ID of the policy.

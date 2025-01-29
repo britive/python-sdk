@@ -9,6 +9,7 @@ def test_whoami():
     print(json.dumps(me, indent=2, default=str))
 
 
+@pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_list_profiles():
     profiles = britive.my_access.list_profiles()
     assert isinstance(profiles, list)

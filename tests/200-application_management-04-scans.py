@@ -13,7 +13,7 @@ def test_scan(cached_scan):
 @pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_status(cached_scan):
     while True:
-        status = britive.scans.status(task_id=cached_scan['taskId'])
+        status = britive.application_management.scans.status(task_id=cached_scan['taskId'])
         if status['status'] == 'Success':
             break
         if status['status'] == 'Error':
@@ -24,14 +24,14 @@ def test_status(cached_scan):
 
 @pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_history(cached_application):
-    response = britive.scans.history(application_id=cached_application['appContainerId'])
+    response = britive.application_management.scans.history(application_id=cached_application['appContainerId'])
     assert isinstance(response, list)
     assert len(response) > 0
 
 
 @pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_diff_accounts(cached_application, cached_environment):
-    response = britive.scans.diff(
+    response = britive.application_management.scans.diff(
         resource='accounts',
         application_id=cached_application['appContainerId'],
         environment_id=cached_environment['id'],
@@ -42,7 +42,7 @@ def test_diff_accounts(cached_application, cached_environment):
 
 @pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_diff_groups(cached_application, cached_environment):
-    response = britive.scans.diff(
+    response = britive.application_management.scans.diff(
         resource='groups', application_id=cached_application['appContainerId'], environment_id=cached_environment['id']
     )
     assert isinstance(response, list)
@@ -51,7 +51,7 @@ def test_diff_groups(cached_application, cached_environment):
 
 @pytest.mark.skipif(scan_skip, reason=scan_skip_message)
 def test_diff_permissions(cached_application, cached_environment):
-    response = britive.scans.diff(
+    response = britive.application_management.scans.diff(
         resource='permissions',
         application_id=cached_application['appContainerId'],
         environment_id=cached_environment['id'],

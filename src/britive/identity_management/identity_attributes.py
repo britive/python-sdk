@@ -99,7 +99,9 @@ class CustomAttributes:
 
     def _build_list(self, operation: str, custom_attributes: dict) -> list:
         # first get list of existing custom identity attributes and build some helpers
-        existing_attrs = [attr for attr in self.britive.identity_attributes.list() if not attr['builtIn']]
+        existing_attrs = [
+            attr for attr in self.britive.identity_management.identity_attributes.list() if not attr['builtIn']
+        ]
         existing_attr_ids = [attr['id'] for attr in existing_attrs]
         attrs_by_name = {attr['name']: attr['id'] for attr in existing_attrs}
 

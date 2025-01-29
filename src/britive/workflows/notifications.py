@@ -107,15 +107,16 @@ class Notifications:
         For all optional parameters omitting the parameter will leave the value unchanged.
 
         :param notification_id: The ID of the notification.
-        :param rules: List of rules to apply. Obtain rule options from `britive.notifications.available_rules()` and
-            use results from that API call to populate this list. Maximum of 3 rules are allowed.
+        :param rules: List of rules to apply.
+            Obtain rule options from `britive.workflows.notifications.available_rules()` and use results from that API
+            call to populate this list. Maximum of 3 rules are allowed.
         :param users: List of user ids to apply. This is the list of users who will be notified if any of the rules are
             triggered. An empty list means that no users will be notified.
         :param user_tags: List of user tag ids to apply. This is the list of user tags who will be notified if any of
             the rules are triggered. An empty list means that no user tags will be notified.
-        :param applications: List of applications to which this notification applies. Obtain applications options from
-            `britive.notifications.available_applications()` and use results from that API call to populate this list.
-            An empty list indicates the event applies to all applications.
+        :param applications: List of applications to which this notification applies.
+            Obtain applications options from `britive.workflows.notifications.available_applications()` and use results
+            from that API call to populate this list. An empty list indicates the event applies to all applications.
         :param send_no_changes: Boolean indicating whether to send notification regardless of whether any changes have
             occurred or not.
         :param notification_medium_id: The ID of the notification medium to use for this notification.
@@ -130,10 +131,10 @@ class Notifications:
         data = self.get(notification_id=notification_id)
 
         members = []
-        for user in self.britive.users.minimized_user_details(user_ids=users):
+        for user in self.britive.identity_management.users.minimized_user_details(user_ids=users):
             members.append({'id': user['id'], 'memberType': 'User', 'name': user['username'], 'condition': None})
 
-        for tag in self.britive.tags.minimized_tag_details(tag_ids=user_tags):
+        for tag in self.britive.identity_management.tags.minimized_tag_details(tag_ids=user_tags):
             members.append({'id': tag['userTagId'], 'memberType': 'Tag', 'name': tag['name'], 'condition': None})
 
         # set the possible parameters

@@ -22,7 +22,7 @@ class Environments:
             'type': 'environment',
             'description': description,
             'parentGroupId': parent_group_id
-            or self.britive.environment_groups.get_or_create_root(application_id=application_id),
+            or self.britive.application_management.environment_groups.get_or_create_root(application_id=application_id),
         }
 
         return self.britive.post(f'{self.base_url}/{application_id}/root-environment-group/environments', json=data)
@@ -91,7 +91,7 @@ class Environments:
         For all other application types the application will be scanned and not the underlying environment(s).
 
         Scans are asynchronous operations. The response will include a `taskId` which can be used to make calls
-        to `britive.scans.status()` to obtain the current status of the scan.
+        to `britive.application_management.scans.status()` to obtain the current status of the scan.
 
         Note that scans can also be initiated from the Scans class. The same type of scan will be performed no matter
         where it is initiated.
@@ -101,7 +101,9 @@ class Environments:
         :return: Details of the scan that was initiated.
         """
 
-        return self.britive.scans.scan(application_id=application_id, environment_id=environment_id)
+        return self.britive.application_management.scans.scan(
+            application_id=application_id, environment_id=environment_id
+        )
 
     def delete(self, application_id: str, environment_id: str) -> None:
         """

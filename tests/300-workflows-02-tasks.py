@@ -7,20 +7,22 @@ def test_create(cached_task):
 
 
 def test_list(cached_task_service):
-    tasks = britive.tasks.list(task_service_id=cached_task_service['taskServiceId'])
+    tasks = britive.workflows.tasks.list(task_service_id=cached_task_service['taskServiceId'])
     assert isinstance(tasks, list)
     assert len(tasks) == 1
     assert tasks[0]['name'] == 'test'
 
 
 def test_get(cached_task_service, cached_task):
-    task = britive.tasks.get(task_service_id=cached_task_service['taskServiceId'], task_id=cached_task['taskId'])
+    task = britive.workflows.tasks.get(
+        task_service_id=cached_task_service['taskServiceId'], task_id=cached_task['taskId']
+    )
     assert isinstance(task, dict)
     assert task['name'] == 'test'
 
 
 def test_update(cached_task_service, cached_task):
-    task = britive.tasks.update(
+    task = britive.workflows.tasks.update(
         task_service_id=cached_task_service['taskServiceId'], task_id=cached_task['taskId'], name='test2'
     )
     assert isinstance(task, dict)
@@ -28,8 +30,10 @@ def test_update(cached_task_service, cached_task):
 
 
 def test_delete(cached_task_service, cached_task):
-    task = britive.tasks.delete(task_service_id=cached_task_service['taskServiceId'], task_id=cached_task['taskId'])
+    task = britive.workflows.tasks.delete(
+        task_service_id=cached_task_service['taskServiceId'], task_id=cached_task['taskId']
+    )
     assert task is None
-    tasks = britive.tasks.list(task_service_id=cached_task_service['taskServiceId'])
+    tasks = britive.workflows.tasks.list(task_service_id=cached_task_service['taskServiceId'])
     assert len(tasks) == 0
     cleanup('task')

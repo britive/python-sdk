@@ -7,7 +7,7 @@ def test_environment_create(cached_environment):
 
 def test_environment_update(cached_application, cached_environment):
     account_id = os.environ['BRITIVE_TEST_ENV_ACCOUNT_ID']
-    response = britive.environments.update(
+    response = britive.application_management.environments.update(
         application_id=cached_application['appContainerId'],
         environment_id=cached_environment['id'],
         accountId=account_id,
@@ -24,14 +24,14 @@ def test_environment_update(cached_application, cached_environment):
 
 
 def test_environment_list_one(cached_application):
-    envs = britive.environments.list(application_id=cached_application['appContainerId'])
+    envs = britive.application_management.environments.list(application_id=cached_application['appContainerId'])
     assert isinstance(envs, list)
     assert len(envs) == 1
     assert isinstance(envs[0], dict)
 
 
 def test_environment_test(cached_application, cached_environment):
-    response = britive.environments.test(
+    response = britive.application_management.environments.test(
         application_id=cached_application['appContainerId'], environment_id=cached_environment['id']
     )
     assert isinstance(response, dict)
@@ -39,7 +39,7 @@ def test_environment_test(cached_application, cached_environment):
 
 
 def test_environment_get(cached_application, cached_environment):
-    env = britive.environments.get(
+    env = britive.application_management.environments.get(
         application_id=cached_application['appContainerId'], environment_id=cached_environment['id']
     )
     assert isinstance(env, dict)

@@ -7,7 +7,7 @@ class Tasks:
         """
         Return a list of tasks for the given `task_service_id`.
 
-        Make a call to `britive.task_services.get()` to obtain the appropriate `task_service_id`.
+        Make a call to `britive.workflows.task_services.get()` to obtain the appropriate `task_service_id`.
 
         :param task_service_id: The ID of the task service.
         :return: List of tasks.
@@ -19,7 +19,7 @@ class Tasks:
         """
         Return details of a task.
 
-        Make a call to `britive.task_services.get()` to obtain the appropriate `task_service_id`.
+        Make a call to `britive.workflows.task_services.get()` to obtain the appropriate `task_service_id`.
 
         :param task_service_id: The ID of the task service.
         :param task_id: The ID of the task.
@@ -40,7 +40,7 @@ class Tasks:
         """
         Create a new task.
 
-        Make a call to `britive.task_services.get()` to obtain the appropriate `task_service_id`.
+        Make a call to `britive.workflows.task_services.get()` to obtain the appropriate `task_service_id`.
 
         :param task_service_id: The ID of the task service.
         :param name: The name of the task.
@@ -105,7 +105,7 @@ class Tasks:
 
         Only provide parameters that should be updated.
 
-        Make a call to `britive.task_services.get()` to obtain the appropriate `task_service_id`.
+        Make a call to `britive.workflows.task_services.get()` to obtain the appropriate `task_service_id`.
 
         :param task_service_id: The ID of the task service.
         :param task_id: The ID of the task.

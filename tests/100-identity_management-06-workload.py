@@ -4,7 +4,7 @@ from .cache import *  # will also import some globals like `britive`
 
 
 def test_identity_provider_list():
-    response = britive.workload.identity_providers.list()
+    response = britive.identity_management.workload.identity_providers.list()
     assert isinstance(response, list)
 
 
@@ -24,7 +24,7 @@ def test_identity_provider_create_oidc(cached_workload_identity_provider_oidc):
 
 
 def test_identity_provider_get(cached_workload_identity_provider_oidc):
-    response = britive.workload.identity_providers.get(
+    response = britive.identity_management.workload.identity_providers.get(
         workload_identity_provider_id=cached_workload_identity_provider_oidc['id']
     )
     assert isinstance(response, dict)
@@ -35,25 +35,25 @@ def test_identity_provider_update_aws(cached_workload_identity_provider_aws):
     # we may very well need to set the update back to what it was originally as
     # we can only have 1 aws provider, so we want to restore that provider to its
     # original state
-    existing_max_duration = britive.workload.identity_providers.get(
+    existing_max_duration = britive.identity_management.workload.identity_providers.get(
         workload_identity_provider_id=cached_workload_identity_provider_aws['id']
     )['maxDuration']
 
     # do the update
-    response = britive.workload.identity_providers.update_aws(
+    response = britive.identity_management.workload.identity_providers.update_aws(
         workload_identity_provider_id=cached_workload_identity_provider_aws['id'], max_duration=1
     )
     assert isinstance(response, dict)
     assert response['maxDuration'] == 1
 
     # restore it back
-    britive.workload.identity_providers.update_aws(
+    britive.identity_management.workload.identity_providers.update_aws(
         workload_identity_provider_id=cached_workload_identity_provider_aws['id'], max_duration=existing_max_duration
     )
 
 
 def test_identity_provider_update_oidc(cached_workload_identity_provider_oidc):
-    response = britive.workload.identity_providers.update_oidc(
+    response = britive.identity_management.workload.identity_providers.update_oidc(
         workload_identity_provider_id=cached_workload_identity_provider_oidc['id'],
         issuer_url='https://id2.fakedomain.com',
     )
@@ -62,7 +62,7 @@ def test_identity_provider_update_oidc(cached_workload_identity_provider_oidc):
 
 
 def test_generate_attribute_map(cached_identity_attribute):
-    response = britive.workload.identity_providers.generate_attribute_map(
+    response = britive.identity_management.workload.identity_providers.generate_attribute_map(
         idp_attribute_name='sub', custom_identity_attribute_id=cached_identity_attribute['id']
     )
     assert isinstance(response, dict)
@@ -71,7 +71,7 @@ def test_generate_attribute_map(cached_identity_attribute):
     assert response['idpAttr'] == 'sub'
     assert response['userAttr'] == cached_identity_attribute['id']
 
-    response = britive.workload.identity_providers.generate_attribute_map(
+    response = britive.identity_management.workload.identity_providers.generate_attribute_map(
         idp_attribute_name='sub', custom_identity_attribute_name=cached_identity_attribute['name']
     )
     assert isinstance(response, dict)
@@ -83,20 +83,22 @@ def test_generate_attribute_map(cached_identity_attribute):
 
 def test_service_identity_get_when_nothing_associated(cached_service_identity_federated):
     with pytest.raises(BritiveGenericException):
-        britive.workload.service_identities.get(service_identity_id=cached_service_identity_federated['userId'])
+        britive.identity_management.workload.service_identities.get(
+            service_identity_id=cached_service_identity_federated['userId']
+        )
 
 
 def test_service_identity_assign_and_unassign(
     cached_service_identity_federated, cached_identity_attribute, cached_workload_identity_provider_oidc
 ):
-    response = britive.workload.service_identities.assign(
+    response = britive.identity_management.workload.service_identities.assign(
         service_identity_id=cached_service_identity_federated['userId'],
         idp_id=cached_workload_identity_provider_oidc['id'],
         federated_attributes={cached_identity_attribute['id']: 'test'},
     )
     assert isinstance(response, dict)
 
-    attrs = britive.service_identities.custom_attributes.get(
+    attrs = britive.identity_management.service_identities.custom_attributes.get(
         principal_id=cached_service_identity_federated['userId'], as_dict=True
     )
 
@@ -104,13 +106,13 @@ def test_service_identity_assign_and_unassign(
     assert len(attrs) == 1
     assert attrs[cached_identity_attribute['id']] == 'test'
 
-    response = britive.workload.service_identities.unassign(
+    response = britive.identity_management.workload.service_identities.unassign(
         service_identity_id=cached_service_identity_federated['userId']
     )
 
     assert response is None
 
-    attrs = britive.service_identities.custom_attributes.get(
+    attrs = britive.identity_management.service_identities.custom_attributes.get(
         principal_id=cached_service_identity_federated['userId'], as_dict=False
     )
 
@@ -118,14 +120,14 @@ def test_service_identity_assign_and_unassign(
     assert len(attrs) == 1
     assert attrs[0]['attributeName'] is None
 
-    response = britive.workload.service_identities.assign(
+    response = britive.identity_management.workload.service_identities.assign(
         service_identity_id=cached_service_identity_federated['userId'],
         idp_id=cached_workload_identity_provider_oidc['id'],
         federated_attributes={cached_identity_attribute['name']: 'test'},
     )
     assert isinstance(response, dict)
 
-    attrs = britive.service_identities.custom_attributes.get(
+    attrs = britive.identity_management.service_identities.custom_attributes.get(
         principal_id=cached_service_identity_federated['userId'], as_dict=True
     )
 
@@ -133,13 +135,13 @@ def test_service_identity_assign_and_unassign(
     assert len(attrs) == 1
     assert attrs[cached_identity_attribute['id']] == 'test'
 
-    response = britive.workload.service_identities.unassign(
+    response = britive.identity_management.workload.service_identities.unassign(
         service_identity_id=cached_service_identity_federated['userId']
     )
 
     assert response is None
 
-    attrs = britive.service_identities.custom_attributes.get(
+    attrs = britive.identity_management.service_identities.custom_attributes.get(
         principal_id=cached_service_identity_federated['userId'], as_dict=False
     )
 
@@ -152,11 +154,11 @@ def test_identity_provider_delete(cached_workload_identity_provider_oidc, cached
     try:
         # we do not want to delete the pre-existing aws provider
         if cached_workload_identity_provider_aws['name'].startswith('python-sdk-aws'):
-            aws = britive.workload.identity_providers.delete(
+            aws = britive.identity_management.workload.identity_providers.delete(
                 workload_identity_provider_id=cached_workload_identity_provider_aws['id']
             )
             assert aws is None
-        oidc = britive.workload.identity_providers.delete(
+        oidc = britive.identity_management.workload.identity_providers.delete(
             workload_identity_provider_id=cached_workload_identity_provider_oidc['id']
         )
         assert oidc is None

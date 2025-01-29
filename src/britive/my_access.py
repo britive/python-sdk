@@ -1,4 +1,3 @@
-import os
 import time
 from typing import Any, Callable
 
@@ -17,7 +16,6 @@ from .exceptions.badrequest import (
 )
 from .exceptions.generic import BritiveGenericError, StepUpAuthenticationRequiredError
 from .helpers import HelperMethods
-from .my_approvals import MyApprovals
 from .my_requests import MyAccessRequests
 
 approval_exceptions = {
@@ -53,16 +51,6 @@ class MyAccess:
         self.request_approval_by_name = __my_requests.request_approval_by_name
         self.withdraw_approval_request = __my_requests.withdraw_approval_request
         self.withdraw_approval_request_by_name = __my_requests.withdraw_approval_request_by_name
-
-        # FUTURE_BRITIVE_SDK == 'true' will remove backwards compatibility
-        if os.getenv('FUTURE_BRITIVE_SDK', 'false').lower() != 'true':
-            # MyAccess backwards compatibility
-            self.approval_request_status = __my_requests.approval_request_status
-            # MyApprovals backwards compatibility
-            __my_approvals = MyApprovals(self.britive)
-            self.approve_request = __my_approvals.approve_request
-            self.list_approvals = __my_approvals.list
-            self.reject_request = __my_approvals.reject_request
 
     def list(self, filter_text: str = None, search_text: str = None, size: int = None) -> list:
         """
@@ -245,7 +233,7 @@ class MyAccess:
         # if not check it out
         if not transaction:
             if otp:
-                response = self.britive.step_up.authenticate(otp=otp)
+                response = self.britive.security.step_up_auth.authenticate(otp=otp)
                 if response.get('result') == 'FAILED':
                     raise StepUpAuthFailed
 

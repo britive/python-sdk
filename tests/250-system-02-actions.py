@@ -21,4 +21,4 @@ def test_list():
     consumers = {c['consumer'] for c in response2}
 
     assert len(consumers) == 1
-    assert consumers[0] == 'apps'
+    assert next(iter(consumers)) == 'apps'

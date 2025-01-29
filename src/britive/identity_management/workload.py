@@ -9,6 +9,7 @@ class Workload:
         self.service_identities = WorkloadServiceIdentities(self)
         self.scim_user = WorkloadScimUser(self)
 
+
 class WorkloadIdentityProviders:
     def __init__(self, workload) -> None:
         self.britive = workload.britive
@@ -40,7 +41,9 @@ class WorkloadIdentityProviders:
 
     def _build_attributes_map_list(self, attributes_map: dict) -> list:
         # first get list of existing custom identity attributes and build some helpers
-        existing_attrs = [attr for attr in self.britive.identity_attributes.list() if not attr['builtIn']]
+        existing_attrs = [
+            attr for attr in self.britive.identity_management.identity_attributes.list() if not attr['builtIn']
+        ]
         existing_attr_ids = [attr['id'] for attr in existing_attrs]
         attrs_by_name = {attr['name']: attr['id'] for attr in existing_attrs}
 
@@ -304,23 +307,20 @@ class WorkloadIdentityProviders:
             )
 
         if not custom_identity_attribute_id and not custom_identity_attribute_name:
-            raise ValueError(
-                'one of custom_identity_attribute_id or custom_identity_attribute_name should be provided'
-            )
+            raise ValueError('one of custom_identity_attribute_id or custom_identity_attribute_name should be provided')
 
         if custom_identity_attribute_name:
             found = False
-            for attr in self.britive.identity_attributes.list():
+            for attr in self.britive.identity_management.identity_attributes.list():
                 if attr['name'] == custom_identity_attribute_name:
                     custom_identity_attribute_id = attr['id']
                     found = True
                     break
             if not found:
-                raise ValueError(
-                    f'custom_identity_attribute_name value of {custom_identity_attribute_name} not found.'
-                )
+                raise ValueError(f'custom_identity_attribute_name value of {custom_identity_attribute_name} not found.')
 
         return {'idpAttr': idp_attribute_name, 'userAttr': custom_identity_attribute_id}
+
 
 class WorkloadServiceIdentities:
     def __init__(self, workload) -> None:
@@ -357,7 +357,7 @@ class WorkloadServiceIdentities:
 
         mapping_attributes = []
         converted_federated_attributes = {}
-        converted_attributes = self.britive.service_identities.custom_attributes._build_list(
+        converted_attributes = self.britive.identity_management.service_identities.custom_attributes._build_list(
             operation='add', custom_attributes=federated_attributes
         )
 
@@ -385,6 +385,7 @@ class WorkloadServiceIdentities:
         :returns: None.
         """
         return self.britive.delete(self.base_url.format(id=service_identity_id))
+
 
 class WorkloadScimUser:
     def __init__(self, workload) -> None:

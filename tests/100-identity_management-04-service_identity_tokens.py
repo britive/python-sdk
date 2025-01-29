@@ -14,7 +14,7 @@ def test_service_identity_tokens_update(cached_service_identity_token_updated):
 
 
 def test_service_identity_tokens_get(cached_service_identity):
-    token = britive.service_identity_tokens.get(cached_service_identity['userId'])
+    token = britive.identity_management.service_identity_tokens.get(cached_service_identity['userId'])
     assert isinstance(token, dict)
     assert 'tokenExpirationDays' in token
     assert token['tokenExpirationDays'] == 45

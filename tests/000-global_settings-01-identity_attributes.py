@@ -2,7 +2,7 @@ from .cache import *  # will also import some globals like `britive`
 
 
 def test_list():
-    attributes = britive.identity_attributes.list()
+    attributes = britive.identity_management.identity_attributes.list()
     assert isinstance(attributes, list)
     assert len(attributes) >= 7  # there are 7 default attributes that are managed by the system
 
