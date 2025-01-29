@@ -9,6 +9,7 @@ class ResponseTemplates:
         name: str,
         description: str = '',
         is_console_enabled: bool = False,
+        show_on_ui: bool = False,
     ) -> dict:
         """
         Create a new response template.
@@ -17,6 +18,7 @@ class ResponseTemplates:
         :param description: Description of the response template.
         :param template_data: Template data.
         :param is_console_enabled: Is console enabled.
+        :param show_on_ui: Show on UI.
         :return: Created response template.
         """
 
@@ -24,7 +26,8 @@ class ResponseTemplates:
             'name': name,
             'description': description,
             'template_data': template_data,
-            'is_console_enabled': is_console_enabled,
+            'isConsoleAccessEnabled': is_console_enabled,
+            'show_on_ui': show_on_ui,
         }
 
         return self.britive.post(self.base_url, json=params)

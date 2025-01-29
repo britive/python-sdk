@@ -82,7 +82,7 @@ class Policies:
 
         return self.britive.get(f'{self.base_url}/{profile_id}/policies/{policy_id}')
 
-    def update(  # noqa: PLR0913
+    def update(
         self,
         profile_id: str,
         policy_id: str,

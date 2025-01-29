@@ -92,11 +92,9 @@ class SystemRoles:
         """
 
         # put it all together
-        role = {
+        return {
             'name': name,
             'description': description,
             'isReadOnly': read_only,
             'permissions': [{identifier_type: p} for p in permissions],
         }
-
-        return role

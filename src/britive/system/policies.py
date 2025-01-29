@@ -268,8 +268,6 @@ class SystemPolicies:
             prompt = 'true' if always_prompt_stepup_auth else 'false'
             step_up_condition = {'factor': 'TOTP', 'alwaysPrompt': prompt}
             condition['stepUpCondition'] = step_up_condition
-        # else:
-        #     condition = {}
 
         # put it all together
         policy = {

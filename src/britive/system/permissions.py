@@ -61,11 +61,11 @@ class SystemPermissions:
 
         self._validate_identifier_type(identifier_type)
 
-        if permission.get('isInline'):
+        if permission.pop('isInline', False):  # InvalidRequest: 400 - PA-0059 - isInline is not allowed to update
             raise ValueError('attribute isInline is set to True - cannot update an inline permission.')
 
-        permission.pop('isInline', None)  # InvalidRequest: 400 - PA-0059 - isInline is not allowed to update
         permission.pop('isReadOnly', None)
+
         return self.britive.patch(f'{self.base_url}/{permission_identifier}', json=permission)
 
     def delete(self, permission_identifier: str, identifier_type: str = 'name') -> None:
@@ -109,7 +109,7 @@ class SystemPermissions:
             resources = []
 
         # put it all together
-        permission = {
+        return {
             'name': name,
             'description': description,
             'isReadOnly': read_only,
@@ -118,5 +118,3 @@ class SystemPermissions:
             'actions': actions,
             'resources': resources if len(resources) > 0 else ['*'],
         }
-
-        return permission

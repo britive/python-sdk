@@ -7,7 +7,7 @@ This package aims to wrap the Britive API for usage in Python development. For t
 the developer/end user experience. Some APIs may also be combined into one Python method with a parameter if and where
 it makes more sense to present the API that way.
 
-This package supports Python versions `>= 3.8`.
+This package supports Python versions `>= 3.9`.
 
 ## Installation
 
@@ -88,6 +88,8 @@ they exist.
 * Identity Attributes
 * Identity Providers
 * My Access (access granted to the given identity (user or service))
+* My Approvals
+* My Requests
 * My Resources (access granted to the given identity (user or service))
 * My Secrets (access granted to the given identity (user or service))
 * Notifications
@@ -194,7 +196,7 @@ import json
 
 britive = Britive()  # source needed data from environment variables
 
-print(json.dumps(britive.users.list(), indent=2, default=str))
+print(json.dumps(britive.identity_management.users.list(), indent=2, default=str))
 ```
 
 ### Provide Needed Authentication Information in the Script
@@ -205,7 +207,7 @@ import json
 
 britive = Britive(tenant='example', token='...') # source token and tenant locally (not from environment variables)
 
-print(json.dumps(britive.users.list(), indent=2, default=str))
+print(json.dumps(britive.identity_management.users.list(), indent=2, default=str))
 ```
 
 ### Create API Token for a Service Identity
@@ -216,7 +218,7 @@ import json
 
 britive = Britive()  # source needed data from environment variables
 
-print(json.dumps(britive.service_identity_tokens.create(service_identity_id='abc123'), indent=2, default=str))
+print(json.dumps(britive.identity_management.service_identity_tokens.create(service_identity_id='abc123'), indent=2, default=str))
 ```
 
 ### Run a Report (JSON and CSV output)
@@ -243,7 +245,7 @@ from britive.britive import Britive
 
 b = Britive()
 
-policy = b.profiles.policies.build(
+policy = b.application_management.profiles.policies.build(
     name='example',
     users=['user@domain.com'],
     approval_notification_medium='Email',
@@ -251,5 +253,5 @@ policy = b.profiles.policies.build(
     time_to_approve=10
 )
 
-b.profiles.policies.create(profile_id='...', policy=policy)
+b.application_management.profiles.policies.create(profile_id='...', policy=policy)
 ```

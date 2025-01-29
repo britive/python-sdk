@@ -7,7 +7,7 @@ can consume a native Python library.
 
 ## Python Version Support
 
-_CURRENT SUPPORTED VERSION(S):_ `>= 3.8`
+_CURRENT SUPPORTED VERSION(S):_ `>= 3.9`
 
 We use [typing](https://docs.python.org/3/library/typing.html) and dictionary unpacking, e.g. `{**dict1, **dict2}`,
 which requires Python 3.5 or greater.
@@ -117,48 +117,52 @@ to an internal end-to-end process vs. integrating with a cloud service provider.
 Then run these in order or as required.
 
 ```sh
-pytest tests/test_005-identity_attributes.py -v
-pytest tests/test_010-users.py -v
-pytest tests/test_020-tags.py -v
-pytest tests/test_030-service_identities.py -v
-pytest tests/test_040-service_identity_tokens.py -v
-pytest tests/test_050-applications.py -v
-pytest tests/test_060-environment_groups.py -v
-pytest tests/test_070-environments.py -v
-pytest tests/test_080-scans.py -v  # WARNING - this one will take a while since it initiates a real scan
-pytest tests/test_090-accounts.py -v  # NOTE - a scan must first be completed
-pytest tests/test_100-permissions.py -v  # NOTE - a scan must first be completed
-pytest tests/test_110-groups.py -v  # NOTE - a scan must first be completed
-pytest tests/test_130-profiles.py -v
-pytest tests/test_140-task_services.py -v
-pytest tests/test_150-tasks.py -v
-pytest tests/test_160-security_policies.py -v
-pytest tests/test_170-saml.py -v
-pytest tests/test_180-api_tokens.py -v
-pytest tests/test_190-audit_logs.py -v
-pytest tests/test_200-reports.py -v
-pytest tests/test_210-identity_providers.py -v
-pytest tests/test_215-workload.py -v
-pytest tests/test_220-my_access.py -v
-pytest tests/test_230-notifications.py -v
-pytest tests/test_240-secrets_manager.py -v
-pytest tests/test_250-my_secrets.py -v
-pytest tests/test_260-notification_mediums.py -v
-pytest tests/test_270-system_policies.py -v
-pytest tests/test_280_system_actions.py -v
-pytest tests/test_290_system_consumers.py -v
-pytest tests/test_300-system_roles.py -v
-pytest tests/test_310-system_permissions.py -v
-pytest tests/test_320-settings_banner.py -v
-pytest tests/test_330-response_templates.py -v
-pytest tests/test_340-resource_types.py -v
-pytest tests/test_350-resource_labels.py -v
-pytest tests/test_360-resource.py -v
-pytest tests/test_370-resource_permissions.py -v
-pytest tests/test_380-access_broker_profiles.py -v
-pytest tests/test_390-access_broker_profiles_policies.py -v
-pytest tests/test_400-access_broker_permissions.py -v
-pytest tests/test_990-delete_all_resources.py -v
+pytest tests/000-global_settings-01-identity_attributes.py -v
+pytest tests/000-global_settings-02-notification_mediums.py -v
+pytest tests/000-global_settings-03-banner.py -v
+pytest tests/100-identity_management-01-users.py -v
+pytest tests/100-identity_management-02-tags.py -v
+pytest tests/100-identity_management-03-service_identities.py -v
+pytest tests/100-identity_management-04-service_identity_tokens.py -v
+pytest tests/100-identity_management-05-identity_providers.py -v
+pytest tests/100-identity_management-06-workload.py -v
+pytest tests/150-secrets_manager-01-secrets_manager.py -v
+pytest tests/200-application_management-01-applications.py -v
+pytest tests/200-application_management-02-environment_groups.py -v
+pytest tests/200-application_management-03-environments.py -v
+pytest tests/200-application_management-04-scans.py -v  # WARNING - this one will take a while since it initiates a real scan
+pytest tests/200-application_management-05-accounts.py -v  # NOTE - a scan must first be completed
+pytest tests/200-application_management-06-permissions.py -v  # NOTE - a scan must first be completed
+pytest tests/200-application_management-07-groups.py -v  # NOTE - a scan must first be completed
+pytest tests/200-application_management-08-profiles.py -v
+pytest tests/200-application_management-09-access_builder.py -v
+pytest tests/250-system-01-policies.py -v
+pytest tests/250-system-02-actions.py -v
+pytest tests/250-system-03-consumers.py -v
+pytest tests/250-system-04-roles.py -v
+pytest tests/250-system-05-permissions.py -v
+pytest tests/300-workflows-01-task_services.py -v
+pytest tests/300-workflows-02-tasks.py -v
+pytest tests/300-workflows-03-notifications.py -v
+pytest tests/350-access_broker-01-response_templates.py -v
+pytest tests/350-access_broker-02-resource_types.py -v
+pytest tests/350-access_broker-03-resource_labels.py -v
+pytest tests/350-access_broker-04-resource.py -v
+pytest tests/350-access_broker-05-resource_permissions.py -v
+pytest tests/350-access_broker-06-profiles.py -v
+pytest tests/350-access_broker-07-profiles_policies.py -v
+pytest tests/350-access_broker-08-permissions.py -v
+pytest tests/400-security-01-policies.py -v
+pytest tests/400-security-02-saml.py -v
+pytest tests/400-security-03-api_tokens.py -v
+pytest tests/500-audit_logs-01-logs.py -v
+pytest tests/500-audit_logs-02-webhooks.py -v
+pytest tests/550-reports-01-reports.py -v
+pytest tests/600-britive-01-my_access.py -v
+pytest tests/600-britive-02-my_secrets.py -v
+pytest tests/600-britive-03-my_requests.py -v
+pytest tests/600-britive-04-my_approvals.py -v
+pytest tests/999-cleanup-01-delete_all_resources.py -v
 ```
 
 Or you can simply run `pytest -v` to test everything all at once. The above commands however allow you to halt testing

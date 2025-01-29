@@ -1,5 +1,75 @@
 # Change Log (v2.8.1+)
 
+## v4.0.0 [2025-01-17]
+
+__What's New:__
+
+* Reorganized codebase to align with UI orginizational structure.
+* Decoupled `my_requests` and `my_approvals` from `my_access`.
+* Added `brokers` and `pools` functionality for `access_broker`.
+* Added `firewall` settings functionality.
+* Added Britive `managed_permissions` functionality.
+* Britive exceptions by type and error code.
+* `my_resources` improvements.
+
+__Enhancements:__
+
+* Added `add_favorite` and `delete_favorite` to `my_resources`.
+* Added checkout approvals to `my_resources`.
+* Added ITSM to checkout approvals.
+* Added `(create|list|update|delete)_filter`) to `my_access`.
+* Added `response_templates` functionality for `access_broker` credentials.
+* Added `request_approval[_by_name]|withdraw_approval_request[_by_name]` to `my_resources`.
+* Added `my_access.list` to retrieve access details with new `type=sdk` option.
+
+__Bug Fixes:__
+
+* Fixed missing `param_values` option for resource creation.
+* `my_approvals.list` now includes `my_resources` requests.
+* Make `get` call in helper method instead `list_approvals`.
+* Catch `requests.exceptions.JSONDecodeError` in `handle_response`.
+
+__Dependencies:__
+
+* `requests >= 2.32.0`
+
+__Other:__
+
+* Python 3.8 is EOL, so support is dropped.
+* Method assignments dropped:
+
+| Dropped                                | New location                                  |
+| -------------------------------------- | --------------------------------------------- |
+| `access_builder`                       | `application_management.access_builder`       |
+| `accounts`                             | `application_management.accounts`             |
+| `applications`                         | `application_management.applications`         |
+| `audit_logs`                           | `audit_logs.logs`                             |
+| `environment_groups`                   | `application_management.environment_groups`   |
+| `environments`                         | `application_management.environments`         |
+| `groups`                               | `application_management.groups`               |
+| `identity_attributes`                  | `identity_management.identity_attributes`     |
+| `identity_providers`                   | `identity_management.identity_providers`      |
+| `notification_mediums`                 | `global_settings.notification_mediums`        |
+| `notifications`                        | `workflows.notifications`                     |
+| `permissions`                          | `application_management.permissions`          |
+| `profiles`                             | `application_management.profiles`             |
+| `saml`                                 | `security.saml`                               |
+| `scans`                                | `application_management.scans`                |
+| `security_policies`                    | `security.security_policies`                  |
+| `service_identities`                   | `identity_management.service_identities`      |
+| `service_identity_tokens`              | `identity_management.service_identity_tokens` |
+| `settings`                             | `global_settings`                             |
+| `step_up`                              | `security.step_up_auth`                       |
+| `tags`                                 | `identity_management.tags`                    |
+| `task_services`                        | `workflows.task_services`                     |
+| `tasks`                                | `workflows.tasks`                             |
+| `users`                                | `identity_management.users`                   |
+| `workload`                             | `identity_management.workload`                |
+| `my_access.approval_request_status`    | `my_requests.approval_request_status`         |
+| `my_access.approve_request`            | `my_approvals.approve_request`                |
+| `my_access.list_approvals`             | `my_approvals.list`                           |
+| `my_access.reject_request`             | `my_approvals.reject_request`                 |
+
 ## v3.1.0 [2024-10-07]
 
 __What's New:__
