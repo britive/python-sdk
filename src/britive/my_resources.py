@@ -88,6 +88,16 @@ class MyResources:
 
         return [i for i in self.list_profiles() if i['transactionId']]
 
+    def list_response_templates(self, transaction_id: str) -> list:
+        """
+        List the Response Templates for a checked out profile.
+
+        :param transaction_id: Transaction ID of the checked out profile.
+        :return: List of response templates.
+        """
+
+        return self.britive.get(f'{self.base_url}/{transaction_id}/templates')
+
     def get_checked_out_profile(self, transaction_id: str) -> dict:
         """
         Retrieve details of a given checked out profile.

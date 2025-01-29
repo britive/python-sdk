@@ -191,7 +191,7 @@ class ServiceIdentityTokens:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}'
 
-    def __validate_token_expiration(days) -> None:
+    def __validate_token_expiration(self, days) -> None:
         if not (1 <= days <= 90):
             raise ValueError('invalid token expiration value - must ust be between 1 and 90')
 
