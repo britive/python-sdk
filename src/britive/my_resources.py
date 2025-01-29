@@ -19,6 +19,7 @@ approval_exceptions = {
     'rejected': ProfileApprovalRejected(),
     'cancelled': ProfileApprovalWithdrawn(),
     'timeout': ProfileApprovalTimedOut(),
+    'withdrawn': ProfileApprovalWithdrawn(),
 }
 
 
