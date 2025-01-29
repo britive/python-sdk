@@ -203,7 +203,13 @@ class MyAccess:
     ) -> dict:
         params = {'accessType': 'PROGRAMMATIC' if programmatic else 'CONSOLE'}
 
-        data = {'justification': justification}
+        data = {}
+        if justification:
+            data['justification'] = justification
+        if ticket_type:
+            data['ticketType'] = ticket_type
+        if ticket_id:
+            data['ticketId'] = ticket_id
 
         transaction = None
 
@@ -578,7 +584,7 @@ class MyAccess:
 
         data = {'name': filter_name, 'filter': filter_properties}
 
-        return self.britive.post(f"{self.base_url}/{self.whoami()['userId']}/filters", json=data)
+        return self.britive.post(f'{self.base_url}/{self.whoami()["userId"]}/filters', json=data)
 
     def list_filters(self) -> list:
         """
@@ -587,7 +593,7 @@ class MyAccess:
         :return: List of filters.
         """
 
-        return self.britive.get(f"{self.base_url}/{self.whoami()['userId']}/filters")
+        return self.britive.get(f'{self.base_url}/{self.whoami()["userId"]}/filters')
 
     def update_filter(self, filter_id: str, filter_name: str, filter_properties: str) -> dict:
         """
@@ -620,7 +626,7 @@ class MyAccess:
 
         data = {'name': filter_name, 'filter': filter_properties}
 
-        return self.britive.put(f"{self.base_url}/{self.whoami()['userId']}/filters/{filter_id}", json=data)
+        return self.britive.put(f'{self.base_url}/{self.whoami()["userId"]}/filters/{filter_id}', json=data)
 
     def delete_filter(self, filter_id: str) -> None:
         """
@@ -630,4 +636,4 @@ class MyAccess:
         :return: None.
         """
 
-        return self.britive.delete(f"{self.base_url}/{self.whoami()['userId']}/filters/{filter_id}")
+        return self.britive.delete(f'{self.base_url}/{self.whoami()["userId"]}/filters/{filter_id}')

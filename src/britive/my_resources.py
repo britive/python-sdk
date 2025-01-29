@@ -126,7 +126,13 @@ class MyResources:
         ticket_type: str = None,
         wait_time: int = 60,
     ) -> dict:
-        data = {'justification': justification}
+        data = {}
+        if justification:
+            data['justification'] = justification
+        if ticket_type:
+            data['ticketType'] = ticket_type
+        if ticket_id:
+            data['ticketId'] = ticket_id
 
         transaction = None
 
