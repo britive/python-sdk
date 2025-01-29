@@ -53,8 +53,8 @@ def test_password_policies_list():
 
 
 def test_password_policies_update(cached_password_policies):
-    r = str(random.randint(0, 1000000))
-    new_name = f'pytestpolicy-{r}'
+    r = str(random.randint(0, 999))
+    new_name = f'{cached_password_policies["name"]}-{r}'
     britive.secrets_manager.password_policies.update(cached_password_policies['id'], name=new_name)
     assert britive.secrets_manager.password_policies.get(cached_password_policies['id'])['name'] == new_name
 

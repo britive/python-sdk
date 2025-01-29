@@ -269,7 +269,7 @@ def test_application_delete(cached_application):
                     application_id=cached_application['appContainerId']
                 )
                 break
-            except exceptions.InvalidRequest:
+            except (exceptions.InvalidRequest, exceptions.badrequest.ApplicationDeletionError):
                 sleep(5)
         assert response is None
     finally:

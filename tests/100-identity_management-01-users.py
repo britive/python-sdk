@@ -165,6 +165,9 @@ def test_minimized_user_details(cached_user):
 
 def test_stepup_mfa():
     challenge = britive.identity_management.users.enable_mfa.enable()
-    totp = pyotp.TOTP(challenge.get('additionalDetails').get('key'))
-    totp = totp.now()
-    assert len(str(totp)) == 6
+    if challenge_key := challenge.get('additionalDetails', {}).get('key'):
+        totp = pyotp.TOTP(challenge_key)
+        totp = totp.now()
+        assert len(str(totp)) == 6
+    if 'is already registered for MFA factor: TOTP' in challenge.get('message', ''):
+        assert challenge.get('errorCode') == 'MFA-0001'

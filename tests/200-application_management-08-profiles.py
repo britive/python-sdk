@@ -90,7 +90,7 @@ def test_session_attributes_add_dynamic(cached_dynamic_session_attribute):
     assert isinstance(cached_dynamic_session_attribute, dict)
 
 
-def test_session_attributes_list(cached_profile):
+def test_session_attributes_list(cached_profile, cached_static_session_attribute, cached_dynamic_session_attribute):
     attributes = britive.application_management.profiles.session_attributes.list(profile_id=cached_profile['papId'])
     assert isinstance(attributes, list)
     assert len(attributes) == 2
@@ -197,7 +197,7 @@ def test_policies_create_with_approval_multiple_notification_medium(
     cached_profile, cached_service_identity, cached_user
 ):
     policy = britive.application_management.profiles.policies.build(
-        name=f"{cached_profile['papId']}-2",
+        name=f'{cached_profile["papId"]}-2',
         description='',
         service_identities=[cached_service_identity['username']],
         approval_notification_medium=['Email'],
