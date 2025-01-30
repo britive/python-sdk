@@ -192,7 +192,7 @@ class MyResources:
                 # handle the response based on the value of status
                 if status == 'approved':
                     transaction = self.britive.post(
-                        f'{self.base_url}/{profile_id}/resources/{resource_id}/checkout', json=data
+                        f'{self.base_url}/profiles/{profile_id}/resources/{resource_id}/checkout', json=data
                     )
                 else:
                     raise approval_exceptions[status](e) from e

@@ -107,7 +107,7 @@ class MyRequests:
                     # the first ^C we get we will try to withdraw the request
                     time.sleep(1)  # give the caller a small window to ^C again
                     self._withdraw_approval_request(request_id=request_id)
-                    raise ProfileApprovalWithdrawn from e
+                    raise ProfileApprovalWithdrawn('user interrupt.') from e
                 except KeyboardInterrupt:
                     raise e from None
         else:
