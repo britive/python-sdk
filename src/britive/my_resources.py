@@ -19,6 +19,7 @@ approval_exceptions = {
     'rejected': ProfileApprovalRejected(),
     'cancelled': ProfileApprovalWithdrawn(),
     'timeout': ProfileApprovalTimedOut(),
+    'withdrawn': ProfileApprovalWithdrawn(),
 }
 
 
@@ -125,7 +126,13 @@ class MyResources:
         ticket_type: str = None,
         wait_time: int = 60,
     ) -> dict:
-        data = {'justification': justification}
+        data = {}
+        if justification:
+            data['justification'] = justification
+        if ticket_type:
+            data['ticketType'] = ticket_type
+        if ticket_id:
+            data['ticketId'] = ticket_id
 
         transaction = None
 
@@ -185,7 +192,7 @@ class MyResources:
                 # handle the response based on the value of status
                 if status == 'approved':
                     transaction = self.britive.post(
-                        f'{self.base_url}/{profile_id}/resources/{resource_id}/checkout', json=data
+                        f'{self.base_url}/profiles/{profile_id}/resources/{resource_id}/checkout', json=data
                     )
                 else:
                     raise approval_exceptions[status](e) from e
