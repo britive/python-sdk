@@ -1,5 +1,29 @@
 # Change Log (v2.8.1+)
 
+## v4.0.1 [2025-01-29]
+
+__What's New:__
+
+* None
+
+__Enhancements:__
+
+* None
+
+__Bug Fixes:__
+
+* Withdrawn request now returns `withdrawn` status instead of `cancelled`.
+* Always include ITSM `ticket_type` and/or `ticket_id` if they are provided.
+* Failing `my_resources.checkout` due to 404 after approval.
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v4.0.0 [2025-01-17]
 
 __What's New:__

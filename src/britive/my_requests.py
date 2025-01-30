@@ -1,9 +1,9 @@
-import sys
 import time
 from typing import Any, Callable
 
 from .exceptions import (
     ProfileApprovalMaxBlockTimeExceeded,
+    ProfileApprovalWithdrawn,
     ProfileCheckoutAlreadyApproved,
 )
 from .helpers import HelperMethods
@@ -102,15 +102,14 @@ class MyRequests:
                     # status == timeout or approved or rejected or cancelled
                     return status
                 raise ProfileApprovalMaxBlockTimeExceeded
-            except KeyboardInterrupt:  # handle Ctrl+C (^C)
-                # the first ^C we get we will try to withdraw the request
+            except KeyboardInterrupt as e:  # handle Ctrl+C (^C)
                 try:
+                    # the first ^C we get we will try to withdraw the request
                     time.sleep(1)  # give the caller a small window to ^C again
-                    self.withdraw_approval_request(request_id=request_id)
-                    sys.exit()
+                    self._withdraw_approval_request(request_id=request_id)
+                    raise ProfileApprovalWithdrawn('user interrupt.') from e
                 except KeyboardInterrupt:
-                    sys.exit()
-
+                    raise e from None
         else:
             return request
 
