@@ -1,5 +1,28 @@
 # Change Log (v2.8.1+)
 
+## v4.1.0 [2025-02-28]
+
+__What's New:__
+
+* `my_resources.list` akin to `my_access.list` allowing the use of `size`.
+
+__Enhancements:__
+
+* None
+
+__Bug Fixes:__
+
+* `managed_permissions` added to the `application_management` init.
+* `Britive.parse_tenant` still referenced in `aws` federation provider.
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v4.0.1 [2025-01-29]
 
 __What's New:__

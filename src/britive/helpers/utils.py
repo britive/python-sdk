@@ -22,9 +22,9 @@ def check_response_for_error(status_code, content) -> None:
     if status_code in allowed_exceptions:
         if isinstance(content, dict):
             error_code = content.get('errorCode', 'E0000')
-            message = f"{status_code} - {error_code} - {content.get('message', 'no message available')}"
+            message = f'{status_code} - {error_code} - {content.get("message", "no message available")}'
             if content.get('details'):
-                message += f" - {content.get('details')}"
+                message += f' - {content.get("details")}'
         else:
             message = f'{status_code} - {content}'
         raise unauthorized_code_map.get(
@@ -39,7 +39,6 @@ def check_response_for_error(status_code, content) -> None:
 def handle_response(response):
     try:
         return response.json()
-    # Can likely drop to just the `requests` exception, with `>=2.32.0`, but leaving both for now.
     except requests.exceptions.JSONDecodeError:
         return response.content.decode('utf-8')
 

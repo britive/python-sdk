@@ -50,12 +50,36 @@ class MyResources:
         self.withdraw_approval_request = __my_requests.withdraw_approval_request
         self.withdraw_approval_request_by_name = __my_requests.withdraw_approval_request_by_name
 
+    # Let's just mimic my_access.list functionality for now.
+    def list(self, filter_text: str = None, list_type: str = None, search_text: str = None, size: int = None) -> list:
+        """
+        List the resource details for the current user.
+
+        :param filter_text: filter resource by key, e.g. `filter_text='key eq env'`
+        :param list_type: filter resources by type, e.g. `list_type='frequently-used'`
+        :param search_text: filter resources by search text.
+        :param size: reduce the size of the response to the specified limit.
+        :return: List of profiles.
+        """
+
+        params = {}
+        if filter_text:
+            params['filter'] = filter_text
+        if list_type:
+            params['type'] = list_type
+        if search_text:
+            params['searchText'] = search_text
+        if size:
+            params.update(page=0, size=size)
+
+        return self.britive.get(self.base_url, params=params)
+
     def list_profiles(self, filter_text: str = None, list_type: str = None, search_text: str = None) -> list:
         """
         List the profiles for which the user has access.
 
         :param filter_text: filter resource by key, e.g. `filter_text='key eq env'`
-        :param list_type: filter resources by type, e.g. `list_type='frequentlyUsed'`
+        :param list_type: filter resources by type, e.g. `list_type='frequently-used'`
         :param search_text: filter resources by search text.
         :return: List of profiles.
         """
