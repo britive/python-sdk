@@ -261,6 +261,10 @@ class Britive:
 
             # load the result as a dict
             result = handle_response(response)
+
+            if url.endswith('my-resources') and method == 'get' and params.get('page') == 0 and params.get('size'):
+                return result
+
             _pagination_type = _pagination_type or pagination_type(response.headers, result)
 
             # check on the pagination and iterate if required - we only need to check on this after the first

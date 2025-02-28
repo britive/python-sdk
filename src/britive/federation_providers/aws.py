@@ -12,7 +12,7 @@ from .federation_provider import FederationProvider
 
 class AwsFederationProvider(FederationProvider):
     def __init__(self, profile: str, tenant: str, duration: int = 900) -> None:
-        from britive.britive import Britive  # doing import here to avoid circular dependency
+        from britive.helpers.utils import parse_tenant  # doing import here to avoid circular dependency
 
         self.profile = profile
         self.duration = duration
@@ -21,7 +21,7 @@ class AwsFederationProvider(FederationProvider):
             raise TenantMissingError(
                 'Error: the aws federation provider requires the britive tenant as part of the signing algorithm'
             )
-        self.tenant = Britive.parse_tenant(temp_tenant).split(':')[0]  # remove the port if it exists
+        self.tenant = parse_tenant(temp_tenant).split(':')[0]  # remove the port if it exists
         super().__init__()
 
     @staticmethod
