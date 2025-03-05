@@ -51,7 +51,7 @@ class MyResources:
         self.withdraw_approval_request_by_name = __my_requests.withdraw_approval_request_by_name
 
     # Let's just mimic my_access.list functionality for now.
-    def list(self, filter_text: str = None, list_type: str = None, search_text: str = None, size: int = None) -> list:
+    def list(self, filter_text: str = None, list_type: str = None, search_text: str = None, size: int = None) -> dict:
         """
         List the resource details for the current user.
 
@@ -59,7 +59,7 @@ class MyResources:
         :param list_type: filter resources by type, e.g. `list_type='frequently-used'`
         :param search_text: filter resources by search text.
         :param size: reduce the size of the response to the specified limit.
-        :return: List of profiles.
+        :return: Dict of resource details.
         """
 
         params = {}
