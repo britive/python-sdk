@@ -1,5 +1,30 @@
 # Change Log (v2.8.1+)
 
+## v4.1.1 [2025-03-05]
+
+__What's New:__
+
+* None
+
+__Enhancements:__
+
+* None
+
+__Bug Fixes:__
+
+* Added missing `409 Conflict` to `exceptions.allowed_exceptions`
+* Added missing zero in the `PP-` errors in `exceptions.badrequest`
+* Raise specific `InvalidTenantError` when DNS resolution fails in `helpers.utils.parse_tenant`.
+* Updated type hint typo, from `list` to `dict`, in `[my_access|my_resources].list`.
+
+__Dependencies:__
+
+* `jmespath >= 1.0.1`
+
+__Other:__
+
+* None
+
 ## v4.1.0 [2025-02-28]
 
 __What's New:__

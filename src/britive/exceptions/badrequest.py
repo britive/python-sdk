@@ -473,12 +473,12 @@ bad_request_code_map = {
     'PF-0002': ProfileFavoriteDeleteError,
     'PF-0003': ProfileFavoriteReadError,
     # Profile Policy related
-    'PP-001': ProfilePolicyPermissionsError,
-    'PP-002': ProfilePolicyInvalidTokenError,
-    'PP-003': ProfilePolicyCreationError,
-    'PP-004': ProfilePolicyUpdateError,
-    'PP-005': ProfilePolicyGenericError,
-    'PP-006': ProfilePolicyCreationUpdateError,
+    'PP-0001': ProfilePolicyPermissionsError,
+    'PP-0002': ProfilePolicyInvalidTokenError,
+    'PP-0003': ProfilePolicyCreationError,
+    'PP-0004': ProfilePolicyUpdateError,
+    'PP-0005': ProfilePolicyGenericError,
+    'PP-0006': ProfilePolicyCreationUpdateError,
     # Profile request related
     'PR-0001': ProfileRequestError,
     # Access Broker related
