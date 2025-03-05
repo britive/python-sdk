@@ -6,7 +6,7 @@ import requests
 from britive.exceptions import BritiveException, InvalidFederationProvider, allowed_exceptions
 from britive.exceptions.badrequest import bad_request_code_map
 from britive.exceptions.generic import generic_code_map
-from britive.exceptions.unauthorized import unauthorized_code_map
+from britive.exceptions.unauthorized import InvalidTenantError, unauthorized_code_map
 from britive.federation_providers import (
     AwsFederationProvider,
     AzureSystemAssignedManagedIdentityFederationProvider,
@@ -69,7 +69,7 @@ def parse_tenant(tenant: str) -> str:
             socket.getaddrinfo(host=resolved_domain, port=443)  # validate the hostname is real
             return resolved_domain  # and if so set the tenant accordingly
         except socket.gaierror as e:
-            raise Exception(f'Invalid tenant provided: {tenant}. DNS resolution failed.') from e
+            raise InvalidTenantError(f'Invalid tenant provided: {tenant}. DNS resolution failed.') from e
 
 
 def response_has_no_content(response) -> bool:

@@ -53,14 +53,14 @@ class MyAccess:
         self.withdraw_approval_request = __my_requests.withdraw_approval_request
         self.withdraw_approval_request_by_name = __my_requests.withdraw_approval_request_by_name
 
-    def list(self, filter_text: str = None, search_text: str = None, size: int = None) -> list:
+    def list(self, filter_text: str = None, search_text: str = None, size: int = None) -> dict:
         """
         List the access details for the current user.
 
         :param filter_text: filter details by key, using eq|co|sw operators, e.g. `filter_text='key co text'`
         :param search_text: filter details by search text.
         :param size: reduce the size of the response to the specified limit.
-        :return: List of profiles.
+        :return: Dict of access details.
         """
 
         params = {'type': 'sdk'}
