@@ -22,6 +22,10 @@ class ApprovalWorkflowTimedOut(BritiveException):
     pass
 
 
+class Conflict(BritiveException):
+    pass
+
+
 class ForbiddenRequest(BritiveException):
     pass
 
@@ -165,6 +169,7 @@ allowed_exceptions = {
     403: ForbiddenRequest,
     404: NotFound,
     405: MethodNotAllowed,
+    409: Conflict,
     500: InternalServerError,
     503: ServiceUnavailable,
 }
