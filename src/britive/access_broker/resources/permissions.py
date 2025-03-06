@@ -36,24 +36,29 @@ class Permissions:
             'name': name,
             'resourceTypeId': resource_type_id,
         }
-        permissionId = self.britive.post(f'{self.base_url}/permissions', json=create_params)['permissionId']
-        urls = self.get_urls(permissionId)
-        requests.put(urls['checkinURL'], files={'file': checkin_file})
-        requests.put(urls['checkoutURL'], files={'file': checkout_file})
-        update_params = {
-            'checkinFileName': permissionId + '_checkin',
-            'checkinTimeLimit': 60,
-            'checkoutFileName': permissionId + '_checkout',
-            'checkoutTimeLimit': 60,
-            'description': description,
-            'inlineFileExists': True,
-            'isDraft': False,
-            'name': name,
-            'resourceTypeId': resource_type_id,
-            'variables': variables,
-        }
+        permission = self.britive.post(f'{self.base_url}/permissions', json=create_params)
 
-        return self.britive.put(f'{self.base_url}/permissions/{permissionId}', json=update_params)
+        if checkin_file and checkout_file:
+            permissionId = permission['permissionId']
+            urls = self.get_urls(permissionId)
+            requests.put(urls['checkinURL'], files={'file': checkin_file})
+            requests.put(urls['checkoutURL'], files={'file': checkout_file})
+            update_params = {
+                'checkinFileName': permissionId + '_checkin',
+                'checkinTimeLimit': 60,
+                'checkoutFileName': permissionId + '_checkout',
+                'checkoutTimeLimit': 60,
+                'description': description,
+                'inlineFileExists': True,
+                'isDraft': False,
+                'name': name,
+                'resourceTypeId': resource_type_id,
+                'variables': variables,
+            }
+            permission = self.britive.put(f'{self.base_url}/permissions/{permissionId}', json=update_params)
+            permission['permissionId'] = permissionId
+
+        return permission
 
     def get(self, permission_id: str, version_id: str = None) -> dict:
         """
