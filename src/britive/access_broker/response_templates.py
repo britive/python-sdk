@@ -32,7 +32,17 @@ class ResponseTemplates:
 
         return self.britive.post(self.base_url, json=params)
 
-    def list(self, search_text: str = '') -> list:
+    def get(self, response_template_id: str) -> dict:
+        """
+        Retrieve a response template by ID.
+
+        :param response_template_id: ID of the response template.
+        :return: Response template.
+        """
+
+        return self.britive.get(f'{self.base_url}/{response_template_id}')
+
+    def list(self, search_text: str = None) -> list:
         """
         Retrieve all response templates.
 
@@ -48,8 +58,8 @@ class ResponseTemplates:
         self,
         response_template_id: str,
         name: str,
-        description: str = '',
-        template_data: str = '',
+        description: str = None,
+        template_data: str = None,
         is_console_enabled: bool = False,
     ) -> dict:
         """
@@ -73,16 +83,6 @@ class ResponseTemplates:
             params['is_console_enabled'] = is_console_enabled
 
         return self.britive.put(f'{self.base_url}/{response_template_id}', json=params)
-
-    def get(self, response_template_id: str) -> dict:
-        """
-        Retrieve a response template by ID.
-
-        :param response_template_id: ID of the response template.
-        :return: Response template.
-        """
-
-        return self.britive.get(f'{self.base_url}/{response_template_id}')
 
     def delete(self, response_template_id: str) -> None:
         """

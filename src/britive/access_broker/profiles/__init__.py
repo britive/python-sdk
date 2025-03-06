@@ -6,8 +6,8 @@ class Profiles:
     def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/resource-manager/profiles'
-        self.policies = Policies(britive)
         self.permissions = Permissions(britive)
+        self.policies = Policies(britive)
 
     def create(self, name: str, description: str = '', expiration_duration: int = 900000) -> dict:
         """
@@ -23,15 +23,6 @@ class Profiles:
 
         return self.britive.post(f'{self.base_url}', json=params)
 
-    def list(self) -> list:
-        """
-        Retrieve all profiles.
-
-        :return: List of profiles.
-        """
-
-        return self.britive.get(self.base_url, params={})
-
     def get(self, profile_id: str) -> dict:
         """
         Retrieve a profile by ID.
@@ -42,7 +33,18 @@ class Profiles:
 
         return self.britive.get(f'{self.base_url}/{profile_id}')
 
-    def update(self, profile_id: str, name: str = '', description: str = '', expiration_duration: int = 0) -> dict:
+    def list(self) -> list:
+        """
+        Retrieve all profiles.
+
+        :return: List of profiles.
+        """
+
+        return self.britive.get(self.base_url, params={})
+
+    def update(
+        self, profile_id: str, name: str = None, description: str = None, expiration_duration: int = None
+    ) -> dict:
         """
         Update a profile.
 

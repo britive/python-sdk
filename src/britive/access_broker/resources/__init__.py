@@ -6,26 +6,10 @@ from .types import Types
 class Resources:
     def __init__(self, britive) -> None:
         self.britive = britive
-        self.labels = Labels(britive)
-        self.types = Types(britive)
-        self.permissions = Permissions(britive)
         self.base_url = f'{self.britive.base_url}/resource-manager/resources'
-
-    def list(self, filter_expression: str = '', search_text: str = '') -> list:
-        """
-        Retrieve all resources.
-
-        :param filter_expression: Parameter to filter resources by name. Example: `name eq profile1`.
-        :param search_text: Filter resources by search text.
-        :return: List of resources.
-        """
-
-        params = {
-            **({'filter': filter_expression} if filter_expression else {}),
-            **({'searchText': search_text} if search_text else {}),
-        }
-
-        return self.britive.get(f'{self.base_url}', params=params)
+        self.labels = Labels(britive)
+        self.permissions = Permissions(britive)
+        self.types = Types(britive)
 
     def create(self, name: str, resource_type_id: str, description: str = '', param_values: dict = None) -> dict:
         """
@@ -50,6 +34,17 @@ class Resources:
 
         return self.britive.post(self.base_url, json=params)
 
+    def add_broker_pools(self, resource_id: str, pools: list) -> list:
+        """
+        Add broker pools to a resource.
+
+        :param resource_id: ID of the resource.
+        :param pools: List of broker pools.
+        :return: List of broker pools.
+        """
+
+        return self.britive.post(f'{self.base_url}/{resource_id}/broker-pools', json=pools)
+
     def get(self, resource_id: str) -> dict:
         """
         Retrieve a resource by ID.
@@ -60,7 +55,23 @@ class Resources:
 
         return self.britive.get(f'{self.base_url}/{resource_id}')
 
-    def update(self, resource_id: str, description: str = '', resource_labels: list = None) -> dict:
+    def list(self, filter_expression: str = None, search_text: str = None) -> list:
+        """
+        Retrieve all resources.
+
+        :param filter_expression: Parameter to filter resources by name. Example: `name eq profile1`.
+        :param search_text: Filter resources by search text.
+        :return: List of resources.
+        """
+
+        params = {
+            **({'filter': filter_expression} if filter_expression else {}),
+            **({'searchText': search_text} if search_text else {}),
+        }
+
+        return self.britive.get(f'{self.base_url}', params=params)
+
+    def update(self, resource_id: str, description: str = None, resource_labels: list = None) -> dict:
         """
         Update a resource.
 
@@ -80,7 +91,7 @@ class Resources:
 
         return self.britive.put(f'{self.base_url}/{resource_id}', json=params)
 
-    def delete(self, resource_id: str) -> dict:
+    def delete(self, resource_id: str) -> None:
         """
         Delete a resource.
 
@@ -89,14 +100,3 @@ class Resources:
         """
 
         return self.britive.delete(f'{self.base_url}/{resource_id}')
-
-    def add_broker_pools(self, resource_id: str, pools: list) -> list:
-        """
-        Add broker pools to a resource.
-
-        :param resource_id: ID of the resource.
-        :param pools: List of broker pools.
-        :return: List of broker pools.
-        """
-
-        return self.britive.post(f'{self.base_url}/{resource_id}/broker-pools', json=pools)
