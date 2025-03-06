@@ -23,6 +23,16 @@ class Pools:
 
         return self.britive.post(self.base_url, json=params)
 
+    def get(self, pool_id: str) -> dict:
+        """
+        Retrieve broker pool by ID.
+
+        :param pool_id: Broker pool ID.
+        :return: Details of the broker pool.
+        """
+
+        return self.britive.get(f'{self.base_url}/{pool_id}')
+
     def list(self, name_filter: str = '') -> list:
         """
         List broker pools with ability to filter by name.
@@ -37,15 +47,28 @@ class Pools:
 
         return self.britive.get(self.base_url, params=params)['data']
 
-    def get(self, pool_id: str) -> dict:
+    def list_brokers(self, pool_id: str) -> list:
         """
-        Retrieve broker pool by ID.
+        Retrieve brokers for the broker pool.
 
         :param pool_id: Broker pool ID.
-        :return: Details of the broker pool.
+        :return: List of brokers for the broker pool.
         """
 
-        return self.britive.get(f'{self.base_url}/{pool_id}')
+        return self.britive.get(f'{self.base_url}/{pool_id}/brokers')
+
+    def list_resources(self, pool_id: str, search_text: str = '') -> list:
+        """
+        Retrieve resources for the broker pool.
+
+        :param pool_id: Broker pool ID.
+        :param search_text: Filter resources by search text.
+        :return: List of resources for the broker pool.
+        """
+
+        params = {'filter': f'brokerPool eq {pool_id}', 'searchText': search_text}
+
+        return self.britive.get(f'{self.britive.base_url}/resource-manager/resources', params=params)
 
     def update(
         self, pool_id: str, name: str = None, description: str = None, keep_alive: int = None, disconnect: int = None
@@ -83,29 +106,6 @@ class Pools:
         """
 
         return self.britive.delete(f'{self.base_url}/{pool_id}')
-
-    def list_brokers(self, pool_id: str) -> list:
-        """
-        Retrieve brokers for the broker pool.
-
-        :param pool_id: Broker pool ID.
-        :return: List of brokers for the broker pool.
-        """
-
-        return self.britive.get(f'{self.base_url}/{pool_id}/brokers')
-
-    def list_resources(self, pool_id: str, search_text: str = '') -> list:
-        """
-        Retrieve resources for the broker pool.
-
-        :param pool_id: Broker pool ID.
-        :param search_text: Filter resources by search text.
-        :return: List of resources for the broker pool.
-        """
-
-        params = {'filter': f'brokerPool eq {pool_id}', 'searchText': search_text}
-
-        return self.britive.get(f'{self.britive.base_url}/resource-manager/resources', params=params)
 
     def create_token(self, pool_id, name: str, description: str = '') -> dict:
         """
@@ -162,16 +162,6 @@ class Pools:
 
         return self.britive.delete(f'{self.base_url}/{pool_id}/tokens/{name}')
 
-    def list_labels(self, pool_id: str) -> list:
-        """
-        Retrieve resource labels for the broker pool.
-
-        :param pool_id: Broker pool ID.
-        :return: List of resource labels for the broker pool.
-        """
-
-        return self.britive.get(f'{self.base_url}/{pool_id}/labels')
-
     def add_label(self, pool_id: str, key: str, values: list) -> dict:
         """
         Add a resource label to the broker pool.
@@ -185,6 +175,16 @@ class Pools:
         params = {'key': key, 'label-values': values}
 
         return self.britive.post(f'{self.base_url}/{pool_id}/labels/', json=params)
+
+    def list_labels(self, pool_id: str) -> list:
+        """
+        Retrieve resource labels for the broker pool.
+
+        :param pool_id: Broker pool ID.
+        :return: List of resource labels for the broker pool.
+        """
+
+        return self.britive.get(f'{self.base_url}/{pool_id}/labels')
 
     def update_label(self, pool_id: str, key: str, values: list) -> dict:
         """

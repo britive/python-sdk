@@ -3,15 +3,6 @@ class Types:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/resource-manager/resource-types'
 
-    def list(self) -> list:
-        """
-        Retrieve all resource types.
-
-        :return: List of resource types.
-        """
-
-        return self.britive.get(self.base_url)['data']
-
     def create(self, name: str, description: str = '', fields: list = None) -> dict:
         """
         Create a new resource type.
@@ -39,7 +30,7 @@ class Types:
 
         return self.britive.post(self.base_url, json=params)
 
-    def get(self, resource_type_id) -> dict:
+    def get(self, resource_type_id: str) -> dict:
         """
         Retrieve a resource type by ID.
 
@@ -47,6 +38,15 @@ class Types:
         :return: Resource type.
         """
         return self.britive.get(f'{self.base_url}/{resource_type_id}')
+
+    def list(self) -> list:
+        """
+        Retrieve all resource types.
+
+        :return: List of resource types.
+        """
+
+        return self.britive.get(self.base_url)['data']
 
     def update(self, resource_type_id: str, description: str = None, fields: list = None) -> dict:
         """
@@ -74,7 +74,7 @@ class Types:
 
         return self.britive.put(f'{self.base_url}/{resource_type_id}', json=params)
 
-    def delete(self, resource_type_id) -> dict:
+    def delete(self, resource_type_id: str) -> None:
         """
         Delete a resource type.
 
