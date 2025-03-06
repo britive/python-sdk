@@ -248,6 +248,9 @@ class Britive:
         return_data = []
         _pagination_type = None
 
+        if params is None:
+            params = {}
+
         while True:
             response = self.__request_with_exponential_backoff_and_retry(method, url, params, data, json)
             if response_has_no_content(response):
