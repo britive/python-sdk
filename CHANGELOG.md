@@ -1,5 +1,30 @@
 # Change Log (v2.8.1+)
 
+## v4.1.2 [2025-03-06]
+
+__What's New:__
+
+* None
+
+__Enhancements:__
+
+* None
+
+__Bug Fixes:__
+
+* Added missing `fields` param to `access_broker.resources.types.[create|update]`
+* Fixed `my_resources.list` bug, where `params` is `None` instead of expected `dict` 
+* Fixed issue with `access_broker.resources.permissions.create` uploading files when none are specified.
+* Correct the `members` param example for `access_broker.profiles.policies.[create|update]`
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* Type hint cleanup and preferential sorting for `access_broker`
+
 ## v4.1.1 [2025-03-05]
 
 __What's New:__

@@ -6,61 +6,6 @@ class Permissions:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/resource-manager'
 
-    def list(self, resource_type_id: str, search_text: str = '') -> list:
-        """
-        Retrieve all permissions for a resource type.
-
-        :param resource_type_id: ID of the resource type.
-        :param search_text: filter resource types by search text.
-        :return: List of permissions.
-        """
-
-        params = {**({'searchText': search_text} if search_text else {})}
-
-        return self.britive.get(f'{self.base_url}/resource-types/{resource_type_id}/permissions', params=params)
-
-    def get(self, permission_id: str, version_id: str = '') -> dict:
-        """
-        Retrieve a permission by ID.
-
-        :param permission_id: ID of the permission.
-        :param version_id: ID of the version. Optional.
-        :return: Permission.
-        """
-
-        if version_id:
-            return self.britive.get(f'{self.base_url}/permissions/{permission_id}/{version_id}')
-
-        return self.britive.get(f'{self.base_url}/permissions/{permission_id}')
-
-    def delete(self, permission_id: str, version_id: str = '') -> None:
-        """
-        Delete a permission.
-
-        :param permission_id: ID of the permission.
-        :param version_id: Version of the permission. Optional.
-        :return: None
-        """
-
-        if version_id:
-            return self.britive.delete(f'{self.base_url}/permissions/{permission_id}/{version_id}')
-        return self.britive.delete(f'{self.base_url}/permissions/{permission_id}')
-
-    def get_urls(self, permission_id: str) -> dict:
-        """
-        Retrieve URLs for a permission.
-
-        :param permission_id: ID of the permission.
-        :return: URLs.
-        """
-
-        return self.britive.get(f'{self.base_url}/permissions/get-urls/{permission_id}')
-
-    def get_system_values(self, resource_type_id):
-        return self.britive.get(
-            f'{self.base_url}/permissions/system-defined-values', params={'resourceTypeId': resource_type_id}
-        )
-
     def create(
         self,
         resource_type_id: str,
@@ -91,24 +36,71 @@ class Permissions:
             'name': name,
             'resourceTypeId': resource_type_id,
         }
-        permissionId = self.britive.post(f'{self.base_url}/permissions', json=create_params)['permissionId']
-        urls = self.get_urls(permissionId)
-        requests.put(urls['checkinURL'], files={'file': checkin_file})
-        requests.put(urls['checkoutURL'], files={'file': checkout_file})
-        update_params = {
-            'checkinFileName': permissionId + '_checkin',
-            'checkinTimeLimit': 60,
-            'checkoutFileName': permissionId + '_checkout',
-            'checkoutTimeLimit': 60,
-            'description': description,
-            'inlineFileExists': True,
-            'isDraft': False,
-            'name': name,
-            'resourceTypeId': resource_type_id,
-            'variables': variables,
-        }
+        permission = self.britive.post(f'{self.base_url}/permissions', json=create_params)
 
-        return self.britive.put(f'{self.base_url}/permissions/{permissionId}', json=update_params)
+        if checkin_file and checkout_file:
+            permissionId = permission['permissionId']
+            urls = self.get_urls(permissionId)
+            requests.put(urls['checkinURL'], files={'file': checkin_file})
+            requests.put(urls['checkoutURL'], files={'file': checkout_file})
+            update_params = {
+                'checkinFileName': permissionId + '_checkin',
+                'checkinTimeLimit': 60,
+                'checkoutFileName': permissionId + '_checkout',
+                'checkoutTimeLimit': 60,
+                'description': description,
+                'inlineFileExists': True,
+                'isDraft': False,
+                'name': name,
+                'resourceTypeId': resource_type_id,
+                'variables': variables,
+            }
+            permission = self.britive.put(f'{self.base_url}/permissions/{permissionId}', json=update_params)
+            permission['permissionId'] = permissionId
+
+        return permission
+
+    def get(self, permission_id: str, version_id: str = None) -> dict:
+        """
+        Retrieve a permission by ID.
+
+        :param permission_id: ID of the permission.
+        :param version_id: ID of the version. Optional.
+        :return: Permission.
+        """
+
+        if version_id:
+            return self.britive.get(f'{self.base_url}/permissions/{permission_id}/{version_id}')
+
+        return self.britive.get(f'{self.base_url}/permissions/{permission_id}')
+
+    def get_system_values(self, resource_type_id: str):
+        return self.britive.get(
+            f'{self.base_url}/permissions/system-defined-values', params={'resourceTypeId': resource_type_id}
+        )
+
+    def get_urls(self, permission_id: str) -> dict:
+        """
+        Retrieve URLs for a permission.
+
+        :param permission_id: ID of the permission.
+        :return: URLs.
+        """
+
+        return self.britive.get(f'{self.base_url}/permissions/get-urls/{permission_id}')
+
+    def list(self, resource_type_id: str, search_text: str = None) -> list:
+        """
+        Retrieve all permissions for a resource type.
+
+        :param resource_type_id: ID of the resource type.
+        :param search_text: filter resource types by search text.
+        :return: List of permissions.
+        """
+
+        params = {**({'searchText': search_text} if search_text else {})}
+
+        return self.britive.get(f'{self.base_url}/resource-types/{resource_type_id}/permissions', params=params)
 
     def update(
         self,
@@ -170,3 +162,16 @@ class Permissions:
             )
 
         return self.britive.put(f'{self.base_url}/permissions/{permission_id}', json=params)
+
+    def delete(self, permission_id: str, version_id: str = None) -> None:
+        """
+        Delete a permission.
+
+        :param permission_id: ID of the permission.
+        :param version_id: Version of the permission. Optional.
+        :return: None
+        """
+
+        if version_id:
+            return self.britive.delete(f'{self.base_url}/permissions/{permission_id}/{version_id}')
+        return self.britive.delete(f'{self.base_url}/permissions/{permission_id}')

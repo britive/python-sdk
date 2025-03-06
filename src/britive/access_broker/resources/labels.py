@@ -20,6 +20,16 @@ class Labels:
 
         return self.britive.post(self.base_url, json=params)
 
+    def get(self, label_id: str) -> dict:
+        """
+        Retrieve a label by ID.
+
+        :param label_id: ID of the label.
+        :return: Label.
+        """
+
+        return self.britive.get(f'{self.base_url}/{label_id}')
+
     def list(self) -> list:
         """
         Retrieve all labels.
@@ -49,16 +59,6 @@ class Labels:
             params['values'] = values
 
         return self.britive.put(f'{self.base_url}/{label_id}', json=params)
-
-    def get(self, label_id: str) -> dict:
-        """
-        Retrieve a label by ID.
-
-        :param label_id: ID of the label.
-        :return: Label.
-        """
-
-        return self.britive.get(f'{self.base_url}/{label_id}')
 
     def delete(self, label_id: str) -> None:
         """
