@@ -31,15 +31,21 @@ class Policies:
         :param name: Name of the policy.
         :param access_type: Access type of the policy.
         :param condition: Condition of the policy.
-        :param members: List of member objects.
-            Example: [
-                {
-                    'id': 'string',
-                    'name': 'string',
-                    'memberType': 'User',
-                },
-                ...
-            ]
+        :param members: Dict of member type objects.
+            Example: {
+                users: [
+                    {'id': '...'}
+                ],
+                tags: [
+                    {'id': '...'}
+                ],
+                tokens: [
+                    {'id': '...'}
+                ],
+                serviceIdentities: [
+                    {'id': '...'}
+                ],
+            }
         :param is_active: Is active.
         :param is_draft: Is draft.
         :param is_read_only: Is read only.
@@ -103,15 +109,21 @@ class Policies:
         :param name: Name of the policy.
         :param access_type: Access type of the policy.
         :param condition: Condition of the policy.
-        :param members: List of member objects.
-            Example: [
-                {
-                    'id': 'string',
-                    'name': 'string',
-                    'memberType': 'User',
-                },
-                ...
-            ]
+        :param members: Dict of member type objects.
+            Example: {
+                users: [
+                    {'id': '...'}
+                ],
+                tags: [
+                    {'id': '...'}
+                ],
+                tokens: [
+                    {'id': '...'}
+                ],
+                serviceIdentities: [
+                    {'id': '...'}
+                ],
+            }
         :param is_active: Is active.
         :param is_draft: Is draft.
         :param is_read_only: Is read only.
