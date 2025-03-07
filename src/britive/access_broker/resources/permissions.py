@@ -11,8 +11,8 @@ class Permissions:
         resource_type_id: str,
         name: str,
         description: str = '',
-        checkin_file: bytes = None,
-        checkout_file: bytes = None,
+        checkin_file: str = None,
+        checkout_file: str = None,
         variables: list = None,
     ) -> dict:
         """
@@ -41,8 +41,16 @@ class Permissions:
         if checkin_file and checkout_file:
             permissionId = permission['permissionId']
             urls = self.get_urls(permissionId)
-            requests.put(urls['checkinURL'], files={'file': checkin_file})
-            requests.put(urls['checkoutURL'], files={'file': checkout_file})
+            try:
+                with open(checkin_file, 'rb') as checkin_upload:
+                    requests.put(urls['checkinURL'], data=checkin_upload)
+            except FileNotFoundError:
+                requests.put(urls['checkinURL'], data=checkin_file)
+            try:
+                with open(checkout_file, 'rb') as checkout_upload:
+                    requests.put(urls['checkoutURL'], data=checkout_upload)
+            except FileNotFoundError:
+                requests.put(urls['checkoutURL'], data=checkout_file)
             update_params = {
                 'checkinFileName': permissionId + '_checkin',
                 'checkinTimeLimit': 60,
@@ -107,9 +115,9 @@ class Permissions:
         permission_id: str,
         resource_type_id: str,
         name: str,
-        checkin_file: bytes = None,
+        checkin_file: str = None,
         checkin_time_limit: int = 60,
-        checkout_file: bytes = None,
+        checkout_file: str = None,
         checkout_time_limit: int = 60,
         **kwargs,
     ) -> dict:
@@ -151,8 +159,17 @@ class Permissions:
 
         if checkin_file and checkout_file:
             urls = self.get_urls(permission_id)
-            requests.put(urls['checkinURL'], files={'file': checkin_file})
-            requests.put(urls['checkoutURL'], files={'file': checkout_file})
+            try:
+                with open(checkin_file, 'rb') as checkin_upload:
+                    requests.put(urls['checkinURL'], data=checkin_upload)
+            except FileNotFoundError:
+                requests.put(urls['checkinURL'], data=checkin_file)
+            try:
+                with open(checkout_file, 'rb') as checkout_upload:
+                    requests.put(urls['checkoutURL'], data=checkout_upload)
+            except FileNotFoundError:
+                requests.put(urls['checkoutURL'], data=checkout_file)
+
             params.update(
                 checkinFileName=permission_id + '_checkin',
                 checkinURL=urls['checkinURL'],

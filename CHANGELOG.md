@@ -1,5 +1,27 @@
 # Change Log (v2.8.1+)
 
+## v4.1.3 [2025-03-07]
+
+__What's New:__
+
+* None
+
+__Enhancements:__
+
+* None
+
+__Bug Fixes:__
+
+* Upload `check[in|out]_file` content for `access_broker.resources.permissions.[create|update]` to avoid `requests` injected headers.
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v4.1.2 [2025-03-06]
 
 __What's New:__
