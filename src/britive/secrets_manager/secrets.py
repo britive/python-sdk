@@ -10,12 +10,13 @@ class Secrets:
         self,
         name: str,
         vault_id: str,
+        description: str = '',
+        file: bytes = None,
         path: str = '/',
-        static_secret_template_id: str = '7a5f41d8-f7af-46a0-88f7-edf0403607ae',
         secret_mode: str = 'shared',
         secret_nature: str = 'static',
+        static_secret_template_id: str = '7a5f41d8-f7af-46a0-88f7-edf0403607ae',
         value: dict = None,
-        file: bytes = None,
     ) -> dict:
         """
         Creates a new secret in the vault.
@@ -42,20 +43,22 @@ class Secrets:
             return self.britive.post(
                 f'{self.base_url}/{vault_id}/secrets?path={path}',
                 json={
-                    'name': name,
+                    'description': description,
                     'entityType': 'secret',
-                    'staticSecretTemplateId': static_secret_template_id,
+                    'name': name,
                     'secretMode': secret_mode,
                     'secretNature': secret_nature,
+                    'staticSecretTemplateId': static_secret_template_id,
                     'value': value,
                 },
             )
         secret_data = {
+            'description': description,
             'entityType': 'secret',
             'name': name,
-            'staticSecretTemplateId': static_secret_template_id,
             'secretMode': secret_mode,
             'secretNature': secret_nature,
+            'staticSecretTemplateId': static_secret_template_id,
             'value': value,
         }
         return self.britive.post_upload(
@@ -63,19 +66,39 @@ class Secrets:
             files={'file': file, 'secretData': (None, json.dumps(secret_data))},
         )
 
-    def update(self, vault_id: str, path: str = '/', value: dict = None) -> None:
+    def update(
+        self,
+        vault_id: str,
+        path: str = '/',
+        name: str = None,
+        description: str = None,
+        value: dict = None,
+        file: bytes = None,
+    ) -> None:
         """
         Updates a secret's value
 
         :param vault_id: ID of the vault to update the secret in
         :param path: path of the secret, include the / at the beginning
         :param value: value of the secret
+        :param file: file to upload as the secret
         :return: None
         """
-        if value is None:
-            value = {}
-
-        return self.britive.patch(f'{self.base_url}/{vault_id}/secrets?path={path}', json={'value': value})
+        secret_data = {
+            **({'description': description} if description else {}),
+            **({'name': name} if name else {}),
+        }
+        if value:
+            return self.britive.patch(
+                f'{self.base_url}/{vault_id}/secrets?path={path}',
+                json={**secret_data, **{'value': value}},
+            )
+        if file:
+            return self.britive.patch(
+                f'{self.base_url}/{vault_id}/secrets/file?path={path}',
+                files={'file': file, 'secretData': (None, json.dumps(secret_data))},
+            )
+        return None
 
     def rename(self, vault_id: str, path: str = '/', new_name: str = '') -> None:
         """
