@@ -173,6 +173,7 @@ class SystemPolicies:
         condition_as_dict: bool = False,
         stepup_auth: bool = False,
         always_prompt_stepup_auth: bool = False,
+        advanced_settings: list = None,
     ) -> dict:
         """
         Build a policy document given the provided inputs.
@@ -231,6 +232,7 @@ class SystemPolicies:
             `True` will result in the policy condition being returned/built as a python dictionary.
         :param stepup_auth: Indicates if step-up authentication is required to access the resource.
         :param always_prompt_stepup_auth: Indicates if previous successful verification should be remembered
+        :param advanced_settings: Optional Advanced Settings settings for this policy.
         :return: A dict which can be provided as a policy to `create` and `update`.
         """
 
@@ -283,6 +285,7 @@ class SystemPolicies:
                 'serviceIdentities': [{identifier_type: s} for s in service_identities] if service_identities else None,
                 'tokens': [{identifier_type: t} for t in tokens] if tokens else None,
             },
+            'settings': advanced_settings or [],
         }
 
         if not users:
