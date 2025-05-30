@@ -79,15 +79,15 @@ class Vaults:
 
         return self.britive.delete(f'{self.base_url}/{vault_id}')
 
-    def update(self, vault_id: str, **kwargs) -> None:
+    def update(self, vault_id: str, name: str, **kwargs) -> None:
         """
         Updates a vault.
 
         If not all kwargs a provided, the vault will update with the default values of the unprovided kwargs.
 
         :param vault_id: The ID of the vault.
+        :param name: The name of the vault.
         :param kwargs: Valid fields are...
-            name - required
             description
             rotationTime - time in days between key rotations
             encryptionAlgorithm - the encryption algorithm to use for the vault
@@ -96,7 +96,9 @@ class Vaults:
         :return: None
         """
 
-        return self.britive.patch(f'{self.base_url}/{vault_id}', json=kwargs)
+        params = {'name': name, **kwargs}
+
+        return self.britive.patch(f'{self.base_url}/{vault_id}', json=params)
 
     def rotate_keys(self) -> None:
         """

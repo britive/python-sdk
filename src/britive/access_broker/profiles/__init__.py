@@ -1,3 +1,5 @@
+from britive.application_management.advanced_settings import AdvancedSettings
+
 from .permissions import Permissions
 from .policies import Policies
 
@@ -6,6 +8,7 @@ class Profiles:
     def __init__(self, britive) -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/resource-manager/profiles'
+        self.advanced_settings = AdvancedSettings(britive, base_url='/resource-manager/profile/{}/advanced-settings')
         self.permissions = Permissions(britive)
         self.policies = Policies(britive)
 

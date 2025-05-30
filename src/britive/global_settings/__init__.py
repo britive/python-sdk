@@ -1,5 +1,6 @@
 from .banner import Banner
 from .firewall import Firewall
+from .itsm import Itsm
 from .notification_mediums import NotificationMediums
 
 
@@ -8,3 +9,4 @@ class GlobalSettings:
         self.banner = Banner(britive)
         self.firewall = Firewall(britive)
         self.notification_mediums = NotificationMediums(britive)
+        self.itsm = Itsm(britive)

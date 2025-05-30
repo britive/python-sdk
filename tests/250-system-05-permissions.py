@@ -16,7 +16,7 @@ def test_create(cached_system_level_permission):
     assert isinstance(cached_system_level_permission, dict)
     assert 'id' in cached_system_level_permission
     assert 'name' in cached_system_level_permission
-    assert cached_system_level_permission['name'].startswith('python-sdk')
+    assert cached_system_level_permission['name'].startswith('pysdk')
 
 
 def test_get_id(cached_system_level_permission):
@@ -25,14 +25,14 @@ def test_get_id(cached_system_level_permission):
     )
     assert 'id' in response
     assert 'name' in response
-    assert response['name'].startswith('python-sdk')
+    assert response['name'].startswith('pysdk')
 
 
 def test_get_name(cached_system_level_permission):
     response = britive.system.permissions.get(permission_identifier=cached_system_level_permission['name'])
     assert 'id' in response
     assert 'name' in response
-    assert response['name'].startswith('python-sdk')
+    assert response['name'].startswith('pysdk')
 
 
 def test_update_id(cached_system_level_permission):
@@ -50,7 +50,7 @@ def test_update_id(cached_system_level_permission):
     )
     assert 'id' in response
     assert 'name' in response
-    assert response['name'].startswith('python-sdk')
+    assert response['name'].startswith('pysdk')
     assert len(response['actions']) == 2
 
 
@@ -71,7 +71,7 @@ def test_update_name(cached_system_level_permission):
     )
     assert 'id' in response
     assert 'name' in response
-    assert response['name'].startswith('python-sdk')
+    assert response['name'].startswith('pysdk')
     assert len(response['actions']) == 3
 
 

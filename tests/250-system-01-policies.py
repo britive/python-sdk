@@ -16,14 +16,14 @@ def test_create(cached_system_level_policy):
     assert isinstance(cached_system_level_policy, dict)
     assert 'id' in cached_system_level_policy
     assert 'name' in cached_system_level_policy
-    assert cached_system_level_policy['name'].startswith('python-sdk')
+    assert cached_system_level_policy['name'].startswith('pysdktest')
 
 
 def test_create_default(cached_system_level_policy_condition_as_default_json_str):
     assert isinstance(cached_system_level_policy_condition_as_default_json_str, dict)
     assert 'id' in cached_system_level_policy_condition_as_default_json_str
     assert 'name' in cached_system_level_policy_condition_as_default_json_str
-    assert cached_system_level_policy_condition_as_default_json_str['name'].startswith('python-sdk-')
+    assert cached_system_level_policy_condition_as_default_json_str['name'].startswith('pysdktest')
     assert 'condition' in cached_system_level_policy_condition_as_default_json_str
     assert isinstance(cached_system_level_policy_condition_as_default_json_str['condition'], str)
 
@@ -32,14 +32,14 @@ def test_create_condition_dictionary(cached_system_level_policy_condition_as_dic
     assert isinstance(cached_system_level_policy_condition_as_dictionary, dict)
     assert 'id' in cached_system_level_policy_condition_as_dictionary
     assert 'name' in cached_system_level_policy_condition_as_dictionary
-    assert cached_system_level_policy_condition_as_dictionary['name'].startswith('python-sdk-')
+    assert cached_system_level_policy_condition_as_dictionary['name'].startswith('pysdktest')
     assert 'condition' in cached_system_level_policy_condition_as_dictionary
     assert isinstance(cached_system_level_policy_condition_as_dictionary['condition'], dict)
 
 
 def test_create_single_nm(cached_tag):
     policy = britive.system.policies.build(
-        name='python-sdk',
+        name='pysdktest',
         tags=[cached_tag['name']],
         roles=['UserViewRole'],
         approval_notification_medium='Email',
@@ -48,12 +48,12 @@ def test_create_single_nm(cached_tag):
 
     assert isinstance(policy, dict)
     assert 'name' in policy
-    assert policy['name'].startswith('python-sdk')
+    assert policy['name'].startswith('pysdktest')
 
 
 def test_create_multiple_nm(cached_tag):
     policy = britive.system.policies.build(
-        name='python-sdk',
+        name='pysdktest',
         tags=[cached_tag['name']],
         roles=['UserViewRole'],
         approval_notification_medium=['Email'],
@@ -62,14 +62,14 @@ def test_create_multiple_nm(cached_tag):
 
     assert isinstance(policy, dict)
     assert 'name' in policy
-    assert policy['name'].startswith('python-sdk')
+    assert policy['name'].startswith('pysdktest')
 
 
 def test_get_id(cached_system_level_policy):
     response = britive.system.policies.get(policy_identifier=cached_system_level_policy['id'], identifier_type='id')
     assert 'id' in response
     assert 'name' in response
-    assert response['name'].startswith('python-sdk')
+    assert response['name'].startswith('pysdktest')
 
 
 def test_policies_condition_created_as_str_get_formatted_json(cached_system_level_policy_condition_as_default_json_str):
@@ -120,7 +120,7 @@ def test_get_name(cached_system_level_policy):
     response = britive.system.policies.get(policy_identifier=cached_system_level_policy['name'])
     assert 'id' in response
     assert 'name' in response
-    assert response['name'].startswith('python-sdk')
+    assert response['name'].startswith('pysdktest')
 
 
 def test_update_id(cached_system_level_policy, cached_tag):
@@ -143,7 +143,7 @@ def test_update_id(cached_system_level_policy, cached_tag):
     response = britive.system.policies.get(policy_identifier=cached_system_level_policy['id'], identifier_type='id')
     assert 'id' in response
     assert 'name' in response
-    assert response['name'].startswith('python-sdk')
+    assert response['name'].startswith('pysdktest')
     assert len(response['roles']) == 2
 
 
@@ -162,7 +162,7 @@ def test_update_name(cached_system_level_policy, cached_tag):
     response = britive.system.policies.get(policy_identifier=cached_system_level_policy['name'], identifier_type='name')
     assert 'id' in response
     assert 'name' in response
-    assert response['name'].startswith('python-sdk')
+    assert response['name'].startswith('pysdktest')
     assert len(response['roles']) == 3
 
 

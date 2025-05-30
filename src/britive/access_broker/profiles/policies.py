@@ -33,16 +33,16 @@ class Policies:
         :param condition: Condition of the policy.
         :param members: Dict of member type objects.
             Example: {
-                users: [
+                'users': [
                     {'id': '...'}
                 ],
-                tags: [
+                'tags': [
                     {'id': '...'}
                 ],
-                tokens: [
+                'tokens': [
                     {'id': '...'}
                 ],
-                serviceIdentities: [
+                'serviceIdentities': [
                     {'id': '...'}
                 ],
             }
@@ -111,16 +111,16 @@ class Policies:
         :param condition: Condition of the policy.
         :param members: Dict of member type objects.
             Example: {
-                users: [
+                'users': [
                     {'id': '...'}
                 ],
-                tags: [
+                'tags': [
                     {'id': '...'}
                 ],
-                tokens: [
+                'tokens': [
                     {'id': '...'}
                 ],
-                serviceIdentities: [
+                'serviceIdentities': [
                     {'id': '...'}
                 ],
             }

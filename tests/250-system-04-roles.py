@@ -16,21 +16,21 @@ def test_create(cached_system_level_role):
     assert isinstance(cached_system_level_role, dict)
     assert 'id' in cached_system_level_role
     assert 'name' in cached_system_level_role
-    assert cached_system_level_role['name'].startswith('python-sdk')
+    assert cached_system_level_role['name'].startswith('pysdk')
 
 
 def test_get_id(cached_system_level_role):
     response = britive.system.roles.get(role_identifier=cached_system_level_role['id'], identifier_type='id')
     assert 'id' in response
     assert 'name' in response
-    assert response['name'].startswith('python-sdk')
+    assert response['name'].startswith('pysdk')
 
 
 def test_get_name(cached_system_level_role):
     response = britive.system.roles.get(role_identifier=cached_system_level_role['name'])
     assert 'id' in response
     assert 'name' in response
-    assert response['name'].startswith('python-sdk')
+    assert response['name'].startswith('pysdk')
 
 
 def test_update_id(cached_system_level_role):
@@ -53,7 +53,7 @@ def test_update_id(cached_system_level_role):
     response = britive.system.roles.get(role_identifier=cached_system_level_role['id'], identifier_type='id')
     assert 'id' in response
     assert 'name' in response
-    assert response['name'].startswith('python-sdk')
+    assert response['name'].startswith('pysdk')
     assert len(response['permissions']) == 2
 
 
@@ -72,7 +72,7 @@ def test_update_name(cached_system_level_role):
     response = britive.system.roles.get(role_identifier=cached_system_level_role['name'], identifier_type='name')
     assert 'id' in response
     assert 'name' in response
-    assert response['name'].startswith('python-sdk')
+    assert response['name'].startswith('pysdk')
     assert len(response['permissions']) == 3
 
 
