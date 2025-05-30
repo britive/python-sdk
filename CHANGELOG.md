@@ -1,5 +1,32 @@
 # Change Log (v2.8.1+)
 
+## v4.2.0 [2025-05-30]
+
+__What's New:__
+
+* Added `advanced_settings` functionality to:
+	* `application_management`
+	* `application_management.profiles`
+	* `access_broker.profiles`
+* Added `global_settings.itsm` functionality.
+
+__Enhancements:__
+
+* Added missing params for `secrets_manager.[secrets|vaults]` and `file` updates.
+
+__Bug Fixes:__
+
+* None
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* Updated tests to use uniform naming convention.
+* Refactored `application_management.profiles` to break out classes for added clarity.
+
 ## v4.1.3 [2025-03-07]
 
 __What's New:__
