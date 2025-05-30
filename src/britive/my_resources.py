@@ -504,3 +504,29 @@ class MyResources:
         ids = self._get_profile_and_resource_ids_given_names(profile_name=profile_name, resource_name=resource_name)
 
         return self.get_profile_settings(profile_id=ids['profile_id'], resource_id=ids['resource_id'])
+
+    def search_tickets(self, profile_id: str, ticket_type: str, search_text: str = '') -> dict:
+        """
+        Search ITSM tickets for a profile.
+
+        :param profile_id: The ID of the profile.
+        :param ticket_type: The type of ITSM ticket.
+        :param search_text: Optional text to search for in tickets.
+        :return: Dict of the search results.
+        """
+
+        params = {'searchText': search_text} if search_text else {}
+
+        return self.britive.get(f'{self.base_url}/profiles/{profile_id}/itsm/{ticket_type}/search', params=params)
+
+    def validate_ticket(self, profile_id: str, ticket_type: str, ticket_id: str) -> dict:
+        """
+        Validate an ITSM ticket using the ITSM integration settings for a profile.
+
+        :param profile_id: The ID of the profile.
+        :param ticket_type: The type of ticket to validate.
+        :param ticket_id: The ID of the ticket to validate.
+        :return: Dict of the validation results.
+        """
+
+        return self.britive.get(f'{self.base_url}/profiles/{profile_id}/itsm/{ticket_type}/validate/{ticket_id}')

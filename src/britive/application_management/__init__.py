@@ -1,5 +1,6 @@
 from .access_builder import AccessBuilderSettings
 from .accounts import Accounts
+from .advanced_settings import AdvancedSettings
 from .applications import Applications
 from .environment_groups import EnvironmentGroups
 from .environments import Environments
@@ -14,6 +15,7 @@ class ApplicationManagement:
     def __init__(self, britive) -> None:
         self.access_builder = AccessBuilderSettings(britive)
         self.accounts = Accounts(britive)
+        self.advanced_settings = AdvancedSettings(britive)
         self.applications = Applications(britive)
         self.environment_groups = EnvironmentGroups(britive)
         self.environments = Environments(britive)

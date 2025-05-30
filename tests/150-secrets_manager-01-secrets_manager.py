@@ -22,7 +22,7 @@ def test_get_vault(cached_vault):
 
 
 def test_update_vault(cached_vault):
-    britive.secrets_manager.vaults.update(cached_vault['id'], description='12345')
+    britive.secrets_manager.vaults.update(vault_id=cached_vault['id'], name=cached_vault['name'], description='12345')
     vault = britive.secrets_manager.vaults.get_vault_by_id(cached_vault['id'])
     assert vault['description'] == '12345'
 
@@ -143,6 +143,7 @@ def test_resources_get():
 def test_rotate_keys(cached_vault):
     initial_time = britive.secrets_manager.vaults.get_vault_by_id(cached_vault['id'])['lastRotation']
     britive.secrets_manager.vaults.rotate_keys()
+    sleep(3)
     current_time = britive.secrets_manager.vaults.get_vault_by_id(cached_vault['id'])['lastRotation']
     assert initial_time != current_time
     tries = 0

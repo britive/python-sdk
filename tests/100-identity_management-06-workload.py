@@ -18,7 +18,7 @@ def test_identity_provider_create_aws(cached_workload_identity_provider_aws):
 def test_identity_provider_create_oidc(cached_workload_identity_provider_oidc):
     assert isinstance(cached_workload_identity_provider_oidc, dict)
     assert 'id' in cached_workload_identity_provider_oidc
-    assert cached_workload_identity_provider_oidc['name'].startswith('python-sdk-oidc')
+    assert cached_workload_identity_provider_oidc['name'].startswith('pysdktest-oidc')
     assert isinstance(cached_workload_identity_provider_oidc['attributesMap'], list)
     assert len(cached_workload_identity_provider_oidc['attributesMap']) == 1
 
@@ -153,7 +153,7 @@ def test_service_identity_assign_and_unassign(
 def test_identity_provider_delete(cached_workload_identity_provider_oidc, cached_workload_identity_provider_aws):
     try:
         # we do not want to delete the pre-existing aws provider
-        if cached_workload_identity_provider_aws['name'].startswith('python-sdk-aws'):
+        if cached_workload_identity_provider_aws['name'].startswith('pysdktest-aws'):
             aws = britive.identity_management.workload.identity_providers.delete(
                 workload_identity_provider_id=cached_workload_identity_provider_aws['id']
             )

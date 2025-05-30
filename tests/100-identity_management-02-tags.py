@@ -78,10 +78,10 @@ def test_disable(cached_tag):
 
 def test_update(cached_tag):
     r = str(random.randint(0, 1000000))
-    tag = britive.identity_management.tags.update(cached_tag['userTagId'], name=f'testpythonapteiwrappertag-{r}')
+    tag = britive.identity_management.tags.update(cached_tag['userTagId'], name=f'pysdktest-tag-{r}')
     assert isinstance(tag, dict)
     assert set(tag_keys).issubset(tag.keys())
-    assert tag['name'] == f'testpythonapteiwrappertag-{r}'
+    assert tag['name'] == f'pysdktest-tag-{r}'
     # set it back for downstream processes
     britive.identity_management.tags.update(cached_tag['userTagId'], name=cached_tag['name'])
 
