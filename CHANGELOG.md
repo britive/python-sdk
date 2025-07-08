@@ -1,5 +1,27 @@
 # Change Log (v2.8.1+)
 
+## v4.3.0 [2025-07-08]
+
+__What's New:__
+
+* Added `security.active_sessions` functionality to allow administrative session management.
+
+__Enhancements:__
+
+* None
+
+__Bug Fixes:__
+
+* None
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v4.2.0 [2025-05-30]
 
 __What's New:__
