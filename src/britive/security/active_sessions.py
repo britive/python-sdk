@@ -12,7 +12,7 @@ class ActiveSessions:
 
         return self.britive.get(self.base_url)
 
-    def list(self, user_id: str) -> list:
+    def list_users_sessions(self, user_id: str) -> list:
         """
         Retrieve a list of the active sessions of a user
 
@@ -22,39 +22,21 @@ class ActiveSessions:
 
         return self.britive.get(f'{self.base_url}/{user_id}')
 
-    def delete(self, user_id: str, profile_id: str) -> None:
+    def checkin(self, user_id: str, profile_ids: list = None) -> None:
         """
-        Kills a user's session.
+        Checks in a user's session.
 
         :param user_id: The target user
         :param profile_id: The target profile that has been checked out
         :return: None
         """
 
-        sessions = self.britive.get(f'{self.base_url}/{user_id}')
-        target = None
-
-        for item in sessions:
-            if item['papId'] == profile_id:
-                target = item['transactionId']
-                self.britive.delete(f'{self.base_url}/{target}')
-
-    def delete_all(self) -> None:
-        """
-        Kills all users' sessions
-
-        :return: None
-        """
-
-        users = self.britive.get(self.base_url)
-        total_sessions = []
-
-        for user in users:
-            user_id = user['userId']
+        if not profile_ids:
+            print('No profiles checked in due to empty profile_ids')
+        else:
             sessions = self.britive.get(f'{self.base_url}/{user_id}')
-            for session in sessions:
-                total_sessions.append(session)
-
-        for item in total_sessions:
-            target = item['transactionId']
-            self.britive.delete(f'{self.base_url}/{target}')
+            target = None
+            for item in sessions:
+                if item['papId'] in profile_ids:
+                    target = item['transactionId']
+                    self.britive.delete(f'{self.base_url}/{target}')
