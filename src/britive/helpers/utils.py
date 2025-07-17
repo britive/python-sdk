@@ -12,6 +12,7 @@ from britive.federation_providers import (
     AzureSystemAssignedManagedIdentityFederationProvider,
     AzureUserAssignedManagedIdentityFederationProvider,
     BitbucketFederationProvider,
+    GcpFederationProvider,
     GithubFederationProvider,
     GitlabFederationProvider,
     SpaceliftFederationProvider,
@@ -127,6 +128,9 @@ def source_federation_token(provider: str, tenant: Optional[str] = None, duratio
         `azuresmi-<audience>` and `azureumi-<client-id>|<audience>`. If no audience is provided the default audience
          of `https://management.azure.com/` will be used.
 
+        For the GCP provider it is possible to provide an OIDC audience value via
+        `gcp-<audience>`. If no audience is provided the default audience of https://accounts.google.com/ will be used.
+
         For the Github provider it is possible to provide an OIDC audience value via `github-<audience>`. If no
         audience is provided the default Github audience value will be used.
 
@@ -150,6 +154,7 @@ def source_federation_token(provider: str, tenant: Optional[str] = None, duratio
             profile=safe_list_get(helper, 1), tenant=tenant, duration=duration_seconds
         ).get_token(),
         'bitbucket': lambda: BitbucketFederationProvider().get_token(),
+        'gcp': lambda: GcpFederationProvider().get_token(audience=safe_list_get(helper, 1)).get_token(),
         'github': lambda: GithubFederationProvider(audience=safe_list_get(helper, 1)).get_token(),
         'gitlab': lambda: GitlabFederationProvider(token_env_var=safe_list_get(helper, 1)).get_token(),
         'spacelift': lambda: SpaceliftFederationProvider().get_token(),
