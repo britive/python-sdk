@@ -252,6 +252,8 @@ class Policies:
             If `approval_notification_medium` is set then either `approver_users` or `approver_tags` is required.
         :param manager_condition: Optional condition to enable requiring user's manager approval. Valid values are
             `Any` or `All` or `Manager`. `Any` corresponds to manager approval required, `All` corresponds to
+            manager and approver_users/approver_tags approval required, and `Manager` corresponds to just the manager's
+            approval required
         :param access_type: The type of access this policy provides. Valid values are `Allow` and `Deny`. Defaults
             to `Allow`.
         :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
