@@ -25,6 +25,7 @@ class Policies:
         access_validity_time: int = 120,
         approver_users: list = None,
         approver_tags: list = None,
+        manager_condition: str = '',
         access_type: str = 'Allow',
         identifier_type: str = 'name',
         condition_as_dict: bool = False,
@@ -73,6 +74,10 @@ class Policies:
             If `approval_notification_medium` is set then either `approver_users` or `approver_tags` is required.
         :param approver_tags: Optional list of tag names who are considered approvers.
             If `approval_notification_medium` is set then either `approver_users` or `approver_tags` is required.
+        :param manager_condition: Optional condition to enable requiring user's manager approval. Valid values are
+            `Any` or `All` or `Manager`. `Any` corresponds to manager approval required, `All` corresponds to
+            manager and approver_users/approver_tags approval required, and `Manager` corresponds to just the manager's
+            approval required
         :param access_type: The type of access this policy provides. Valid values are `Allow` and `Deny`. Defaults
             to `Allow`.
         :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
@@ -105,6 +110,7 @@ class Policies:
             access_validity_time=access_validity_time,
             approver_users=approver_users,
             approver_tags=approver_tags,
+            manager_condition=manager_condition,
             access_type=access_type,
             identifier_type=identifier_type,
             condition_as_dict=condition_as_dict,
