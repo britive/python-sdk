@@ -255,7 +255,7 @@ class SystemPolicies:
             if not approver_users and not approver_tags and not manager_condition:
                 raise ValueError(
                     'when approval is required either '
-                    'approver_tags or approver_users or manager_condition or both all be provided'
+                    'approver_tags, approver_users or manager_condition[`Manager`] must be provided'
                 )
             approval_condition = {
                 'notificationMedium': approval_notification_medium,
