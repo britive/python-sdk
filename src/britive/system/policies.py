@@ -168,6 +168,7 @@ class SystemPolicies:
         access_validity_time: int = 120,
         approver_users: list = None,
         approver_tags: list = None,
+        manager_condition: str = '',
         access_type: str = 'Allow',
         identifier_type: str = 'name',
         condition_as_dict: bool = False,
@@ -221,6 +222,10 @@ class SystemPolicies:
             If `approval_notification_medium` is set then either `approver_users` or `approver_tags` is required.
         :param approver_tags: Optional list of tag names who are considered approvers.
             If `approval_notification_medium` is set then either `approver_users` or `approver_tags` is required.
+        :param manager_condition: Optional condition to enable requiring user's manager approval. Valid values are
+            `Any` or `All` or `Manager`. `Any` corresponds to manager approval required, `All` corresponds to
+            manager and approver_users/approver_tags approval required, and `Manager` corresponds to just the manager's
+            approval required
         :param access_type: The type of access this policy provides. Valid values are `Allow` and `Deny`. Defaults
             to `Allow`.
         :param identifier_type: Valid values are `id` or `name`. Defaults to `name`. Represents which type of
@@ -247,9 +252,10 @@ class SystemPolicies:
 
         # handle approval logic
         if approval_notification_medium:
-            if not approver_users and not approver_tags:
+            if not approver_users and not approver_tags and not manager_condition:
                 raise ValueError(
-                    'when approval is required either approver_tags or approver_users or both must be provided'
+                    'when approval is required either '
+                    'approver_tags or approver_users or manager_condition or both all be provided'
                 )
             approval_condition = {
                 'notificationMedium': approval_notification_medium,
@@ -263,6 +269,8 @@ class SystemPolicies:
                 approval_condition['approvers'].pop('userIds')
             if not approver_tags:
                 approval_condition['approvers'].pop('tags')
+            if manager_condition:
+                approval_condition['managerApproval'] = {'required': True, 'condition': manager_condition}
 
             condition['approval'] = approval_condition
 
