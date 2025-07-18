@@ -17,7 +17,8 @@ class AzureSystemAssignedManagedIdentityFederationProvider(FederationProvider):
             return f'OIDC::{token}'
         except ImportError as e:
             raise MissingAzureDependency(
-                '`azure-identity` package required to use the azure managed identity federation provider'
+                'azure dependency package required to use the azure managed identity federation provider, '
+                'install with `pip install britive[azure]'
             ) from e
         except CredentialUnavailableError as e:
             msg = (

@@ -49,6 +49,8 @@ class MethodNotAllowed(BritiveException):
 class MissingAzureDependency(BritiveException):
     pass
 
+class MissingGcpDependency(BritiveException):
+    pass
 
 class NoSecretsVaultFound(BritiveException):
     pass
@@ -57,6 +59,8 @@ class NoSecretsVaultFound(BritiveException):
 class NotExecutingInAzureEnvironment(BritiveException):
     pass
 
+class NotExecutingInGcpEnvironment(BritiveException):
+    pass
 
 class NotExecutingInBitbucketEnvironment(BritiveException):
     pass

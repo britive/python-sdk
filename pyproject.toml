@@ -33,6 +33,7 @@ keywords = ["britive", "cpam", "identity", "jit"]
 
 [project.optional-dependencies]
 azure = ["azure-identity"]
+gcp = ["google-auth"]
 
 [project.urls]
 Homepage = "https://www.britive.com"
