@@ -270,7 +270,7 @@ class SystemPolicies:
             if not approver_tags:
                 approval_condition['approvers'].pop('tags')
             if manager_condition:
-                approval_condition['managerApproval'] = {'required': True, 'condition': manager_condition}
+                approval_condition['managerApproval'] = {'required': True, 'condition': manager_condition.capitalize()}
 
             condition['approval'] = approval_condition
 
