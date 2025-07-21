@@ -1,5 +1,5 @@
 import json
-from typing import Union
+from typing import Union, Literal
 
 
 class SystemPolicies:
@@ -168,7 +168,7 @@ class SystemPolicies:
         access_validity_time: int = 120,
         approver_users: list = None,
         approver_tags: list = None,
-        manager_condition: str = '',
+        manager_condition: Literal['All', 'Any', 'Manager'] = '',
         access_type: str = 'Allow',
         identifier_type: str = 'name',
         condition_as_dict: bool = False,
@@ -252,11 +252,8 @@ class SystemPolicies:
 
         # handle approval logic
         if approval_notification_medium:
-            if not approver_users and not approver_tags and not manager_condition:
-                raise ValueError(
-                    'when approval is required either '
-                    'approver_tags, approver_users or manager_condition[`Manager`] must be provided'
-                )
+            if not approver_users and not approver_tags and manager_condition.capitalize() != 'Manager':
+                raise ValueError('when approval is required either approver_tags or approver_users must be provided')
             approval_condition = {
                 'notificationMedium': approval_notification_medium,
                 'timeToApprove': time_to_approve,

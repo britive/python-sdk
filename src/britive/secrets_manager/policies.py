@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Literal
 
 
 class PasswordPolicies:
@@ -201,7 +201,7 @@ class Policies:
         access_validity_time: int = 120,
         approver_users: list = None,
         approver_tags: list = None,
-        manager_condition: str = '',
+        manager_condition: Literal['All', 'Any', 'Manager'] = '',
         access_type: str = 'Allow',
         identifier_type: str = 'name',
         condition_as_dict: bool = False,
