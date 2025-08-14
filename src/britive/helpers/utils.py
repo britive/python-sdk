@@ -26,7 +26,8 @@ def check_response_for_error(status_code, content) -> None:
             if content.get('details'):
                 message += f' - {content.get("details")}'
         else:
-            message = f'{status_code} - {content}'
+            error_code = status_code
+            message = f'{status_code}{" - " + content if content else ""}'
         raise unauthorized_code_map.get(
             error_code,
             bad_request_code_map.get(
