@@ -1,5 +1,27 @@
 # Change Log (v2.8.1+)
 
+## v4.3.1 [2025-08-14]
+
+__What's New:__
+
+* None
+
+__Enhancements:__
+
+* None
+
+__Bug Fixes:__
+
+* Fixed unbound variable error when `check_response_for_error` is run against generic HTTP error.
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v4.3.0 [2025-07-08]
 
 __What's New:__
