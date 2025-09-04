@@ -126,7 +126,7 @@ class Applications:
             data['propertyTypes'].append({'name': key, 'value': value, 'defaultValue': value})
         return self.britive.patch(f'{self.base_url}/{application_id}/properties', json=data)
 
-    def scan(self, application_id: str) -> dict:
+    def scan(self, application_id: str, org_scan_only: bool = False) -> dict:
         """
         Initiate a scan of the application.
 
@@ -143,10 +143,11 @@ class Applications:
         where it is initiated.
 
         :param application_id: The ID of the application to scan.
+        :param org_scan_only: Optionally only scan the organization for Azure and GCP.
         :return: Details of the scan that was initiated.
         """
 
-        return self.britive.application_management.scans.scan(application_id=application_id)
+        return self.britive.application_management.scans.scan(application_id=application_id, org_scan_only=org_scan_only)
 
     def delete(self, application_id: str) -> None:
         """

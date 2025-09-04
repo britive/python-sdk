@@ -1,5 +1,27 @@
 # Change Log (v2.8.1+)
 
+## v4.3.2 [2025-09-04]
+
+__What's New:__
+
+* None
+
+__Enhancements:__
+
+* Added `org_scan_only` parameter to `application_management.[applications|scans].scan` allowing organization only scans of Azure and GCP. 
+
+__Bug Fixes:__
+
+* None
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v4.3.1 [2025-08-14]
 
 __What's New:__
