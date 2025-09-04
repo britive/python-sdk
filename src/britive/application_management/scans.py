@@ -3,7 +3,7 @@ class Scans:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/apps'
 
-    def scan(self, application_id: str, environment_id: str = None) -> dict:
+    def scan(self, application_id: str, environment_id: str = None, org_scan_only: bool = False) -> dict:
         """
         Initiate a scan of the provided application and optionally provided environment.
 
@@ -18,12 +18,13 @@ class Scans:
 
         :param application_id: The ID of the application to scan.
         :param environment_id: Optionally the ID of the environment to scan.
+        :param org_scan_only: Optionally only scan the organization for Azure and GCP.
         :return: Details of the scan that was initiated.
         """
 
         if environment_id:
             return self.britive.post(f'{self.base_url}/{application_id}/environments/{environment_id}/scans')
-        return self.britive.post(f'{self.base_url}/{application_id}/scan')
+        return self.britive.post(f'{self.base_url}/{application_id}/scan', params={'orgScanOnly': org_scan_only})
 
     def status(self, task_id: str) -> dict:
         """
