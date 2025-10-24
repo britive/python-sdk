@@ -1,5 +1,29 @@
 # Change Log (v2.8.1+)
 
+## v4.4.0 [2025-10-24]
+
+__What's New:__
+
+* Added Manager Approval support to `[application_management|secrets_manager|system]`.
+* Added GCP Federation Provider.
+
+__Enhancements:__
+
+* Added `manager_condition` parameter to `[application_management.profiles|secrets_manager|system].policies.build`.
+* Drop `socket` usage to speed up response times in specific scenarios, e.g., Windows DNS in WSL environments.
+
+__Bug Fixes:__
+
+* None
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* Test naming convention updates.
+
 ## v4.3.2 [2025-09-04]
 
 __What's New:__
