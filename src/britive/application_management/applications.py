@@ -147,7 +147,9 @@ class Applications:
         :return: Details of the scan that was initiated.
         """
 
-        return self.britive.application_management.scans.scan(application_id=application_id, org_scan_only=org_scan_only)
+        return self.britive.application_management.scans.scan(
+            application_id=application_id, org_scan_only=org_scan_only
+        )
 
     def delete(self, application_id: str) -> None:
         """

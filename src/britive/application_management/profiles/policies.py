@@ -1,5 +1,5 @@
 import json
-from typing import Union, Literal
+from typing import Literal, Union
 
 
 class Policies:

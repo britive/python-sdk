@@ -3,10 +3,10 @@ from .azure_system_assigned_managed_identity import AzureSystemAssignedManagedId
 from .azure_user_assigned_managed_identity import AzureUserAssignedManagedIdentityFederationProvider
 from .bitbucket import BitbucketFederationProvider
 from .federation_provider import FederationProvider
+from .gcp import GcpFederationProvider
 from .github import GithubFederationProvider
 from .gitlab import GitlabFederationProvider
 from .spacelift import SpaceliftFederationProvider
-from .gcp import GcpFederationProvider
 
 
 class FederationProviders:
