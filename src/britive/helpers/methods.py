@@ -3,12 +3,12 @@ class HelperMethods:
         self.britive = britive
 
     def get_profile_and_environment_ids_given_names(
-        self, profile_name: str, environment_name: str, application_name: str = None
+        self, profile_name: str, environment_name: str, application_name: str = None, headers: dict = None
     ) -> dict:
         ids = None
         environment_found = False
         profile_found = False
-        for app in self.britive.get(f'{self.britive.base_url}/access'):
+        for app in self.britive.get(f'{self.britive.base_url}/access', headers=headers):
             if application_name and app['appName'].lower() != application_name.lower():
                 continue
             if not (
