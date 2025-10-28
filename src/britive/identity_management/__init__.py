@@ -8,6 +8,7 @@ from .workload import Workload
 
 class IdentityManagement:
     def __init__(self, britive) -> None:
+        self.ai_identities = ServiceIdentities(britive, identity_type='AIIdentity')
         self.identity_attributes = IdentityAttributes(britive)
         self.identity_providers = IdentityProviders(britive)
         self.service_identities = ServiceIdentities(britive)
