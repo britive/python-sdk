@@ -1,7 +1,8 @@
-import socket
+import warnings
 from typing import Optional, Union
 
 import requests
+import urllib3
 
 from britive.exceptions import BritiveException, InvalidFederationProvider, allowed_exceptions
 from britive.exceptions.badrequest import bad_request_code_map
@@ -60,18 +61,20 @@ def pagination_type(headers, result) -> str:
     return 'none'
 
 
-def parse_tenant(tenant: str) -> str:
-    domain = tenant.replace('https://', '').replace('http://', '').split('/')[0]  # remove scheme and paths
+def parse_tenant(tenant: str, timeout: float = 3) -> str:
+    if not (domain := urllib3.util.parse_url(tenant).host).endswith('britive-app.com'):
+        domain = f'{domain}.britive-app.com'
     try:
-        socket.getaddrinfo(host=domain, port=443)  # if success then a full domain was provided
+        requests.head(f'https://{domain}/api/health', timeout=timeout)
         return domain
-    except socket.gaierror:  # assume just the tenant name was provided (originally the only supported method)
-        resolved_domain = f'{tenant}.britive-app.com'
-        try:
-            socket.getaddrinfo(host=resolved_domain, port=443)  # validate the hostname is real
-            return resolved_domain  # and if so set the tenant accordingly
-        except socket.gaierror as e:
-            raise InvalidTenantError(f'Invalid tenant provided: {tenant}. DNS resolution failed.') from e
+    except requests.exceptions.Timeout:
+        original = warnings.formatwarning
+        warnings.formatwarning = lambda msg, *a, **k: f'{msg}\n'
+        warnings.warn(f'WARNING: Tenant validation timed out, but domain structure is valid: [{domain}]')
+        warnings.formatwarning = original
+        return domain
+    except requests.exceptions.ConnectionError as e:
+        raise InvalidTenantError(f'Invalid tenant provided: {tenant}. Domain resolution failed.') from e
 
 
 def response_has_no_content(response) -> bool:
