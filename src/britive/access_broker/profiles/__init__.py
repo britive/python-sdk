@@ -12,17 +12,25 @@ class Profiles:
         self.permissions = Permissions(britive)
         self.policies = Policies(britive)
 
-    def create(self, name: str, description: str = '', expiration_duration: int = 900000) -> dict:
+    def create(
+        self, name: str, description: str = '', expiration_duration: int = 900000, impersonation: bool = False
+    ) -> dict:
         """
         Create a new profile.
 
         :param name: Name of the profile.
         :param description: Description of the profile.
         :param expiration_duration: Expiration duration of the profile.
+        :param impersonation: Allow impersonation of the profile.
         :return: Created profile.
         """
 
-        params = {'name': name, 'description': description, 'expirationDuration': expiration_duration}
+        params = {
+            'name': name,
+            'delegationEnabled': impersonation,
+            'description': description,
+            'expirationDuration': expiration_duration,
+        }
 
         return self.britive.post(f'{self.base_url}', json=params)
 
@@ -46,7 +54,12 @@ class Profiles:
         return self.britive.get(self.base_url, params={})
 
     def update(
-        self, profile_id: str, name: str = None, description: str = None, expiration_duration: int = None
+        self,
+        profile_id: str,
+        name: str = None,
+        description: str = None,
+        expiration_duration: int = None,
+        impersonation: bool = None,
     ) -> dict:
         """
         Update a profile.
@@ -55,6 +68,7 @@ class Profiles:
         :param name: Name of the profile.
         :param description: Description of the profile.
         :param expiration_duration: Expiration duration of the profile.
+        :param impersonation: Allow impersonation of the profile.
         :return: Updated profile.
         """
 
@@ -66,6 +80,9 @@ class Profiles:
             params['description'] = description
         if expiration_duration:
             params['expirationDuration'] = expiration_duration
+        params['delegationEnabled'] = (
+            self.get(profile_id=profile_id).get('delegationEnabled') if impersonation is None else impersonation
+        )
 
         return self.britive.patch(f'{self.base_url}/{profile_id}', json=params)
 
