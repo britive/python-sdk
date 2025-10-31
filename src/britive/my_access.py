@@ -90,7 +90,7 @@ class MyAccess:
         :param headers: Any additional headers
             Example:
                 {
-                    "X-On-Behalf-Of": "Bearer ...",
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
                     ...
                 }
         :return: List of checked out profiles.
@@ -117,7 +117,7 @@ class MyAccess:
         :param headers: Any additional headers
             Example:
                 {
-                    "X-On-Behalf-Of": "Bearer ...",
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
                     ...
                 }
         :return: Details of the given profile/transaction.
@@ -373,7 +373,7 @@ class MyAccess:
         :param headers: Any additional headers
             Example:
                 {
-                    "X-On-Behalf-Of": "Bearer ...",
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
                     ...
                 }
         :param include_credentials: True if tokens should be included in the response. False if the caller wishes to
@@ -444,7 +444,7 @@ class MyAccess:
         :param headers: Any additional headers
             Example:
                 {
-                    "X-On-Behalf-Of": "Bearer ...",
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
                     ...
                 }
         :param include_credentials: True if tokens should be included in the response. False if the caller wishes to
@@ -506,7 +506,7 @@ class MyAccess:
         :param headers: Any additional headers
             Example:
                 {
-                    "X-On-Behalf-Of": "Bearer ...",
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
                     ...
                 }
         :param transaction: Optional - the details of the transaction. Primary use is for internal purposes.
@@ -546,7 +546,7 @@ class MyAccess:
         :param headers: Any additional headers
             Example:
                 {
-                    "X-On-Behalf-Of": "Bearer ...",
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
                     ...
                 }
         :return: Details of the checked in profile.
@@ -568,7 +568,7 @@ class MyAccess:
         :param headers: Any additional headers
             Example:
                 {
-                    "X-On-Behalf-Of": "Bearer ...",
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
                     ...
                 }
         :return: Details of the checked in profile.
@@ -595,7 +595,7 @@ class MyAccess:
         :param headers: Any additional headers
             Example:
                 {
-                    "X-On-Behalf-Of": "Bearer ...",
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
                     ...
                 }
 
