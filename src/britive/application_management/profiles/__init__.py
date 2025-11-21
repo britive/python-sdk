@@ -7,15 +7,17 @@ from .policies import Policies
 from .session_attributes import SessionAttributes
 
 creation_defaults = {
-    'expirationDuration': 3600000,
-    'extensionDuration': 1800000,
-    'notificationPriorToExpiration': 300000,
-    'extendable': False,
-    'extensionLimit': '1',
-    'status': 'active',
-    'destinationUrl': '',
-    'useDefaultAppUrl': True,
+    'delegationEnabled': False,
     'description': '',
+    'destinationUrl': '',
+    'excludeAdminFromAdminRelatedCommunication': 'DEFAULT',
+    'expirationDuration': 3600000,
+    'extendable': False,
+    'extensionDuration': 1800000,
+    'extensionLimit': '1',
+    'notificationPriorToExpiration': 300000,
+    'status': 'active',
+    'useDefaultAppUrl': True,
 }
 
 update_fields_to_keep: list = list(creation_defaults)
@@ -42,24 +44,25 @@ class Profiles:
         :param kwargs: A key/value mapping consisting of the following fields. If any/all are omitted default values
             will be used. The keys and default values are provided below.
 
-            - expirationDuration: 3600000
-            - extensionDuration: 1800000
-            - notificationPriorToExpiration: 300000
-            - extendable: False
-            - extensionLimit: '1'
-            - status: 'active'
-            - destinationUrl: ''
-            - useDefaultAppUrl: True
+            - delegationEnabled: False
             - description: ''
+            - destinationUrl: ''
+            - excludeAdminFromAdminRelatedCommunication: 'DEFAULT'
+            - expirationDuration: 3600000
+            - extendable: False
+            - extensionDuration: 1800000
+            - extensionLimit: '1'
+            - notificationPriorToExpiration: 300000
             - scope: if not provided, no scopes will be applied. If provided it must follow the
                 format listed below.
-
                 [
                     {
                         'type': 'EnvironmentGroup'|'Environment',
                         'value':'ID'
                     },
                 ]
+            - status: 'active'
+            - useDefaultAppUrl: True
 
         :return: Details of the newly created profile.
         """

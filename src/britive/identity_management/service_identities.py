@@ -4,10 +4,11 @@ valid_statues = ['active', 'inactive']
 
 
 class ServiceIdentities:
-    def __init__(self, britive) -> None:
+    def __init__(self, britive, identity_type: str = 'ServiceIdentity') -> None:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/users'
         self.custom_attributes = CustomAttributes(britive)
+        self.identity_type = identity_type
 
     def list(self, filter_expression: str = None, include_tags: bool = False) -> list:
         """
@@ -19,7 +20,7 @@ class ServiceIdentities:
         :return: List of service identity records
         """
 
-        params = {'type': 'ServiceIdentity', 'page': 0, 'size': 100}
+        params = {'type': self.identity_type, 'page': 0, 'size': 100}
         if filter_expression:
             params['filter'] = filter_expression
         if include_tags:
@@ -35,7 +36,7 @@ class ServiceIdentities:
         :return: Details of the specified user.
         """
 
-        params = {'type': 'ServiceIdentity'}
+        params = {'type': self.identity_type}
         return self.britive.get(f'{self.base_url}/{service_identity_id}', params=params)
 
     def get_by_name(self, name: str) -> list:
@@ -70,7 +71,7 @@ class ServiceIdentities:
         :return: List of user records
         """
 
-        params = {'type': 'ServiceIdentity', 'page': 0, 'size': 100, 'searchText': search_string}
+        params = {'type': self.identity_type, 'page': 0, 'size': 100, 'searchText': search_string}
 
         return self.britive.get(self.base_url, params)
 
@@ -87,7 +88,7 @@ class ServiceIdentities:
 
         required_fields = ['name']
 
-        kwargs['type'] = 'ServiceIdentity'
+        kwargs['type'] = self.identity_type
         if 'status' not in kwargs:
             kwargs['status'] = 'active'
 

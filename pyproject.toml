@@ -97,7 +97,7 @@ select = [
 
 [tool.ruff.lint.pylint]
 allow-magic-value-types = ["int", "str"]
-max-args = 12
+max-args = 14
 max-branches = 30
 max-returns = 8
 max-statements = 72
