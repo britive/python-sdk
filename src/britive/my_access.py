@@ -336,6 +336,7 @@ class MyAccess:
                 transaction=transaction,
                 return_transaction_details=True,
                 progress_func=progress_func,
+                headers=headers,
             )
             transaction['credentials'] = credentials
 
