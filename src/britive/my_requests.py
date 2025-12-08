@@ -34,7 +34,7 @@ class MyRequests:
         :return: List of My Requests.
         """
 
-        return self.britive.get(f'{self.base_url}/', params={'requestType': 'myRequests'})
+        return self.britive.get(f'{self.base_url}', params={'requestType': 'myRequests'})
 
     def approval_request_status(self, request_id: str) -> dict:
         """
@@ -78,7 +78,7 @@ class MyRequests:
             f'{self.britive.base_url}/access/{profile_id}/{entity_type}/{entity_id}/approvalRequest'
             if entity_type == 'environments'
             else (
-                f'{self.britive.base_url}/resource-manager/my-resources/profiles/'
+                f'{self.britive.base_url}/resource-manager/my-resources/profiles'
                 f'{profile_id}/resources/{entity_id}/approvalRequest'
             )
         )

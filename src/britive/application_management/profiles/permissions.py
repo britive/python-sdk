@@ -99,8 +99,7 @@ class PermissionConstraints:
         """
 
         url = (
-            f'{self.base_url}/{profile_id}/permissions/{permission_name}/'
-            f'{permission_type}/constraints/{constraint_type}'
+            f'{self.base_url}/{profile_id}/permissions/{permission_name}{permission_type}/constraints/{constraint_type}'
         )
         return self.britive.get(url).get('result')
 
@@ -147,8 +146,7 @@ class PermissionConstraints:
         """
 
         url = (
-            f'{self.base_url}/{profile_id}/permissions/{permission_name}/'
-            f'{permission_type}/constraints/{constraint_type}'
+            f'{self.base_url}/{profile_id}/permissions/{permission_name}{permission_type}/constraints/{constraint_type}'
         )
 
         params = {'operation': 'add'}
@@ -176,8 +174,7 @@ class PermissionConstraints:
         """
 
         url = (
-            f'{self.base_url}/{profile_id}/permissions/{permission_name}/'
-            f'{permission_type}/constraints/{constraint_type}'
+            f'{self.base_url}/{profile_id}/permissions/{permission_name}{permission_type}/constraints/{constraint_type}'
         )
         params = {'operation': 'remove'}
         if constraint is None:
