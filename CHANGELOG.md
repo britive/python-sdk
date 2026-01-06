@@ -1,5 +1,27 @@
 # Change Log (v2.8.1+)
 
+## v4.5.0 [2026-01-7]
+
+__What's New:__
+
+* Added support for dynamic resources.
+
+__Enhancements:__
+
+* None
+
+__Bug Fixes:__
+
+* Fixed trailing slash in url bug which affects python 3.14.
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v4.4.0 [2025-10-24]
 
 __What's New:__

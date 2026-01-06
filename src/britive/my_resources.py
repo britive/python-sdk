@@ -530,3 +530,42 @@ class MyResources:
         """
 
         return self.britive.get(f'{self.base_url}/profiles/{profile_id}/itsm/{ticket_type}/validate/{ticket_id}')
+
+    def build(self, profile_id: str, parent_resource_id: str, name: str, resource_parameters: dict) -> dict:
+        """
+        Build a dynamic resource.
+
+        :param profile_id: The ID of the profile.
+        :param parent_resource_id: The ID of the dynamic parent resource
+        :param name: The name of the resource
+        :resource_parameters: The parameters to resolve the dynamic resource
+        :return: Dict of the resource results.
+        """
+
+        data = {
+            'parentResourceId': parent_resource_id,
+            'profileId': profile_id,
+            'resourceName': name,
+            'resourceParameters': resource_parameters,
+        }
+
+        return self.britive.post(f'{self.base_url}/user-resources', json=data)
+
+    def delete(self, resource_id: str) -> None:
+        """
+        Delete a dynamic resource.
+
+        :param resource_id: The ID of the resource to delete.
+        :return: None
+        """
+
+        return self.britive.delete(f'{self.base_url}/user-resources/{resource_id}')
+
+    def list_dynamic_parameters(self, resource_id: str):
+        """
+        Lists resource parameters for a dynamic resource
+
+        :return: List of parameters
+        """
+
+        return self.britive.get(f'{self.base_url}/resource-templates/{resource_id}/dynamic-parameters')

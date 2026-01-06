@@ -13,7 +13,7 @@ class Types:
             Example: [
                 {
                     'name': 'string',
-                    'paramType': 'string'|'multiline'|'password',
+                    'paramType': 'string'|'multiline'|'password'|'ip-cidr'|'regex'|'list',
                     'isMandatory': True|False
                 },
                 ...
@@ -58,7 +58,7 @@ class Types:
             Example: [
                 {
                     'name': 'string',
-                    'paramType': 'string'|'multiline'|'password',
+                    'paramType': 'string'|'multiline'|'password'|'ip-cidr'|'regex'|'list',
                     'isMandatory': True|False
                 },
                 ...
