@@ -1,10 +1,11 @@
 # Change Log (v2.8.1+)
 
-## v4.5.0 [2026-01-07]
+## v4.5.0 [2026-01-09]
 
 __What's New:__
 
 * Added support for dynamic resources.
+* Added support for custom headers for my resources and my secrets.
 
 __Enhancements:__
 

@@ -44,7 +44,7 @@ class MySecrets:
             if 'id' in str(e):
                 raise NoSecretsVaultFound from e
 
-    def list(self, path: str = '/', search: str = None) -> list:
+    def list(self, path: str = '/', search: str = None, headers: dict = None) -> list:
         """
         Recursively list all secrets under the given path.
 
@@ -53,6 +53,12 @@ class MySecrets:
         :param path: Optional argument used to specify where in the hierarchy to begin listing secrets. Include leading
                      '/' if provided.
         :param search: Optional argument used to filter the list of returned secrets by searching on the secret name.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: List of secrets for which the provided identity has access to view.
         """
 
@@ -61,10 +67,18 @@ class MySecrets:
         if search:
             params['filter'] = f"name co '{search}'"
 
-        return self.britive.get(f'{self.base_url}/vault/{self.__get_vault_id()}/secrets', params=params)
+        return self.britive.get(
+            f'{self.base_url}/vault/{self.__get_vault_id()}/secrets', params=params, headers=headers
+        )
 
     def view(
-        self, path: str, justification: str = None, otp: str = None, wait_time: int = 60, max_wait_time: int = 600
+        self,
+        path: str,
+        justification: str = None,
+        otp: str = None,
+        wait_time: int = 60,
+        max_wait_time: int = 600,
+        headers: dict = None,
     ) -> dict:
         """
         Retrieve the decrypted secret value.
@@ -75,6 +89,12 @@ class MySecrets:
         :param wait_time: The number of seconds to sleep/wait between polling to check if the secret request was
                           approved.
         :param max_wait_time: The maximum number of seconds to wait for an approval before throwing an exception.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
 
         :return: Details of the decrypted secret.
         :raises AccessDenied: if the caller does not have access to the secret being requested.
@@ -105,7 +125,10 @@ class MySecrets:
 
                 # attempt to get the secret value and return it
                 return self.britive.post(
-                    f'{self.base_url}/vault/{vault_id}/accesssecrets', params=params, json=data if first else None
+                    f'{self.base_url}/vault/{vault_id}/accesssecrets',
+                    params=params,
+                    json=data if first else None,
+                    headers=headers,
                 )['value']
             except EvaluationError as e:
                 raise AccessDenied(e) from e
@@ -123,7 +146,13 @@ class MySecrets:
                 raise e
 
     def download(
-        self, path: str, justification: str = None, otp: str = None, wait_time: int = 60, max_wait_time: int = 600
+        self,
+        path: str,
+        justification: str = None,
+        otp: str = None,
+        wait_time: int = 60,
+        max_wait_time: int = 600,
+        headers: dict = None,
     ) -> dict:
         """
         Retrieve the decrypted secret file.
@@ -141,6 +170,13 @@ class MySecrets:
             request was approved.
         :param max_wait_time: The maximum number of seconds to wait for an approval before throwing
             an exception.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
+
         :return: Dict containing the filename of the downloaded file and the content of the file as bytes.
         :raises AccessDenied: if the caller does not have access to the secret being requested.
         :raises ApprovalRequiredButNoJustificationProvided: if approval is required but no justification is provided.
@@ -159,7 +195,7 @@ class MySecrets:
                     raise StepUpAuthFailed
 
             # attempt to get the secret file and return it
-            return self.britive.get(f'{self.base_url}/vault/{vault_id}/downloadfile', params=params)
+            return self.britive.get(f'{self.base_url}/vault/{vault_id}/downloadfile', params=params, headers=headers)
         # 403 will be returned when approval is required or access is denied
         except EvaluationError as e:
             raise AccessDenied(e) from e
@@ -168,7 +204,7 @@ class MySecrets:
             # lets call view so we can go through the full approval process
             self.view(path=path, justification=justification, otp=otp, wait_time=wait_time, max_wait_time=max_wait_time)
             # and then we can get the file again
-            return self.britive.get(f'{self.base_url}/vault/{vault_id}/downloadfile', params=params)
+            return self.britive.get(f'{self.base_url}/vault/{vault_id}/downloadfile', params=params, headers=headers)
         except StepUpAuthenticationRequiredError as e:
             raise StepUpAuthRequiredButNotProvided(e) from e
         except ForbiddenRequest as e:

@@ -51,7 +51,14 @@ class MyResources:
         self.withdraw_approval_request_by_name = __my_requests.withdraw_approval_request_by_name
 
     # Let's just mimic my_access.list functionality for now.
-    def list(self, filter_text: str = None, list_type: str = None, search_text: str = None, size: int = None) -> dict:
+    def list(
+        self,
+        filter_text: str = None,
+        list_type: str = None,
+        search_text: str = None,
+        size: int = None,
+        headers: dict = None,
+    ) -> dict:
         """
         List the resource details for the current user.
 
@@ -59,6 +66,12 @@ class MyResources:
         :param list_type: filter resources by type, e.g. `list_type='frequently-used'`
         :param search_text: filter resources by search text.
         :param size: reduce the size of the response to the specified limit.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Dict of resource details.
         """
 
@@ -72,15 +85,23 @@ class MyResources:
         if size:
             params.update(page=0, size=size)
 
-        return self.britive.get(self.base_url, params=params)
+        return self.britive.get(self.base_url, params=params, headers=headers)
 
-    def list_profiles(self, filter_text: str = None, list_type: str = None, search_text: str = None) -> list:
+    def list_profiles(
+        self, filter_text: str = None, list_type: str = None, search_text: str = None, headers: dict = None
+    ) -> list:
         """
         List the profiles for which the user has access.
 
         :param filter_text: filter resource by key, e.g. `filter_text='key eq env'`
         :param list_type: filter resources by type, e.g. `list_type='frequently-used'`
         :param search_text: filter resources by search text.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: List of profiles.
         """
 
@@ -92,46 +113,70 @@ class MyResources:
         if search_text:
             params['searchText'] = search_text
 
-        return self.britive.get(self.base_url, params=params)
+        return self.britive.get(self.base_url, params=params, headers=headers)
 
-    def search(self, search_text: str) -> list:
+    def search(self, search_text: str, headers: dict = None) -> list:
         """
         Search the list of resources/profiles for which the user has access.
 
         :param search_text: The text to search.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: List of profiles.
         """
 
-        return self.list_profiles(search_text=search_text)
+        return self.list_profiles(search_text=search_text, headers=headers)
 
-    def list_checked_out_profiles(self) -> list:
+    def list_checked_out_profiles(self, headers: dict = None) -> list:
         """
         Return list of details on currently checked out profiles for the user.
 
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: List of checked out profiles.
         """
 
-        return [i for i in self.list_profiles() if i['transactionId']]
+        return [i for i in self.list_profiles(headers=headers) if i['transactionId']]
 
-    def list_response_templates(self, transaction_id: str) -> list:
+    def list_response_templates(self, transaction_id: str, headers: dict = None) -> list:
         """
         List the Response Templates for a checked out profile.
 
         :param transaction_id: Transaction ID of the checked out profile.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: List of response templates.
         """
 
-        return self.britive.get(f'{self.base_url}/{transaction_id}/templates')
+        return self.britive.get(f'{self.base_url}/{transaction_id}/templates', headers=headers)
 
-    def get_checked_out_profile(self, transaction_id: str) -> dict:
+    def get_checked_out_profile(self, transaction_id: str, headers: dict = None) -> dict:
         """
         Retrieve details of a given checked out profile.
 
         :param transaction_id: The ID of the transaction.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Details of the given profile/transaction.
         """
 
-        for t in self.list_checked_out_profiles():
+        for t in self.list_checked_out_profiles(headers=headers):
             if t['transactionId'] == transaction_id:
                 return t
         raise TransactionNotFound
@@ -149,6 +194,7 @@ class MyResources:
         ticket_id: str = None,
         ticket_type: str = None,
         wait_time: int = 60,
+        headers: dict = None,
     ) -> dict:
         data = {}
         if justification:
@@ -167,7 +213,7 @@ class MyResources:
             if progress_func and not progress_pending_checked_out_profiles_sent:
                 progress_func('reviewing currently checked out profiles')
                 progress_pending_checked_out_profiles_sent = True
-            for p in self.list_checked_out_profiles():
+            for p in self.list_checked_out_profiles(headers=headers):
                 right_profile = p['profileId'] == profile_id
                 right_resource = p['resourceId'] == resource_id
                 if all([right_profile, right_resource]):
@@ -192,7 +238,9 @@ class MyResources:
 
             try:
                 transaction = self.britive.post(
-                    f'{self.base_url}/profiles/{profile_id}/resources/{resource_id}/checkout', json=data
+                    f'{self.base_url}/profiles/{profile_id}/resources/{resource_id}/checkout',
+                    json=data,
+                    headers=headers,
                 )
             except StepUpAuthenticationRequiredError as e:
                 raise StepUpAuthRequiredButNotProvided(e) from e
@@ -234,6 +282,7 @@ class MyResources:
                 transaction_id=transaction_id,
                 transaction=transaction,
                 progress_func=progress_func,
+                headers=headers,
             )
             transaction['credentials'] = credentials
 
@@ -254,6 +303,7 @@ class MyResources:
         ticket_id: str = None,
         ticket_type: str = None,
         wait_time: int = 60,
+        headers: dict = None,
     ) -> dict:
         """
         Checkout a profile.
@@ -281,6 +331,12 @@ class MyResources:
         :param ticket_type: Optional ITSM ticket type or category
         :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
             was approved.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Details about the checked out profile, and optionally the credentials generated by the checkout.
         :raises ApprovalRequiredButNoJustificationProvided: if approval is required but no justification is provided.
         :raises ProfileApprovalRejected: if the approval request was rejected by the approver.
@@ -301,6 +357,7 @@ class MyResources:
             ticket_id=ticket_id,
             ticket_type=ticket_type,
             wait_time=wait_time,
+            headers=headers,
         )
 
     def checkout_by_name(
@@ -316,6 +373,7 @@ class MyResources:
         ticket_id: str = None,
         ticket_type: str = None,
         wait_time: int = 60,
+        headers: dict = None,
     ) -> dict:
         """
         Checkout a profile by supplying the names of entities vs. the IDs of those entities.
@@ -341,6 +399,12 @@ class MyResources:
         :param ticket_type: Optional ITSM ticket type or category
         :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
             was approved.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Details about the checked out profile, and optionally the credentials generated by the checkout.
         :raises ApprovalRequiredButNoJustificationProvided: if approval is required but no justification is provided.
         :raises ProfileApprovalRejected: if the approval request was rejected by the approver.
@@ -349,7 +413,7 @@ class MyResources:
         :raises ProfileApprovalWithdrawn: if the approval request was withdrawn by the requester.
         """
 
-        ids = self._get_profile_and_resource_ids_given_names(profile_name, resource_name)
+        ids = self._get_profile_and_resource_ids_given_names(profile_name, resource_name, headers=headers)
 
         return self._checkout(
             profile_id=ids['profile_id'],
@@ -363,6 +427,7 @@ class MyResources:
             ticket_id=ticket_id,
             ticket_type=ticket_type,
             wait_time=wait_time,
+            headers=headers,
         )
 
     def credentials(
@@ -372,6 +437,7 @@ class MyResources:
         response_template: str = None,
         return_transaction_details: bool = False,
         transaction: dict = None,
+        headers: dict = None,
     ) -> Any:
         """
         Return credentials of a checked out profile given the transaction ID.
@@ -382,6 +448,12 @@ class MyResources:
         :param return_transaction_details: Optional - whether to return the details of the transaction. Primary use is
             for internal purposes.
         :param transaction: Optional - the details of the transaction. Primary use is for internal purposes.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Credentials associated with the checked out profile represented by the specified transaction.
         """
 
@@ -390,7 +462,7 @@ class MyResources:
         # or the transaction is not in the state of checkedOut
         if not transaction or transaction['status'] != 'checkedOut':
             while True:
-                transaction = self.get_checked_out_profile(transaction_id=transaction_id)
+                transaction = self.get_checked_out_profile(transaction_id=transaction_id, headers=headers)
                 if transaction['status'] == 'checkOutSubmitted':  # async checkout process
                     if progress_func:
                         progress_func('credential creation')
@@ -403,135 +475,204 @@ class MyResources:
         creds = self.britive.post(
             f'{self.base_url}/{transaction_id}/credentials',
             params={'templateName': response_template} if response_template else {},
+            headers=headers,
         )
 
         if return_transaction_details:
             return creds, transaction
         return creds
 
-    def checkin(self, transaction_id: str) -> dict:
+    def checkin(self, transaction_id: str, headers: dict = None) -> dict:
         """
         Check in a checked out profile.
 
         :param transaction_id: The ID of the transaction.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Details of the checked in profile.
         """
 
-        return self.britive.post(f'{self.base_url}/{transaction_id}/check-in')
+        return self.britive.post(f'{self.base_url}/{transaction_id}/check-in', headers=headers)
 
-    def checkin_by_name(self, profile_name: str, resource_name: str) -> dict:
+    def checkin_by_name(self, profile_name: str, resource_name: str, headers: dict = None) -> dict:
         """
         Check in a checked out profile by supplying the names of entities vs. the IDs of those entities
 
         :param profile_name: The name of the profile. Use `list_profiles()` to obtain the eligible profiles.
         :param resource_name: The name of the environment. Use `list_profiles()` to obtain the eligible resources.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Details of the checked in profile.
         """
 
-        ids = self._get_profile_and_resource_ids_given_names(profile_name, resource_name)
+        ids = self._get_profile_and_resource_ids_given_names(profile_name, resource_name, headers=headers)
 
         transaction_id = None
-        for profile in self.list_checked_out_profiles():
+        for profile in self.list_checked_out_profiles(headers=headers):
             if profile['resourceId'] == ids['resource_id'] and profile['profileId'] == ids['profile_id']:
                 transaction_id = profile['transactionId']
                 break
         if not transaction_id:
             raise ValueError('no checked out profile found for the given profile_name and resource_name')
 
-        return self.checkin(transaction_id=transaction_id)
+        return self.checkin(transaction_id=transaction_id, headers=headers)
 
-    def frequents(self) -> list:
+    def frequents(self, headers: dict = None) -> list:
         """
         Return list of frequently used profiles for the user.
 
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: List of profiles.
         """
 
-        return self.list_profiles(list_type='frequently-used')
+        return self.list_profiles(list_type='frequently-used', headers=headers)
 
-    def favorites(self) -> list:
+    def favorites(self, headers: dict = None) -> list:
         """
         Return list of favorite profiles for the user.
 
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: List of profiles.
         """
 
-        return self.list_profiles(list_type='favorites')
+        return self.list_profiles(list_type='favorites', headers=headers)
 
-    def add_favorite(self, resource_id: str, profile_id: str) -> dict:
+    def add_favorite(self, resource_id: str, profile_id: str, headers: dict = None) -> dict:
         """
         Add a resource favorite.
 
         :param resource_id: The resource ID of the resource favorite to add.
         :param profile_id: The profile ID of the resource favorite to add.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Details of the favorite resource.
         """
 
         data = {'resource-id': resource_id, 'profile-id': profile_id}
 
-        return self.post(f'{self.base_url}/favorites', json=data)
+        return self.post(f'{self.base_url}/favorites', json=data, headers=headers)
 
-    def delete_favorite(self, favorite_id: str) -> None:
+    def delete_favorite(self, favorite_id: str, headers: dict = None) -> None:
         """
         Delete a resource favorite.
 
         :param favorite_id: The ID of the resource favorite to delete.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: None
         """
 
-        return self.delete(f'{self.base_url}/favorites/{favorite_id}')
+        return self.delete(f'{self.base_url}/favorites/{favorite_id}', headers=headers)
 
-    def get_profile_settings(self, profile_id: str, resource_id: str) -> dict:
+    def get_profile_settings(self, profile_id: str, resource_id: str, headers: dict = None) -> dict:
         """
         Retrieve settings of a profile.
 
         :param profile_id: The ID of the profile.
         :param resource_id: The ID of the resource.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Dict of the profile settings.
         """
 
-        return self.britive.get(f'{self.base_url}/{profile_id}/resources/{resource_id}/settings')
+        return self.britive.get(f'{self.base_url}/{profile_id}/resources/{resource_id}/settings', headers=headers)
 
-    def get_profile_settings_by_name(self, profile_name: str, resource_name: str) -> dict:
+    def get_profile_settings_by_name(self, profile_name: str, resource_name: str, headers: dict = None) -> dict:
         """
         Retrieve settings of a profile by name.
 
         :param profile_name: The name of the profile.
         :param resource_name: The name of the resource.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Dict of the profile settings.
         """
 
-        ids = self._get_profile_and_resource_ids_given_names(profile_name=profile_name, resource_name=resource_name)
+        ids = self._get_profile_and_resource_ids_given_names(
+            profile_name=profile_name, resource_name=resource_name, headers=headers
+        )
 
-        return self.get_profile_settings(profile_id=ids['profile_id'], resource_id=ids['resource_id'])
+        return self.get_profile_settings(profile_id=ids['profile_id'], resource_id=ids['resource_id'], headers=headers)
 
-    def search_tickets(self, profile_id: str, ticket_type: str, search_text: str = '') -> dict:
+    def search_tickets(self, profile_id: str, ticket_type: str, search_text: str = '', headers: dict = None) -> dict:
         """
         Search ITSM tickets for a profile.
 
         :param profile_id: The ID of the profile.
         :param ticket_type: The type of ITSM ticket.
         :param search_text: Optional text to search for in tickets.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Dict of the search results.
         """
 
         params = {'searchText': search_text} if search_text else {}
 
-        return self.britive.get(f'{self.base_url}/profiles/{profile_id}/itsm/{ticket_type}/search', params=params)
+        return self.britive.get(
+            f'{self.base_url}/profiles/{profile_id}/itsm/{ticket_type}/search', params=params, headers=headers
+        )
 
-    def validate_ticket(self, profile_id: str, ticket_type: str, ticket_id: str) -> dict:
+    def validate_ticket(self, profile_id: str, ticket_type: str, ticket_id: str, headers: dict = None) -> dict:
         """
         Validate an ITSM ticket using the ITSM integration settings for a profile.
 
         :param profile_id: The ID of the profile.
         :param ticket_type: The type of ticket to validate.
         :param ticket_id: The ID of the ticket to validate.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Dict of the validation results.
         """
 
-        return self.britive.get(f'{self.base_url}/profiles/{profile_id}/itsm/{ticket_type}/validate/{ticket_id}')
+        return self.britive.get(
+            f'{self.base_url}/profiles/{profile_id}/itsm/{ticket_type}/validate/{ticket_id}', headers=headers
+        )
 
-    def build(self, profile_id: str, parent_resource_id: str, name: str, resource_parameters: dict) -> dict:
+    def build(
+        self, profile_id: str, parent_resource_id: str, name: str, resource_parameters: dict, headers: dict = None
+    ) -> dict:
         """
         Build a dynamic resource.
 
@@ -539,6 +680,12 @@ class MyResources:
         :param parent_resource_id: The ID of the dynamic parent resource
         :param name: The name of the resource
         :resource_parameters: The parameters to resolve the dynamic resource
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Dict of the resource results.
         """
 
@@ -549,23 +696,36 @@ class MyResources:
             'resourceParameters': resource_parameters,
         }
 
-        return self.britive.post(f'{self.base_url}/user-resources', json=data)
+        return self.britive.post(f'{self.base_url}/user-resources', json=data, headers=headers)
 
-    def delete(self, resource_id: str) -> None:
+    def delete(self, resource_id: str, headers: dict = None) -> None:
         """
         Delete a dynamic resource.
 
         :param resource_id: The ID of the resource to delete.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: None
         """
 
-        return self.britive.delete(f'{self.base_url}/user-resources/{resource_id}')
+        return self.britive.delete(f'{self.base_url}/user-resources/{resource_id}', headers=headers)
 
-    def list_dynamic_parameters(self, resource_id: str):
+    def list_dynamic_parameters(self, resource_id: str, headers: dict = None):
         """
         Lists resource parameters for a dynamic resource
 
+        :param resource_id: The ID of the resource.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: List of parameters
         """
 
-        return self.britive.get(f'{self.base_url}/resource-templates/{resource_id}/dynamic-parameters')
+        return self.britive.get(f'{self.base_url}/resource-templates/{resource_id}/dynamic-parameters', headers=headers)

@@ -34,13 +34,15 @@ class HelperMethods:
             raise ValueError(f'profile `{profile_name}` found but not in environment `{environment_name}`.')
         return ids
 
-    def get_profile_and_resource_ids_given_names(self, profile_name: str, resource_name: str) -> dict:
+    def get_profile_and_resource_ids_given_names(
+        self, profile_name: str, resource_name: str, headers: dict = None
+    ) -> dict:
         resource_profile_map = {
             f'{item["resourceName"].lower()}|{item["profileName"].lower()}': {
                 'profile_id': item['profileId'],
                 'resource_id': item['resourceId'],
             }
-            for item in self.britive.get(f'{self.britive.base_url}/resource-manager/my-resources')
+            for item in self.britive.get(f'{self.britive.base_url}/resource-manager/my-resources', headers=headers)
         }
 
         item = resource_profile_map.get(f'{resource_name.lower()}|{profile_name.lower()}')
