@@ -34,7 +34,7 @@ class MyRequests:
         :return: List of My Requests.
         """
 
-        return self.britive.get(f'{self.base_url}/', params={'requestType': 'myRequests'})
+        return self.britive.get(f'{self.base_url}', params={'requestType': 'myRequests'})
 
     def approval_request_status(self, request_id: str) -> dict:
         """

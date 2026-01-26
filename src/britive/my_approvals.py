@@ -52,4 +52,4 @@ class MyApprovals:
 
         params = {'requestType': 'myApprovals'}
 
-        return self.britive.get(f'{self.base_url}/', params=params)
+        return self.britive.get(f'{self.base_url}', params=params)

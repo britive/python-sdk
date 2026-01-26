@@ -174,7 +174,7 @@ class Pools:
 
         params = {'key': key, 'label-values': values}
 
-        return self.britive.post(f'{self.base_url}/{pool_id}/labels/', json=params)
+        return self.britive.post(f'{self.base_url}/{pool_id}/labels', json=params)
 
     def list_labels(self, pool_id: str) -> list:
         """
