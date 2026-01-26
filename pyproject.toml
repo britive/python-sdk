@@ -14,19 +14,19 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Internet",
     "Topic :: Security",
 ]
 license = {file = "LICENSE"}
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
-    "requests>=2.32.0",
-    "jmespath>=1.0.1"
+    "requests>=2.32.5",
+    "jmespath>=1.1.0"
 ]
 dynamic = ["version"]
 keywords = ["britive", "cpam", "identity", "jit"]
