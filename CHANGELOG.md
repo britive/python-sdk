@@ -1,5 +1,39 @@
 # Change Log (v2.8.1+)
 
+## v4.5.0 [2026-01-26]
+
+__What's New:__
+
+* Added functionality for My Resources dynamic resources.
+* Added support for custom headers for My Access, My Resources, My Secrets.
+* Added support for service identity impersonation.
+* Added support for AI service identity type.
+* Added `python3.14` support.
+* Dropped `python3.9` support, EOL 2025-10-31.
+
+__Enhancements:__
+
+* Added `my_resources.[build|delete|list_dynamic_parameters]` for dynamic resources usage.
+* Added `headers` param for `[my_access|my_resources|my_secrets]` methods.
+* Added `impersonation` to `access_broker.profiles.[create|update]` for service identity impersonation.
+* Added `identity_management.ai_identities` for AI service identity type.
+
+__Bug Fixes:__
+
+* Trailing slash in url affects `python3.14+`.
+* Identity types is a requirement, updates to `identity_management.identity_attributes.[create|identity_types]`
+* Updated `update_fields_to_keep` for `application_managment.profiles.update` due to API error.
+* `access_broker.resources.types.update` requires `name` in payload to avoid name update error.
+
+__Dependencies:__
+
+* `python3.14` dependency bumps: `[requests>=2.32.5, jmespath>=1.1.0]`
+
+__Other:__
+
+* Updated documentation for GCP federation provider doc string.
+* Various test fixes and adjustments
+
 ## v4.4.0 [2025-10-24]
 
 __What's New:__
