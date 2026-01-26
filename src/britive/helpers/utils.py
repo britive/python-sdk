@@ -108,6 +108,7 @@ def source_federation_token(provider: str, tenant: Optional[str] = None, duratio
     * Azure System Assigned Managed Identities (azuresmi)
     * Azure User Assigned Managed Identities (azureumi)
     * Bitbucket Pipelines (bitbucket)
+    * GCP
     * Github Actions (github)
     * Gitlab (gitlab)
     * spacelift.io (spacelift)
@@ -115,8 +116,8 @@ def source_federation_token(provider: str, tenant: Optional[str] = None, duratio
     Any other OIDC federation provider can be used and tokens can be provided to this class for authentication
     to a Britive tenant. Details of how to construct these tokens can be found at https://docs.britive.com.
 
-    :param provider: The name of the federation provider. Valid options are `aws`, `github`, `bitbucket`,
-        `azuresmi`, `azureumi`, `spacelift`, and `gitlab`.
+    :param provider: The name of the federation provider. Valid options are `aws`, `azuresmi`, `azureumi`, `bitbucket`, 
+        `gcp`, `github`, `gitlab`, and `spacelift`.
 
         For the AWS provider it is possible to provide a profile via value `aws-profile`. If no profile is provided
         then the boto3 `Session.get_credentials()` method will be used to obtain AWS credentials, which follows
