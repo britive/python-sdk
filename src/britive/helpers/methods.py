@@ -3,12 +3,12 @@ class HelperMethods:
         self.britive = britive
 
     def get_profile_and_environment_ids_given_names(
-        self, profile_name: str, environment_name: str, application_name: str = None
+        self, profile_name: str, environment_name: str, application_name: str = None, headers: dict = None
     ) -> dict:
         ids = None
         environment_found = False
         profile_found = False
-        for app in self.britive.get(f'{self.britive.base_url}/access'):
+        for app in self.britive.get(f'{self.britive.base_url}/access', headers=headers):
             if application_name and app['appName'].lower() != application_name.lower():
                 continue
             if not (
@@ -34,13 +34,15 @@ class HelperMethods:
             raise ValueError(f'profile `{profile_name}` found but not in environment `{environment_name}`.')
         return ids
 
-    def get_profile_and_resource_ids_given_names(self, profile_name: str, resource_name: str) -> dict:
+    def get_profile_and_resource_ids_given_names(
+        self, profile_name: str, resource_name: str, headers: dict = None
+    ) -> dict:
         resource_profile_map = {
             f'{item["resourceName"].lower()}|{item["profileName"].lower()}': {
                 'profile_id': item['profileId'],
                 'resource_id': item['resourceId'],
             }
-            for item in self.britive.get(f'{self.britive.base_url}/resource-manager/my-resources')
+            for item in self.britive.get(f'{self.britive.base_url}/resource-manager/my-resources', headers=headers)
         }
 
         item = resource_profile_map.get(f'{resource_name.lower()}|{profile_name.lower()}')

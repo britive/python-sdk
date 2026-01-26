@@ -73,24 +73,30 @@ class MyAccess:
 
         return self.britive.get(self.base_url, params=params)
 
-    def list_profiles(self) -> list:
+    def list_profiles(self, headers=None) -> list:
         """
         List the profiles for which the user has access.
 
         :return: List of profiles.
         """
 
-        return self.britive.get(self.base_url)
+        return self.britive.get(self.base_url, headers=headers)
 
-    def list_checked_out_profiles(self, include_profile_details: bool = False) -> list:
+    def list_checked_out_profiles(self, include_profile_details: bool = False, headers: dict = None) -> list:
         """
         Return list of details on currently checked out profiles for the user.
 
         :param include_profile_details: Include `details` for each checked out profile.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: List of checked out profiles.
         """
 
-        checked_out_profiles = self.britive.get(f'{self.base_url}/app-access-status')
+        checked_out_profiles = self.britive.get(f'{self.base_url}/app-access-status', headers=headers)
 
         if include_profile_details:
             for profile in checked_out_profiles:
@@ -103,15 +109,21 @@ class MyAccess:
 
         return checked_out_profiles
 
-    def get_checked_out_profile(self, transaction_id: str) -> dict:
+    def get_checked_out_profile(self, transaction_id: str, headers: dict = None) -> dict:
         """
         Retrieve details of a given checked out profile.
 
         :param transaction_id: The ID of the transaction.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Details of the given profile/transaction.
         """
 
-        for t in self.list_checked_out_profiles():
+        for t in self.list_checked_out_profiles(headers=headers):
             if t['transactionId'] == transaction_id:
                 return t
         raise TransactionNotFound
@@ -190,6 +202,7 @@ class MyAccess:
         self,
         profile_id: str,
         environment_id: str,
+        headers: dict = None,
         include_credentials: bool = False,
         iteration_num: int = 1,
         justification: str = None,
@@ -220,7 +233,7 @@ class MyAccess:
             if progress_func and not progress_pending_checked_out_profiles_sent:
                 progress_func('reviewing currently checked out profiles')
                 progress_pending_checked_out_profiles_sent = True
-            for p in self.list_checked_out_profiles():
+            for p in self.list_checked_out_profiles(headers=headers):
                 right_profile = p['papId'] == profile_id
                 right_env = p['environmentId'] == environment_id
                 right_type = p['accessType'] == params['accessType']
@@ -246,7 +259,10 @@ class MyAccess:
 
             try:
                 transaction = self.britive.post(
-                    f'{self.base_url}/{profile_id}/environments/{environment_id}', params=params, json=data
+                    f'{self.base_url}/{profile_id}/environments/{environment_id}',
+                    params=params,
+                    json=data,
+                    headers=headers,
                 )
             except StepUpAuthenticationRequiredError as e:
                 raise StepUpAuthRequiredButNotProvided(e) from e
@@ -271,7 +287,10 @@ class MyAccess:
                 # handle the response based on the value of status
                 if status == 'approved':
                     transaction = self.britive.post(
-                        f'{self.base_url}/{profile_id}/environments/{environment_id}', params=params, json=data
+                        f'{self.base_url}/{profile_id}/environments/{environment_id}',
+                        params=params,
+                        json=data,
+                        headers=headers,
                     )
                 else:
                     raise approval_exceptions[status](e) from e
@@ -291,6 +310,7 @@ class MyAccess:
                         raise e
                     return self._checkout(
                         environment_id=environment_id,
+                        headers=headers,
                         include_credentials=include_credentials,
                         iteration_num=iteration_num + 1,
                         justification=justification,
@@ -316,6 +336,7 @@ class MyAccess:
                 transaction=transaction,
                 return_transaction_details=True,
                 progress_func=progress_func,
+                headers=headers,
             )
             transaction['credentials'] = credentials
 
@@ -327,6 +348,7 @@ class MyAccess:
         self,
         profile_id: str,
         environment_id: str,
+        headers: dict = None,
         include_credentials: bool = False,
         justification: str = None,
         max_wait_time: int = 600,
@@ -349,6 +371,12 @@ class MyAccess:
 
         :param profile_id: The ID of the profile. Use `list_profiles()` to obtain the eligible profiles.
         :param environment_id: The ID of the environment. Use `list_profiles()` to obtain the eligible environments.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :param include_credentials: True if tokens should be included in the response. False if the caller wishes to
             call `credentials()` at a later time. If True, the `credentials` key will be included in the response which
             contains the response from `credentials()`. Setting this parameter to `True` will result in a synchronous
@@ -374,6 +402,7 @@ class MyAccess:
         return self._checkout(
             profile_id=profile_id,
             environment_id=environment_id,
+            headers=headers,
             include_credentials=include_credentials,
             justification=justification,
             max_wait_time=max_wait_time,
@@ -390,6 +419,7 @@ class MyAccess:
         profile_name: str,
         environment_name: str,
         application_name: str = None,
+        headers: dict = None,
         include_credentials: bool = False,
         justification: str = None,
         max_wait_time: int = 600,
@@ -412,6 +442,12 @@ class MyAccess:
         :param environment_name: The name of the environment. Use `list_profiles()` to obtain the eligible environments.
         :param application_name: Optionally the name of the application, which can help disambiguate between profiles
             with the same name across applications.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :param include_credentials: True if tokens should be included in the response. False if the caller wishes to
             call `credentials()` at a later time. If True, the `credentials` key will be included in the response which
             contains the response from `credentials()`. Setting this parameter to `True` will result in a synchronous
@@ -434,11 +470,14 @@ class MyAccess:
         :raises ProfileApprovalWithdrawn: if the approval request was withdrawn by the requester.
         """
 
-        ids = self._get_profile_and_environment_ids_given_names(profile_name, environment_name, application_name)
+        ids = self._get_profile_and_environment_ids_given_names(
+            profile_name, environment_name, application_name, headers=headers
+        )
 
         return self._checkout(
             profile_id=ids['profile_id'],
             environment_id=ids['environment_id'],
+            headers=headers,
             include_credentials=include_credentials,
             justification=justification,
             max_wait_time=max_wait_time,
@@ -453,6 +492,7 @@ class MyAccess:
     def credentials(
         self,
         transaction_id: str,
+        headers: dict = None,
         transaction: dict = None,
         return_transaction_details: bool = False,
         progress_func: Callable = None,
@@ -464,6 +504,12 @@ class MyAccess:
         details.
 
         :param transaction_id: The ID of the transaction.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :param transaction: Optional - the details of the transaction. Primary use is for internal purposes.
         :param return_transaction_details: Optional - whether to return the details of the transaction. Primary use is
             for internal purposes.
@@ -476,7 +522,7 @@ class MyAccess:
         # or the transaction is not in the state of checkedOut
         if not transaction or transaction['status'] != 'checkedOut':
             while True:
-                transaction = self.get_checked_out_profile(transaction_id=transaction_id)
+                transaction = self.get_checked_out_profile(transaction_id=transaction_id, headers=headers)
                 if transaction['status'] == 'checkOutSubmitted':  # async checkout process
                     if progress_func:
                         progress_func('credential creation')
@@ -487,24 +533,32 @@ class MyAccess:
 
         # step 2: make the proper API call
         url_part = 'url' if transaction['accessType'] == 'CONSOLE' else 'tokens'
-        creds = self.britive.get(f'{self.base_url}/{transaction_id}/{url_part}')
+        creds = self.britive.get(f'{self.base_url}/{transaction_id}/{url_part}', headers=headers)
 
         if return_transaction_details:
             return creds, transaction
         return creds
 
-    def checkin(self, transaction_id: str) -> dict:
+    def checkin(self, transaction_id: str, headers: dict = None) -> dict:
         """
         Check in a checked out profile.
 
         :param transaction_id: The ID of the transaction.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Details of the checked in profile.
         """
 
         params = {'type': 'API'}
-        return self.britive.put(f'{self.base_url}/{transaction_id}', params=params)
+        return self.britive.put(f'{self.base_url}/{transaction_id}', params=params, headers=headers)
 
-    def checkin_by_name(self, profile_name: str, environment_name: str, application_name: str = None) -> dict:
+    def checkin_by_name(
+        self, profile_name: str, environment_name: str, application_name: str = None, headers: dict = None
+    ) -> dict:
         """
         Check in a checked out profile by supplying the names of entities vs. the IDs of those entities
 
@@ -512,29 +566,44 @@ class MyAccess:
         :param environment_name: The name of the environment. Use `list_profiles()` to obtain the eligible environments.
         :param application_name: Optionally the name of the application, which can help disambiguate between profiles
             with the same name across applications.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Details of the checked in profile.
         """
 
-        ids = self._get_profile_and_environment_ids_given_names(profile_name, environment_name, application_name)
+        ids = self._get_profile_and_environment_ids_given_names(
+            profile_name, environment_name, application_name, headers=headers
+        )
 
         transaction_id = None
-        for profile in self.list_checked_out_profiles():
+        for profile in self.list_checked_out_profiles(headers=headers):
             if profile['environmentId'] == ids['environment_id'] and profile['papId'] == ids['profile_id']:
                 transaction_id = profile['transactionId']
                 break
         if not transaction_id:
             raise ValueError('no checked out profile found for the given profile_name and environment_name')
 
-        return self.checkin(transaction_id=transaction_id)
+        return self.checkin(transaction_id=transaction_id, headers=headers)
 
-    def whoami(self) -> dict:
+    def whoami(self, headers=None) -> dict:
         """
         Return details about the currently authenticated identity (user or service).
+
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
 
         :return: Details of the currently authenticated identity.
         """
 
-        return self.britive.post(f'{self.britive.base_url}/auth/validate')['authenticationResult']
+        return self.britive.post(f'{self.britive.base_url}/auth/validate', headers=headers)['authenticationResult']
 
     def frequents(self) -> list:
         """

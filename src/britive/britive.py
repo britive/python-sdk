@@ -181,30 +181,30 @@ class Britive:
     def banner(self) -> dict:
         return self.get(f'{self.base_url}/banner')
 
-    def get(self, url, params=None) -> dict:
+    def get(self, url, params: dict = None, headers: dict = None) -> dict:
         """Internal use only."""
 
-        return self.__request('get', url, params=params)
+        return self.__request('get', url, params=params, headers=headers)
 
-    def post(self, url, params=None, data=None, json=None) -> dict:
+    def post(self, url, params: dict = None, data: dict = None, json: dict = None, headers: dict = None) -> dict:
         """Internal use only."""
 
-        return self.__request('post', url, params=params, data=data, json=json)
+        return self.__request('post', url, params=params, data=data, json=json, headers=headers)
 
-    def patch(self, url, params=None, data=None, json=None) -> dict:
+    def patch(self, url, params: dict = None, data: dict = None, json: dict = None, headers: dict = None) -> dict:
         """Internal use only."""
 
-        return self.__request('patch', url, params=params, data=data, json=json)
+        return self.__request('patch', url, params=params, data=data, json=json, headers=headers)
 
-    def put(self, url, params=None, data=None, json=None) -> dict:
+    def put(self, url, params: dict = None, data: dict = None, json: dict = None, headers: dict = None) -> dict:
         """Internal use only."""
 
-        return self.__request('put', url, params=params, data=data, json=json)
+        return self.__request('put', url, params=params, data=data, json=json, headers=headers)
 
-    def delete(self, url, params=None, data=None, json=None) -> dict:
+    def delete(self, url, params: dict = None, data: dict = None, json: dict = None, headers: dict = None) -> dict:
         """Internal use only."""
 
-        return self.__request('delete', url, params=params, data=data, json=json)
+        return self.__request('delete', url, params=params, data=data, json=json, headers=headers)
 
     # note - this method could be iffy in the future if the app changes the way it handles
     # file uploads. As of 2022-01-26 it is working fine with the "Upload SAML Metadata" action
@@ -223,11 +223,13 @@ class Britive:
         response = self.session.post(url, params=params, files=files, headers={'Content-Type': None})
         return handle_response(response)
 
-    def __request_with_exponential_backoff_and_retry(self, method, url, params, data, json) -> dict:
+    def __request_with_exponential_backoff_and_retry(self, method, url, params, data, json, headers) -> dict:
         num_retries = 0
 
         while num_retries <= self.retry_max_times:
-            response = self.session.request(method, url, params=params, data=data, json=json)
+            response = self.session.request(
+                method, url, params=params, data=data, json=json, headers={**self.session.headers, **headers}
+            )
 
             # handle the use case of a tenant being in maintenance mode
             # which means we should break out of this loop early and
@@ -244,15 +246,17 @@ class Britive:
 
         return response
 
-    def __request(self, method, url, params=None, data=None, json=None) -> dict:
+    def __request(self, method, url, params=None, data=None, json=None, headers=None) -> dict:
         return_data = []
         _pagination_type = None
 
         if params is None:
             params = {}
+        if headers is None:
+            headers = {}
 
         while True:
-            response = self.__request_with_exponential_backoff_and_retry(method, url, params, data, json)
+            response = self.__request_with_exponential_backoff_and_retry(method, url, params, data, json, headers)
             if response_has_no_content(response):
                 return None
 
