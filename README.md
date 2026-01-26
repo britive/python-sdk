@@ -1,6 +1,6 @@
 # Britive Python SDK
 
-Pure Python implementation for interacting with the [Britive API](https://docs.britive.com/v1/docs/en/overview-britive-apis).
+Pure Python implementation for interacting with the [Britive API](https://docs.britive.com/apidocs).
 
 This package aims to wrap the Britive API for usage in Python development. For the most part it is a simple wrapper
 (sending potentially bad parameters to the API) but there are a couple of places where liberties were taken to enhance
@@ -33,7 +33,7 @@ pip install $(curl -s https://api.github.com/repos/britive/python-sdk/releases/l
 Each public method is documented with a docstring which provides details on what the method does, the parameters the
 method accepts, and details about what is returned from the method.
 
-Official API documentation can be found here: [Overview of Britive APIs](https://docs.britive.com/v1/docs/en/overview-britive-apis).
+Official API documentation can be found here: [Britive API Documentation](https://docs.britive.com/apidocs).
 
 ## Authentication
 
