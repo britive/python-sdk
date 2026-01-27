@@ -65,7 +65,7 @@ class Types:
             ]
         :return: Updated resource type.
         """
-        params = {}
+        params = {'name': self.get(resource_type_id=resource_type_id)['name']}
 
         if description:
             params['description'] = description
