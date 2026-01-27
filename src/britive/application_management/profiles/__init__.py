@@ -20,9 +20,9 @@ creation_defaults = {
     'useDefaultAppUrl': True,
 }
 
-update_fields_to_keep: list = list(creation_defaults)
-update_fields_to_keep.append('name')
-update_fields_to_keep.remove('status')
+update_fields_to_keep: list = list(
+    set(list(creation_defaults) + ['name']) - set(['excludeAdminFromAdminRelatedCommunication', 'status'])
+)
 
 
 class Profiles:
