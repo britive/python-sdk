@@ -15,6 +15,8 @@ from britive.exceptions.badrequest import UserCreationError
 britive = Britive()  # source details from environment variables
 scan_skip = bool(os.getenv('BRITIVE_TEST_IGNORE_SCAN'))
 scan_skip_message = 'ignore scan requested'
+skip_federated = bool(os.getenv('BRITIVE_TEST_IGNORE_FEDERATED'))
+skip_federated_message = 'ignore federated service identity requested'
 constraints = bool(not (os.getenv('BRITIVE_GCP_TEST_APP_ID') and os.getenv('BRITIVE_TENANT') == 'engv2-ea'))
 constraints_skip = 'not using engv2-ea and/or BRITIVE_GCP_TEST_APP_ID not set'
 characters = list(string.ascii_letters + string.digits + '!@#$%^&*()')
@@ -211,7 +213,11 @@ def cached_group(pytestconfig, cached_application, cached_environment):
 @cached_resource(name='identity-attribute')
 def cached_identity_attribute(pytestconfig, timestamp):
     return britive.identity_management.identity_attributes.create(
-        name=f'pysdktest-{timestamp}', description='test', data_type='String', multi_valued=False
+        name=f'pysdktest-{timestamp}',
+        description='test',
+        data_type='String',
+        multi_valued=False,
+        identity_types=britive.identity_management.identity_attributes.identity_types(),
     )
 
 
@@ -268,7 +274,7 @@ def cached_profile_approval_policy(pytestconfig, cached_profile, cached_service_
     policy = britive.application_management.profiles.policies.build(
         name=f'{cached_profile["papId"]}-2',
         description='',
-        service_identities=[cached_service_identity['username']],
+        service_identities=[cached_service_identity['name']],
         approval_notification_medium='Email',
         approver_users=[cached_user['username']],
     )

@@ -1,6 +1,6 @@
 from .cache import *  # will also import some globals like `britive`
 
-service_identity_keys = ['userId', 'status', 'name', 'type', 'adminRoles']
+service_identity_keys = ['status', 'type', 'created', 'name', 'tokenExpirationInDays', 'serviceIdentityType', 'userId']
 
 
 def test_create(cached_service_identity):

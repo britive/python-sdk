@@ -88,6 +88,7 @@ def test_service_identity_get_when_nothing_associated(cached_service_identity_fe
         )
 
 
+@pytest.mark.skipif(skip_federated, reason=skip_federated_message)
 def test_service_identity_assign_and_unassign(
     cached_service_identity_federated, cached_identity_attribute, cached_workload_identity_provider_oidc
 ):

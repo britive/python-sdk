@@ -199,7 +199,7 @@ def test_policies_create_with_approval_multiple_notification_medium(
     policy = britive.application_management.profiles.policies.build(
         name=f'{cached_profile["papId"]}-2',
         description='',
-        service_identities=[cached_service_identity['username']],
+        service_identities=[cached_service_identity['name']],
         approval_notification_medium=['Email'],
         approver_users=[cached_user['username']],
     )
