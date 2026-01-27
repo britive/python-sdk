@@ -15,7 +15,9 @@ class IdentityAttributes:
 
         return self.britive.get(self.base_url)
 
-    def create(self, name: str, description: str, data_type: str, multi_valued: bool) -> dict:
+    def create(
+        self, name: str, description: str, data_type: str, multi_valued: bool, identity_types: list = ['User']
+    ) -> dict:
         """
         Create a new identity attribute.
 
@@ -23,6 +25,8 @@ class IdentityAttributes:
         :param description: The description of the identity attribute.
         :param data_type: The data type of the identity attribute. Valid values are
             `String`, `Number`, 'Boolean`, 'Date`.
+        :param identity_types: List of supported Identity Types. Valid values are
+            available with `identity_attributes.identity_types()` - Default: ['User']
         :param multi_valued: Whether the attribute should be considered multi-valued.
         :return: Details of the newly created identity attribute.
         """
@@ -30,7 +34,16 @@ class IdentityAttributes:
         if data_type not in ['String', 'Number', 'Boolean', 'Date']:
             raise ValueError(f'invalid data_type {data_type}')
 
-        data = {'name': name, 'description': description, 'dataType': data_type, 'multiValued': multi_valued}
+        if not set(identity_types).issubset(self.identity_types()):
+            raise ValueError(f'invalid identity_types {identity_types}')
+
+        data = {
+            'name': name,
+            'description': description,
+            'dataType': data_type,
+            'multiValued': multi_valued,
+            'identityTypes': identity_types,
+        }
 
         return self.britive.post(self.base_url, json=data)
 
@@ -43,6 +56,13 @@ class IdentityAttributes:
         """
 
         return self.britive.delete(f'{self.base_url}/{attribute_id}')
+
+    def identity_types(self) -> list:
+        """
+        :return: List of available Identity Types.
+        """
+
+        return self.britive.get(f'{self.base_url}/identity-types')
 
 
 class CustomAttributes:
