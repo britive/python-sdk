@@ -1,5 +1,27 @@
 # Change Log (v2.8.1+)
 
+## v4.6.0 [2026-05-22]
+
+__What's New:__
+
+* Added AWS STS JWT federation provider via `GetWebIdentityToken`.
+
+__Enhancements:__
+
+* Added `federation_providers.aws_sts_jwt` for OIDC-based AWS federation using STS web identity tokens.
+
+__Bug Fixes:__
+
+* None
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v4.5.0 [2026-01-26]
 
 __What's New:__
