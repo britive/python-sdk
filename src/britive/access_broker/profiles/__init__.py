@@ -2,6 +2,7 @@ from britive.application_management.advanced_settings import AdvancedSettings
 
 from .permissions import Permissions
 from .policies import Policies
+from .policy_prioritization import PolicyPrioritization
 
 
 class Profiles:
@@ -11,6 +12,7 @@ class Profiles:
         self.advanced_settings = AdvancedSettings(britive, base_url='/resource-manager/profile/{}/advanced-settings')
         self.permissions = Permissions(britive)
         self.policies = Policies(britive)
+        self.policy_prioritization = PolicyPrioritization(britive)
 
     def create(
         self, name: str, description: str = '', expiration_duration: int = 900000, impersonation: bool = False
