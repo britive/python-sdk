@@ -10,6 +10,7 @@ from britive.exceptions.generic import generic_code_map
 from britive.exceptions.unauthorized import InvalidTenantError, unauthorized_code_map
 from britive.federation_providers import (
     AwsFederationProvider,
+    AwsStsJwtFederationProvider,
     AzureSystemAssignedManagedIdentityFederationProvider,
     AzureUserAssignedManagedIdentityFederationProvider,
     BitbucketFederationProvider,
@@ -102,9 +103,10 @@ def source_federation_token(provider: str, tenant: Optional[str] = None, duratio
     sourced outside of this SDK and provided as input via the standard token presentation
     options.
 
-    Six federation providers are currently supported by this method.
+    The following federation providers are currently supported by this method.
 
     * AWS IAM/STS, with optional profile specified - (aws)
+    * AWS STS JWT via GetWebIdentityToken - (awsstsjwt)
     * Azure System Assigned Managed Identities (azuresmi)
     * Azure User Assigned Managed Identities (azureumi)
     * Bitbucket Pipelines (bitbucket)
@@ -116,13 +118,20 @@ def source_federation_token(provider: str, tenant: Optional[str] = None, duratio
     Any other OIDC federation provider can be used and tokens can be provided to this class for authentication
     to a Britive tenant. Details of how to construct these tokens can be found at https://docs.britive.com.
 
-    :param provider: The name of the federation provider. Valid options are `aws`, `azuresmi`, `azureumi`, `bitbucket`, 
-        `gcp`, `github`, `gitlab`, and `spacelift`.
+    :param provider: The name of the federation provider. Valid options are `aws`, `awsstsjwt`, `azuresmi`, `azureumi`,
+        `bitbucket`, `gcp`, `github`, `gitlab`, and `spacelift`.
 
         For the AWS provider it is possible to provide a profile via value `aws-profile`. If no profile is provided
         then the boto3 `Session.get_credentials()` method will be used to obtain AWS credentials, which follows
         the order provided here:
         https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html#configuring-credentials
+
+        For the AWS STS JWT provider (awsstsjwt) it is possible to provide optional parameters via pipe-delimited
+        values: `awsstsjwt-<profile>|<audience>|<signing_algorithm>|<duration_seconds>`. All parameters are optional.
+        Use an empty string for profile to skip it (e.g. `awsstsjwt-|myaudience`). Defaults: audience=`britive`,
+        signing_algorithm=`ES384`, duration_seconds=`300`. Valid signing algorithms are `ES384` and `RS256`.
+        Duration must be between 60 and 3600 seconds. This provider requires the AWS account to have IAM outbound
+        identity federation enabled.
 
         For Azure User Assigned Managed Identities (azureumi) a client id is required. It must be
         provided in the form `azureumi-<client-id>`. From the Azure documentation...a user-assigned identity's
@@ -167,6 +176,16 @@ def source_federation_token(provider: str, tenant: Optional[str] = None, duratio
 
     if provider_name in federation_providers:
         return federation_providers[provider_name]()
+
+    if provider_name == 'awsstsjwt':
+        parts = helper[1].split('|') if len(helper) > 1 else []
+        profile = safe_list_get(parts, 0) or None
+        audience = safe_list_get(parts, 1) or None
+        signing_algorithm = safe_list_get(parts, 2) or 'ES384'
+        duration = int(safe_list_get(parts, 3) or 300)
+        return AwsStsJwtFederationProvider(
+            profile=profile, audience=audience, duration_seconds=duration, signing_algorithm=signing_algorithm
+        ).get_token()
 
     if provider_name == 'azuresmi':
         return AzureSystemAssignedManagedIdentityFederationProvider(audience=safe_list_get(helper, 1)).get_token()

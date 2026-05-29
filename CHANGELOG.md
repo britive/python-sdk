@@ -1,5 +1,34 @@
 # Change Log (v2.8.1+)
 
+## v4.6.0 [2026-05-27]
+
+__What's New:__
+
+* Added AWS STS JWT federation provider via `GetWebIdentityToken`.
+* Added broker scan and scheduled scan support for access broker resource types.
+* Added secret rotation support for secrets manager.
+* Added policy prioritization support for access broker profiles.
+
+__Enhancements:__
+
+* Added `federation_providers.aws_sts_jwt` for OIDC-based AWS federation using STS web identity tokens.
+* Added `access_broker.resources.types.[scan|get_scan_settings]` for on-demand broker scans.
+* Added `access_broker.resources.types.[get_scheduled_scan_service|create_scheduled_scan|list_scheduled_scans|enable_scheduled_scans|disable_scheduled_scans|delete_scheduled_scan]` for scheduled scan management.
+* Added `secrets_manager.secrets.[metadata|rotation_details|update_rotation|rotate|rotation_history|versions]` for secret rotation and version management.
+* Added `access_broker.profiles.policy_prioritization.[enable|disable|reorder]` for profile policy evaluation ordering.
+
+__Bug Fixes:__
+
+* None
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v4.5.0 [2026-01-26]
 
 __What's New:__
