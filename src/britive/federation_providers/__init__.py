@@ -1,4 +1,5 @@
 from .aws import AwsFederationProvider
+from .aws_sts_jwt import AwsStsJwtFederationProvider
 from .azure_system_assigned_managed_identity import AzureSystemAssignedManagedIdentityFederationProvider
 from .azure_user_assigned_managed_identity import AzureUserAssignedManagedIdentityFederationProvider
 from .bitbucket import BitbucketFederationProvider
@@ -12,6 +13,7 @@ from .spacelift import SpaceliftFederationProvider
 class FederationProviders:
     def __init__(self, britive) -> None:
         self.aws = AwsFederationProvider(britive)
+        self.aws_sts_jwt = AwsStsJwtFederationProvider(britive)
         self.azure_system_assigned_managed_identity = AzureSystemAssignedManagedIdentityFederationProvider(britive)
         self.azure_user_assigned_managed_identity = AzureUserAssignedManagedIdentityFederationProvider(britive)
         self.bitbucket = BitbucketFederationProvider(britive)

@@ -164,3 +164,86 @@ class Secrets:
 
         params = {'getmetadata': get_metadata}
         return self.britive.get(f'{self.base_url}/{vault_id}/secrets?path={path}', params=params)
+
+    def metadata(self, vault_id: str, path: str) -> dict:
+        """
+        Retrieve metadata for a secret, including rotation configuration.
+
+        :param vault_id: ID of the vault.
+        :param path: path of the secret, include the / at the beginning.
+        :return: Secret metadata including rotation interval, last/next rotation timestamps.
+        """
+
+        return self.britive.get(f'{self.base_url}/{vault_id}/secret-metadata?path={path}')
+
+    def rotation_details(self, vault_id: str, path: str) -> dict:
+        """
+        Retrieve admin-level secret details including rotation targets and configuration.
+
+        :param vault_id: ID of the vault.
+        :param path: path of the secret, include the / at the beginning.
+        :return: Secret rotation details including resource, account, and rotation template mappings.
+        """
+
+        return self.britive.get(f'{self.base_url}/{vault_id}/admin/accesssecrets?path={path}')
+
+    def update_rotation(self, vault_id: str, path: str, rotation_config: dict = None, **kwargs) -> None:
+        """
+        Update rotation configuration for a secret.
+
+        The rotation config is sent as part of the secret PATCH body. This can include
+        resource/account mapping, rotation template, notification settings, etc.
+
+        :param vault_id: ID of the vault.
+        :param path: path of the secret, include the / at the beginning.
+        :param rotation_config: dict of rotation configuration fields to set on the secret.
+        :param kwargs: additional fields to include in the PATCH body.
+        :return: None
+        """
+
+        params = {}
+        if rotation_config:
+            params.update(rotation_config)
+        params.update(kwargs)
+        return self.britive.patch(f'{self.base_url}/{vault_id}/secrets?path={path}', json=params)
+
+    def rotate(self, vault_id: str, path: str, value: dict = None, sync_to_target: bool = True) -> dict:
+        """
+        Trigger rotation for a secret (update password and sync to target).
+
+        Updates the secret value and optionally syncs the new value to the mapped target resource.
+        Requires that the secret has a resource and account mapped in its rotation details.
+
+        :param vault_id: ID of the vault.
+        :param path: path of the secret, include the / at the beginning.
+        :param value: new secret value dict (e.g. {'Password': 'newpass'}). If None, only sync is triggered.
+        :param sync_to_target: whether to sync the updated value to the target resource. Defaults to True.
+        :return: Details of the rotation operation.
+        """
+
+        params = {'syncToTarget': sync_to_target}
+        if value:
+            params['value'] = value
+        return self.britive.patch(f'{self.base_url}/{vault_id}/secrets?path={path}', json=params)
+
+    def rotation_history(self, vault_id: str, secret_id: str) -> list:
+        """
+        Retrieve rotation history for a secret.
+
+        :param vault_id: ID of the vault.
+        :param secret_id: ID of the secret.
+        :return: List of rotation history entries with date, status, executed by, and type.
+        """
+
+        return self.britive.get(f'{self.base_url}/{vault_id}/secrets/{secret_id}/rotate/history')
+
+    def versions(self, vault_id: str, secret_id: str) -> list:
+        """
+        List all versions of a secret.
+
+        :param vault_id: ID of the vault.
+        :param secret_id: ID of the secret.
+        :return: List of secret versions with version number, creation date, and created by.
+        """
+
+        return self.britive.get(f'{self.base_url}/{vault_id}/secrets/{secret_id}/versions')
