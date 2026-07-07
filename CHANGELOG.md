@@ -1,5 +1,28 @@
 # Change Log (v2.8.1+)
 
+## v4.7.0 [2026-06-26]
+
+__What's New:__
+
+* Added custom header support (e.g. `X-On-Behalf-Of`) to the approval request and approval action APIs.
+
+__Enhancements:__
+
+* Added an optional `headers` argument to `my_requests.[approval_request_status|request_approval|request_approval_by_name|withdraw_approval_request|withdraw_approval_request_by_name]`, forwarded to the underlying request so on-behalf-of context propagates through the profile/resource approval flow.
+* Added an optional `headers` argument to `my_approvals.[approve_request|reject_request|list]` for parity on the approver-side APIs.
+
+__Bug Fixes:__
+
+* None
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v4.6.0 [2026-05-27]
 
 __What's New:__
