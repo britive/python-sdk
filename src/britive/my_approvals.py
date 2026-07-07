@@ -15,41 +15,59 @@ class MyApprovals:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/v1/approvals'
 
-    def approve_request(self, request_id: str, comments: str = '') -> None:
+    def approve_request(self, request_id: str, comments: str = '', headers: dict = None) -> None:
         """
         Approves a request.
 
         :param request_id: The ID of the request.
         :param comments: Approver comments.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: None.
         """
 
         params = {'approveRequest': 'yes'}
         data = {'approverComment': comments}
 
-        return self.britive.patch(f'{self.base_url}/{request_id}', params=params, json=data)
+        return self.britive.patch(f'{self.base_url}/{request_id}', params=params, json=data, headers=headers)
 
-    def reject_request(self, request_id: str, comments: str = '') -> None:
+    def reject_request(self, request_id: str, comments: str = '', headers: dict = None) -> None:
         """
         Rejects a request.
 
         :param request_id: The ID of the request.
         :param comments: Approver comments.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: None.
         """
 
         params = {'approveRequest': 'no'}
         data = {'approverComment': comments}
 
-        return self.britive.patch(f'{self.base_url}/{request_id}', params=params, json=data)
+        return self.britive.patch(f'{self.base_url}/{request_id}', params=params, json=data, headers=headers)
 
-    def list(self) -> dict:
+    def list(self, headers: dict = None) -> dict:
         """
         Lists approval requests.
 
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: List of approval requests.
         """
 
         params = {'requestType': 'myApprovals'}
 
-        return self.britive.get(f'{self.base_url}', params=params)
+        return self.britive.get(f'{self.base_url}', params=params, headers=headers)
