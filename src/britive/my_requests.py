@@ -27,34 +27,52 @@ class MyRequests:
         self.base_url = f'{self.britive.base_url}/v1/approvals'
         self._helper = HelperMethods(self.britive)
 
-    def list(self) -> list:
+    def list(self, headers: dict = None) -> list:
         """
         List My Requests
 
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: List of My Requests.
         """
 
-        return self.britive.get(f'{self.base_url}', params={'requestType': 'myRequests'})
+        return self.britive.get(f'{self.base_url}/', params={'requestType': 'myRequests'}, headers=headers)
 
-    def approval_request_status(self, request_id: str) -> dict:
+    def approval_request_status(self, request_id: str, headers: dict = None) -> dict:
         """
         Get the details of an approval request.
 
         :param request_id: The ID of the approval request.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: Details of the approval request.
         """
 
-        return self.britive.get(f'{self.base_url}/{request_id}')
+        return self.britive.get(f'{self.base_url}/{request_id}', headers=headers)
 
-    def withdraw_approval_request(self, request_id: str) -> None:
+    def withdraw_approval_request(self, request_id: str, headers: dict = None) -> None:
         """
         Withdraws a pending approval request.
 
         :param request_id: The ID of the approval request.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: None
         """
 
-        return self._withdraw_approval_request(request_id=request_id)
+        return self._withdraw_approval_request(request_id=request_id, headers=headers)
 
     def _request_approval(
         self,
@@ -68,6 +86,7 @@ class MyRequests:
         ticket_id: str = None,
         ticket_type: str = None,
         wait_time: int = 60,
+        headers: dict = None,
     ) -> Any:
         data = {'justification': justification}
 
@@ -82,7 +101,7 @@ class MyRequests:
                 f'{profile_id}/resources/{entity_id}/approvalRequest'
             )
         )
-        request = self.britive.post(url, json=data)
+        request = self.britive.post(url, json=data, headers=headers)
 
         if request is None:
             raise ProfileCheckoutAlreadyApproved
@@ -93,7 +112,7 @@ class MyRequests:
             try:
                 quit_time = time.time() + max_wait_time
                 while time.time() <= quit_time:
-                    status = self.approval_request_status(request_id=request_id)['status'].lower()
+                    status = self.approval_request_status(request_id=request_id, headers=headers)['status'].lower()
                     if status == 'pending':
                         if progress_func:
                             progress_func('awaiting approval')
@@ -106,7 +125,7 @@ class MyRequests:
                 try:
                     # the first ^C we get we will try to withdraw the request
                     time.sleep(1)  # give the caller a small window to ^C again
-                    self._withdraw_approval_request(request_id=request_id)
+                    self._withdraw_approval_request(request_id=request_id, headers=headers)
                     raise ProfileApprovalWithdrawn('user interrupt.') from e
                 except KeyboardInterrupt:
                     raise e from None
@@ -126,9 +145,12 @@ class MyRequests:
         ticket_id: str = None,
         ticket_type: str = None,
         wait_time: int = 60,
+        headers: dict = None,
     ) -> Any:
         if entity_type == 'environments':
-            ids = self._helper.get_profile_and_environment_ids_given_names(profile_name, entity_name, application_name)
+            ids = self._helper.get_profile_and_environment_ids_given_names(
+                profile_name, entity_name, application_name, headers=headers
+            )
             return self._request_approval(
                 profile_id=ids['profile_id'],
                 justification=justification,
@@ -140,8 +162,9 @@ class MyRequests:
                 ticket_id=ticket_id,
                 ticket_type=ticket_type,
                 wait_time=wait_time,
+                headers=headers,
             )
-        ids = self._helper.get_profile_and_resource_ids_given_names(profile_name, entity_name)
+        ids = self._helper.get_profile_and_resource_ids_given_names(profile_name, entity_name, headers=headers)
         return self._request_approval(
             profile_id=ids['profile_id'],
             justification=justification,
@@ -153,14 +176,20 @@ class MyRequests:
             ticket_id=ticket_id,
             ticket_type=ticket_type,
             wait_time=wait_time,
+            headers=headers,
         )
 
     def _withdraw_approval_request(
-        self, request_id: str = None, profile_id: str = None, entity_id: str = None, entity_type: str = None
+        self,
+        request_id: str = None,
+        profile_id: str = None,
+        entity_id: str = None,
+        entity_type: str = None,
+        headers: dict = None,
     ) -> None:
         url = request_id if request_id else f'consumer/{entity_type}/resource?resourceId={profile_id}/{entity_id}'
 
-        return self.britive.delete(f'{self.base_url}/{url}')
+        return self.britive.delete(f'{self.base_url}/{url}', headers=headers)
 
 
 class MyAccessRequests(MyRequests):
@@ -176,6 +205,7 @@ class MyAccessRequests(MyRequests):
         ticket_id: str = None,
         ticket_type: str = None,
         wait_time: int = 60,
+        headers: dict = None,
     ) -> Any:
         """
         Requests approval to checkout a profile at a later time, using names of entities instead of IDs.
@@ -200,6 +230,12 @@ class MyAccessRequests(MyRequests):
         :param ticket_type: Optional ITSM ticket type or category
         :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
             was approved. Only applicable if `block_until_disposition = True`.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: If `block_until_disposition = True` then returns the final status of the request. If
             `block_until_disposition = False` then returns details about the approval request.
         :raises ProfileApprovalMaxBlockTimeExceeded: if max_wait_time has been reached while waiting for approval.
@@ -217,6 +253,7 @@ class MyAccessRequests(MyRequests):
             ticket_id=ticket_id,
             ticket_type=ticket_type,
             wait_time=wait_time,
+            headers=headers,
         )
 
     def request_approval(
@@ -230,6 +267,7 @@ class MyAccessRequests(MyRequests):
         ticket_id: str = None,
         ticket_type: str = None,
         wait_time: int = 60,
+        headers: dict = None,
     ) -> Any:
         """
         Requests approval to checkout a profile at a later time.
@@ -252,6 +290,12 @@ class MyAccessRequests(MyRequests):
         :param ticket_type: Optional ITSM ticket type or category
         :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
             was approved. Only applicable if `block_until_disposition = True`.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: If `block_until_disposition = True` then returns the final status of the request. If
             `block_until_disposition = False` then returns details about the approval request.
         :raises ProfileApprovalMaxBlockTimeExceeded: if max_wait_time has been reached while waiting for approval.
@@ -268,10 +312,11 @@ class MyAccessRequests(MyRequests):
             ticket_id=ticket_id,
             ticket_type=ticket_type,
             wait_time=wait_time,
+            headers=headers,
         )
 
     def withdraw_approval_request_by_name(
-        self, profile_name: str, environment_name: str = None, application_name: str = None
+        self, profile_name: str, environment_name: str = None, application_name: str = None, headers: dict = None
     ) -> None:
         """
         Withdraws a pending approval request, using names of entities instead of IDs.
@@ -280,17 +325,25 @@ class MyAccessRequests(MyRequests):
         :param environment_name: The name of the environment. Use `list_profiles()` to obtain the eligible environments.
         :param application_name: Optionally the name of the application, which can help disambiguate between profiles
             with the same name across applications.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: None
         """
 
-        ids = self._helper.get_profile_and_environment_ids_given_names(profile_name, environment_name, application_name)
+        ids = self._helper.get_profile_and_environment_ids_given_names(
+            profile_name, environment_name, application_name, headers=headers
+        )
 
         return self._withdraw_approval_request(
-            profile_id=ids['profile_id'], entity_id=ids['environment_id'], entity_type='papservice'
+            profile_id=ids['profile_id'], entity_id=ids['environment_id'], entity_type='papservice', headers=headers
         )
 
     def withdraw_approval_request(
-        self, request_id: str = None, profile_id: str = None, environment_id: str = None
+        self, request_id: str = None, profile_id: str = None, environment_id: str = None, headers: dict = None
     ) -> None:
         """
         Withdraws a pending approval request.
@@ -300,13 +353,19 @@ class MyAccessRequests(MyRequests):
         :param request_id: The ID of the approval request.
         :param profile_id: The ID of the profile.
         :param environment_id: The ID of the environment.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: None
         """
         if not request_id and not all([profile_id, environment_id]):
             raise ValueError('profile_id and environment_id are required')
 
         return self._withdraw_approval_request(
-            profile_id=profile_id, entity_id=environment_id, entity_type='papservice'
+            profile_id=profile_id, entity_id=environment_id, entity_type='papservice', headers=headers
         )
 
 
@@ -322,6 +381,7 @@ class MyResourcesRequests(MyRequests):
         ticket_id: str = None,
         ticket_type: str = None,
         wait_time: int = 60,
+        headers: dict = None,
     ) -> Any:
         """
         Requests approval to checkout a profile at a later time.
@@ -344,6 +404,12 @@ class MyResourcesRequests(MyRequests):
         :param ticket_type: Optional ITSM ticket type or category
         :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
             was approved. Only applicable if `block_until_disposition = True`.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: If `block_until_disposition = True` then returns the final status of the request. If
             `block_until_disposition = False` then returns details about the approval request.
         :raises ProfileApprovalMaxBlockTimeExceeded: if max_wait_time has been reached while waiting for approval.
@@ -360,6 +426,7 @@ class MyResourcesRequests(MyRequests):
             ticket_id=ticket_id,
             ticket_type=ticket_type,
             wait_time=wait_time,
+            headers=headers,
         )
 
     def request_approval_by_name(
@@ -373,6 +440,7 @@ class MyResourcesRequests(MyRequests):
         ticket_id: str = None,
         ticket_type: str = None,
         wait_time: int = 60,
+        headers: dict = None,
     ) -> Any:
         """
         Requests approval to checkout a profile at a later time, using names of entities instead of IDs.
@@ -395,6 +463,12 @@ class MyResourcesRequests(MyRequests):
         :param ticket_type: Optional ITSM ticket type or category
         :param wait_time: The number of seconds to sleep/wait between polling to check if the profile checkout
             was approved. Only applicable if `block_until_disposition = True`.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: If `block_until_disposition = True` then returns the final status of the request. If
             `block_until_disposition = False` then returns details about the approval request.
         :raises ProfileApprovalMaxBlockTimeExceeded: if max_wait_time has been reached while waiting for approval.
@@ -411,25 +485,34 @@ class MyResourcesRequests(MyRequests):
             ticket_id=ticket_id,
             ticket_type=ticket_type,
             wait_time=wait_time,
+            headers=headers,
         )
 
-    def withdraw_approval_request_by_name(self, profile_name: str, resource_name: str = None) -> None:
+    def withdraw_approval_request_by_name(
+        self, profile_name: str, resource_name: str = None, headers: dict = None
+    ) -> None:
         """
         Withdraws a pending approval request, using names of entities instead of IDs.
 
         :param profile_name: The name of the profile. Use `list_profiles()` to obtain the eligible profiles.
         :param resource_name: The name of the resource. Use `list_profiles()` to obtain the eligible resources.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: None
         """
 
-        ids = self._helper.get_profile_and_resource_ids_given_names(profile_name, resource_name)
+        ids = self._helper.get_profile_and_resource_ids_given_names(profile_name, resource_name, headers=headers)
 
         return self._withdraw_approval_request(
-            profile_id=ids['profile_id'], entity_id=ids['resource_id'], entity_type='resourceprofile'
+            profile_id=ids['profile_id'], entity_id=ids['resource_id'], entity_type='resourceprofile', headers=headers
         )
 
     def withdraw_approval_request(
-        self, request_id: str = None, profile_id: str = None, resource_id: str = None
+        self, request_id: str = None, profile_id: str = None, resource_id: str = None, headers: dict = None
     ) -> None:
         """
         Withdraws a pending approval request.
@@ -439,6 +522,12 @@ class MyResourcesRequests(MyRequests):
         :param request_id: The ID of the approval request.
         :param profile_id: The ID of the profile.
         :param resource_id: The ID of the resource.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
         :return: None
         """
 
@@ -446,5 +535,5 @@ class MyResourcesRequests(MyRequests):
             raise ValueError('profile_id and resource_id are required')
 
         return self._withdraw_approval_request(
-            profile_id=profile_id, entity_id=resource_id, entity_type='resourceprofile'
+            profile_id=profile_id, entity_id=resource_id, entity_type='resourceprofile', headers=headers
         )
