@@ -1,5 +1,31 @@
 # Change Log (v2.8.1+)
 
+## v4.7.0 [2026-07-31]
+
+__What's New:__
+
+* Migrated `audit_logs.logs` to the Audit Log API v2 (`/api/logs/v2`). Audit Log API v1 is deprecated and scheduled for retirement in mid-October 2026. No method signatures changed, so a simple SDK upgrade is all that is required.
+
+__Enhancements:__
+
+* `audit_logs.logs.query` now uses v2 token based pagination via the `next-page` response header, which resolves the prior issue where the final page of results could be omitted.
+* `audit_logs.logs.query` `from_time`/`to_time` now accept a string or int in addition to a `datetime`. Non-`datetime` values are passed through to the audit API, which supports ISO-8601 timestamps, epoch seconds/milliseconds, and relative expressions such as `now`, `yesterday`, or `1 day ago`. `datetime` inputs continue to be sent as UTC ISO-8601, so existing usage is unchanged.
+* `audit_logs.logs.[fields|operators]` now target the v2 endpoints.
+
+__Bug Fixes:__
+
+* None
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* New errors that can be raised by `audit_logs.logs.query`:
+  * `exceptions.AuditLogCsvDownloadError` — when `csv=True` and the presigned S3 URL for the CSV export cannot be downloaded (e.g. the execution environment lacks outbound HTTPS access to AWS S3).
+  * `exceptions.InvalidRequest` — when the requested time frame exceeds the v2 maximum of 7 days (the human-readable API validation message is surfaced).
+
 ## v4.6.1 [2026-07-07]
 
 __Enhancements:__
