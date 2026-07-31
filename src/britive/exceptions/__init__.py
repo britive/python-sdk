@@ -22,6 +22,10 @@ class ApprovalWorkflowTimedOut(BritiveException):
     pass
 
 
+class AuditLogCsvDownloadError(BritiveException):
+    pass
+
+
 class Conflict(BritiveException):
     pass
 

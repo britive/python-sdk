@@ -53,6 +53,8 @@ def pagination_type(headers, result) -> str:
 
     if is_dict and all(x in result for x in ('count', 'page', 'size', 'data')):
         return 'inline'
+    if is_dict and 'records' in result:  # this is how audit_logs.query() (v2) paginates - via a page token
+        return 'audit_v2'
     if is_dict and has_next_page_header and all(x in result for x in ('data', 'reportId')):  # reports
         return 'report'
     if has_next_page_header:  # this interesting way of paginating is how audit_logs.query() does it

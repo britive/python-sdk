@@ -290,6 +290,16 @@ class Britive:
                     break
                 url = response.headers['next-page']
                 params = {}
+            elif _pagination_type == 'audit_v2':
+                # v2 audit logs return a `records` list and, when more data exists, a page token in the `next-page`
+                # response header. Unlike the `audit` type above - which treats the `next-page` header as a full URL
+                # to follow - this token is an opaque cursor passed back as the `pageToken` query parameter against
+                # the same URL.
+                return_data += result.get('records', [])
+                next_page_token = response.headers.get('next-page')
+                if not next_page_token:
+                    break
+                params['pageToken'] = next_page_token
             elif _pagination_type == 'secmgr':
                 return_data += result['result']
                 url = result['pagination'].get('next', '')
