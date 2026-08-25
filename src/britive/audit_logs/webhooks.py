@@ -7,16 +7,16 @@ from jmespath.exceptions import EmptyExpressionError, ParseError
 class Webhooks:
     def __init__(self, britive) -> None:
         self.britive = britive
-        self.base_url = f'{self.britive.base_url}/logs/webhooks'
+        self.base_url = f'{self.britive.base_url}/v1/notification-service/logs/webhooks'
 
     def create_or_update(self, notification_medium_id: str, jmespath_filter: str = '', description: str = '') -> dict:
         """
-        Return details of a created, or updated if the notificationMediumId already exists, audit log webhook.
+        Create an audit log webhook, or update the webhook for an existing notification medium.
 
-        :param notification_medium_id: the notificationMediumId webhook to create or update.
-        :param jmespath_filter: a JMESPath filter to apply to log entries before sending to the webhook.
-        :param description: the description of the audit log webhook.
-        :return: Dict of field keys to field names.
+        :param notification_medium_id: Notification medium ID for the webhook.
+        :param jmespath_filter: JMESPath filter to apply before sending audit events to the webhook.
+        :param description: Description of the audit log webhook.
+        :return: The created or updated audit log webhook.
         """
 
         try:
@@ -35,28 +35,28 @@ class Webhooks:
 
     def get(self, notification_medium_id: str) -> dict:
         """
-        Return audit log webhook details specified by notificationMediumId.
+        Return the audit log webhook for a notification medium.
 
-        :param notification_medium_id: the notificationMediumId webhook to retrieve.
-        :return: Dict of field keys to field names.
+        :param notification_medium_id: Notification medium ID for the webhook.
+        :return: The audit log webhook.
         """
 
         return self.britive.get(f'{self.base_url}/{notification_medium_id}')
 
     def list(self) -> list:
         """
-        Return a list of audit log webhook details for the tenant.
+        Return the tenant's audit log webhooks.
 
-        :return: List of field keys to field names.
+        :return: A list of audit log webhooks.
         """
 
         return self.britive.get(f'{self.base_url}')
 
     def delete(self, notification_medium_id: str) -> None:
         """
-        Delete an audit log webhook specified by notificationMediumId.
+        Delete the audit log webhook for a notification medium.
 
-        :param notification_medium_id: the notificationMediumId webhook to delete.
+        :param notification_medium_id: Notification medium ID for the webhook.
         :return: None
         """
 
