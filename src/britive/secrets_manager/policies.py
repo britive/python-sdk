@@ -181,7 +181,7 @@ class Policies:
         params = {'consumer': 'secretmanager', 'resource': path}
         return self.britive.delete(f'{self.base_url}/{policy_id}', params=params)
 
-    def build(  # noqa: PLR0913
+    def build(  # noqa: PLR0913,PLR0917
         self,
         name: str,
         access_level: str = None,

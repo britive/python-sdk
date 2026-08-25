@@ -12,7 +12,8 @@ from .federation_provider import FederationProvider
 
 class AwsFederationProvider(FederationProvider):
     def __init__(self, profile: str, tenant: str, duration: int = 900) -> None:
-        from britive.helpers.utils import parse_tenant  # doing import here to avoid circular dependency
+        # doing import here to avoid circular dependency
+        from britive.helpers.utils import parse_tenant  # noqa: PLC0415
 
         self.profile = profile
         self.duration = duration
@@ -39,8 +40,8 @@ class AwsFederationProvider(FederationProvider):
         # boto3 is not a hard requirement of this SDK but is required for the
         # aws provider so checking to ensure it exists
         try:
-            import boto3
-            import botocore.exceptions as botoexceptions
+            import boto3  # noqa: PLC0415
+            import botocore.exceptions as botoexceptions  # noqa: PLC0415
         except ImportError as e:
             raise Exception('boto3 required - please install boto3 package to use the aws federation provider') from e
 

@@ -10,8 +10,8 @@ class AzureSystemAssignedManagedIdentityFederationProvider(FederationProvider):
 
     def get_token(self) -> str:
         try:
-            from azure.identity import ManagedIdentityCredential
-            from azure.identity._exceptions import CredentialUnavailableError
+            from azure.identity import ManagedIdentityCredential  # noqa: PLC0415
+            from azure.identity._exceptions import CredentialUnavailableError  # noqa: PLC0415
 
             token = ManagedIdentityCredential().get_token(self.audience).token
             return f'OIDC::{token}'

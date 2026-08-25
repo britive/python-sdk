@@ -10,9 +10,9 @@ class GcpFederationProvider(FederationProvider):
 
     def get_token(self):
         try:
-            from google.auth.exceptions import DefaultCredentialsError
-            from google.auth.transport.requests import Request
-            from google.oauth2 import id_token
+            from google.auth.exceptions import DefaultCredentialsError  # noqa: PLC0415
+            from google.auth.transport.requests import Request  # noqa: PLC0415
+            from google.oauth2 import id_token  # noqa: PLC0415
 
             token = id_token.fetch_id_token(Request(), self.audience)
 
