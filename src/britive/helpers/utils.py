@@ -47,19 +47,18 @@ def handle_response(response):
         return response.content.decode('utf-8')
 
 
-def pagination_type(headers, result) -> str:
-    is_dict = isinstance(result, dict)
-    has_next_page_header = 'next-page' in headers
-
-    if is_dict and all(x in result for x in ('count', 'page', 'size', 'data')):
-        return 'inline'
-    if is_dict and has_next_page_header and all(x in result for x in ('data', 'reportId')):  # reports
-        return 'report'
-    if has_next_page_header:  # this interesting way of paginating is how audit_logs.query() does it
-        return 'audit'
-    if is_dict and all(x in result for x in ('result', 'pagination')):
-        return 'secmgr'
-    return 'none'
+def pagination_type(headers: dict[str, str], result: object) -> str:
+    match result:
+        case {'count': _, 'page': _, 'size': _, 'data': _}:
+            return 'inline'
+        case {'data': _, 'reportId': _}:
+            return 'report'
+        case {'records': _}:
+            return 'audit'
+        case {'result': _, 'pagination': _}:
+            return 'secmgr'
+        case _:
+            return 'none'
 
 
 def parse_tenant(tenant: str, timeout: float = 3) -> str:

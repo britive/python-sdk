@@ -144,7 +144,7 @@ class Britive:
         # wipe these due to this bug: https://github.com/psf/requests/issues/3829
         os.environ['CURL_CA_BUNDLE'] = ''
         os.environ['REQUESTS_CA_BUNDLE'] = ''
-        import urllib3
+        import urllib3  # noqa: PLC0415
 
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -181,10 +181,10 @@ class Britive:
     def banner(self) -> dict:
         return self.get(f'{self.base_url}/banner')
 
-    def get(self, url, params: dict = None, headers: dict = None) -> dict:
+    def get(self, url, params: dict = None, headers: dict = None, pagination: str = None) -> dict:
         """Internal use only."""
 
-        return self.__request('get', url, params=params, headers=headers)
+        return self.__request('get', url, params=params, headers=headers, pagination=pagination)
 
     def post(self, url, params: dict = None, data: dict = None, json: dict = None, headers: dict = None) -> dict:
         """Internal use only."""
@@ -246,9 +246,9 @@ class Britive:
 
         return response
 
-    def __request(self, method, url, params=None, data=None, json=None, headers=None) -> dict:
+    def __request(self, method, url, params=None, data=None, json=None, headers=None, pagination=None) -> dict:
         return_data = []
-        _pagination_type = None
+        _pagination_type = pagination
 
         if params is None:
             params = {}
@@ -257,16 +257,15 @@ class Britive:
 
         while True:
             response = self.__request_with_exponential_backoff_and_retry(method, url, params, data, json, headers)
+
             if response_has_no_content(response):
                 return None
 
-            # handle secrets file download
             content_disposition = response.headers.get('content-disposition', '').lower()
             if 'attachment' in content_disposition and 'downloadfile' in url:
                 filename = response.headers['content-disposition'].split('=')[1].replace('"', '').strip()
                 return {'filename': filename, 'content_bytes': bytes(response.content)}
 
-            # load the result as a dict
             result = handle_response(response)
 
             if url.endswith('my-resources') and method == 'get' and params.get('page') == 0 and params.get('size'):
@@ -274,30 +273,29 @@ class Britive:
 
             _pagination_type = _pagination_type or pagination_type(response.headers, result)
 
-            # check on the pagination and iterate if required - we only need to check on this after the first
-            # request - checking it each time can screw up the logic when dealing with pagination coming from
-            # the response headers as the header won't exist which will mean _pagination_type will change to 'none'
-            # which means we drop into the else block below and assign just the LAST page as the result, which
-            # is obviously not what we want to be doing.
-            if _pagination_type == 'inline':
-                return_data += result['data']
-                if result['size'] * (result['page'] + 1) >= result['count']:
+            match _pagination_type:
+                case 'inline':
+                    return_data += result['data']
+                    if result['size'] * (result['page'] + 1) >= result['count']:
+                        break
+                    params['page'] = result['page'] + 1
+                case 'report':
+                    return_data += result['data']
+                    if not (url := response.headers.get('next-page')):
+                        break
+                    params = {}
+                case 'audit':
+                    return_data += result.get('records', [])
+                    if not (next_page := response.headers.get('next-page')):
+                        break
+                    headers['next-page'] = next_page
+                case 'secmgr':
+                    return_data += result['result']
+                    if not (url := result['pagination'].get('next')):
+                        break
+                case _:
+                    return_data = result
                     break
-                params['page'] = result['page'] + 1
-            elif _pagination_type in ('audit', 'report'):
-                return_data += result if _pagination_type == 'audit' else result['data']
-                if 'next-page' not in response.headers:
-                    break
-                url = response.headers['next-page']
-                params = {}
-            elif _pagination_type == 'secmgr':
-                return_data += result['result']
-                url = result['pagination'].get('next', '')
-                if not url:
-                    break
-            else:
-                return_data = result
-                break
 
         return return_data
 
