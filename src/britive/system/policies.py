@@ -148,7 +148,7 @@ class SystemPolicies:
         return {'action': action, 'resource': resource, 'consumer': consumer}
 
     @staticmethod
-    def build(  # noqa: PLR0913
+    def build(  # noqa: PLR0913,PLR0917
         name: str,
         description: str = '',
         draft: bool = False,

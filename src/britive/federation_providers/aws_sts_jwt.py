@@ -25,8 +25,8 @@ class AwsStsJwtFederationProvider(FederationProvider):
 
     def get_token(self) -> str:
         try:
-            import boto3
-            import botocore.exceptions as botoexceptions
+            import boto3  # noqa: PLC0415
+            import botocore.exceptions as botoexceptions  # noqa: PLC0415
         except ImportError as e:
             raise Exception(
                 'boto3 required - please install boto3 package to use the aws-sts-jwt federation provider'

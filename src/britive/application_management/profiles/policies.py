@@ -7,7 +7,7 @@ class Policies:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/paps'
 
-    def build(  # noqa: PLR0913
+    def build(  # noqa: PLR0913,PLR0917
         self,
         name: str,
         description: str = '',

@@ -49,8 +49,10 @@ class MethodNotAllowed(BritiveException):
 class MissingAzureDependency(BritiveException):
     pass
 
+
 class MissingGcpDependency(BritiveException):
     pass
+
 
 class NoSecretsVaultFound(BritiveException):
     pass
@@ -59,8 +61,10 @@ class NoSecretsVaultFound(BritiveException):
 class NotExecutingInAzureEnvironment(BritiveException):
     pass
 
+
 class NotExecutingInGcpEnvironment(BritiveException):
     pass
+
 
 class NotExecutingInBitbucketEnvironment(BritiveException):
     pass
@@ -174,6 +178,7 @@ allowed_exceptions = {
     404: NotFound,
     405: MethodNotAllowed,
     409: Conflict,
+    413: BritiveException,
     500: InternalServerError,
     503: ServiceUnavailable,
 }

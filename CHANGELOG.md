@@ -1,5 +1,29 @@
 # Change Log (v2.8.1+)
 
+## v4.7.0 [2026-08-24]
+
+__What's New:__
+
+* Migrated `audit_logs.logs` to the Audit Log API v2 (`/api/logs/v2`).
+
+__Enhancements:__
+
+* `audit_logs.logs.query` now accepts `str`, `int`, or `datetime` for `from_time|to_time` params.
+* Added `audit_logs.logs.download_csv`, which returns the exported CSV as a string or writes it to `output_file`.
+
+__Bug Fixes:__
+
+* None
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* NOTE: Audit Log v2 API limits queries to a maximum range of 7 days
+* NOTE: Audit Log v2 API supports timestamps, epochs, and relative expressions such as `now` or `1 day ago`.
+
 ## v4.6.1 [2026-07-07]
 
 __Enhancements:__
