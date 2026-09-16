@@ -155,6 +155,7 @@ pytest tests/350-access_broker-08-permissions.py -v
 pytest tests/400-security-01-policies.py -v
 pytest tests/400-security-02-saml.py -v
 pytest tests/400-security-03-api_tokens.py -v
+pytest tests/400-security-04-temp_tokens.py -v
 pytest tests/500-audit_logs-01-logs.py -v
 pytest tests/500-audit_logs-02-webhooks.py -v
 pytest tests/550-reports-01-reports.py -v
