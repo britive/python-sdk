@@ -1,5 +1,28 @@
 # Change Log (v2.8.1+)
 
+## v4.8.0b0 [2026-09-16]
+
+__What's New:__
+
+* Added `security.temp_tokens` for temporary bearer tokens.
+
+__Enhancements:__
+
+* None
+
+__Bug Fixes:__
+
+* None
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* Updated github workflows python version to `python3.11`
+* Updated CONTRIBUTING python version to match project minimum.
+
 ## v4.7.0 [2026-08-24]
 
 __What's New:__
