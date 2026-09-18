@@ -7,7 +7,7 @@ can consume a native Python library.
 
 ## Python Version Support
 
-_CURRENT SUPPORTED VERSION(S):_ `>= 3.9`
+_CURRENT SUPPORTED VERSION(S):_ `>= 3.10`
 
 We use [typing](https://docs.python.org/3/library/typing.html) and dictionary unpacking, e.g. `{**dict1, **dict2}`,
 which requires Python 3.5 or greater.
@@ -155,6 +155,7 @@ pytest tests/350-access_broker-08-permissions.py -v
 pytest tests/400-security-01-policies.py -v
 pytest tests/400-security-02-saml.py -v
 pytest tests/400-security-03-api_tokens.py -v
+pytest tests/400-security-04-temp_tokens.py -v
 pytest tests/500-audit_logs-01-logs.py -v
 pytest tests/500-audit_logs-02-webhooks.py -v
 pytest tests/550-reports-01-reports.py -v
