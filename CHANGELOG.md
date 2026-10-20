@@ -1,5 +1,29 @@
 # Change Log (v2.8.1+)
 
+## v4.7.1 [2026-10-20]
+
+__What's New:__
+
+* None
+
+__Enhancements:__
+
+* None
+
+__Bug Fixes:__
+
+* `identity_management.[users|service_identities|ai_identities].[get|enable|disable|delete]` now only act on identities of the collection's type. An ID of another identity type raises `NotFound` (e.g. "... is not an AI identity") and nothing is changed; previously the record was returned, its status changed, or it was deleted.
+* `identity_management.[service_identities|ai_identities].update` now checks the identity type before patching, and sends the collection's type instead of always sending `ServiceIdentity`.
+* `identity_management.[users|service_identities|ai_identities].[enable|disable]` now raise `ValueError` when no ID is given and `NotFound` for unknown IDs, instead of `IndexError: list index out of range`.
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v4.7.0 [2026-08-24]
 
 __What's New:__
