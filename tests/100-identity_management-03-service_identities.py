@@ -1,3 +1,5 @@
+from britive.exceptions import NotFound
+
 from .cache import *  # will also import some globals like `britive`
 
 service_identity_keys = ['status', 'type', 'created', 'name', 'tokenExpirationInDays', 'serviceIdentityType', 'userId']
@@ -78,6 +80,41 @@ def test_enable_list(cached_service_identity):
     )
     assert isinstance(user, list)
     assert user[0]['status'] == 'active'
+
+
+def test_get_wrong_identity_type(cached_service_identity, cached_user):
+    with pytest.raises(NotFound):
+        britive.identity_management.service_identities.get(cached_user['userId'])
+    with pytest.raises(NotFound):
+        britive.identity_management.ai_identities.get(cached_service_identity['userId'])
+
+
+def test_enable_disable_wrong_identity_type(cached_service_identity, cached_user):
+    with pytest.raises(NotFound):
+        britive.identity_management.service_identities.disable(service_identity_id=cached_user['userId'])
+    with pytest.raises(NotFound):
+        britive.identity_management.ai_identities.disable(service_identity_ids=[cached_service_identity['userId']])
+    assert britive.identity_management.service_identities.get(cached_service_identity['userId'])['status'] == 'active'
+
+
+def test_enable_disable_no_ids():
+    with pytest.raises(ValueError):
+        britive.identity_management.service_identities.disable()
+    with pytest.raises(ValueError):
+        britive.identity_management.service_identities.enable(service_identity_ids=[])
+
+
+def test_enable_disable_unknown_id():
+    with pytest.raises(NotFound):
+        britive.identity_management.service_identities.disable(service_identity_id='00000000unknown0000')
+
+
+def test_delete_wrong_identity_type(cached_service_identity, cached_user):
+    with pytest.raises(NotFound):
+        britive.identity_management.ai_identities.delete(cached_service_identity['userId'])
+    with pytest.raises(NotFound):
+        britive.identity_management.service_identities.delete(cached_user['userId'])
+    assert britive.identity_management.service_identities.get(cached_service_identity['userId'])
 
 
 def test_set_custom_identity_attributes(cached_service_identity, cached_identity_attribute):

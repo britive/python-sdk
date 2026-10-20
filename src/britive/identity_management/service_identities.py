@@ -1,6 +1,9 @@
+from britive.exceptions import NotFound
+
 from .identity_attributes import CustomAttributes
 
 valid_statues = ['active', 'inactive']
+identity_type_labels = {'ServiceIdentity': 'a service identity', 'AIIdentity': 'an AI identity'}
 
 
 class ServiceIdentities:
@@ -33,11 +36,16 @@ class ServiceIdentities:
         Provide details of the given service_identity.
 
         :param service_identity_id: The ID  of the service identity.
-        :return: Details of the specified user.
+        :return: Details of the specified service identity.
+        :raises NotFound: if the ID does not exist or is not of this collection's identity type.
         """
 
-        params = {'type': self.identity_type}
-        return self.britive.get(f'{self.base_url}/{service_identity_id}', params=params)
+        # the platform returns any identity type for this ID, so check it matches this collection
+        service_identity = self.britive.get(f'{self.base_url}/{service_identity_id}')
+        if service_identity.get('type') != self.identity_type:
+            label = identity_type_labels.get(self.identity_type, self.identity_type)
+            raise NotFound(f'{service_identity_id} is not {label}.')
+        return service_identity
 
     def get_by_name(self, name: str) -> list:
         """
@@ -111,12 +119,13 @@ class ServiceIdentities:
         :return: A dict containing the newly updated service identity details
         """
 
+        # get the existing identity first, which also confirms it is of this collection's identity type
+        existing = self.get(service_identity_id)
         if 'name' not in kwargs:
-            existing = self.get(service_identity_id)
             kwargs['name'] = existing['name']
 
         # add some required elements to the kwargs passed in by the caller
-        kwargs['type'] = 'ServiceIdentity'
+        kwargs['type'] = self.identity_type
         kwargs['roleName'] = ''
 
         self.britive.patch(f'{self.base_url}/{service_identity_id}', json=kwargs)
@@ -130,8 +139,10 @@ class ServiceIdentities:
 
         :param service_identity_id: The ID of the service identity to delete
         :return: None
+        :raises NotFound: if the ID does not exist or is not of this collection's identity type.
         """
 
+        self.get(service_identity_id)
         self.britive.delete(f'{self.base_url}/{service_identity_id}')
 
     def enable(self, service_identity_id: str = None, service_identity_ids: list = None) -> object:
@@ -145,20 +156,13 @@ class ServiceIdentities:
         :param service_identity_id: The ID of the user you wish to enable.
         :param service_identity_ids: A list of user IDs that you wish to enable.
         :return: if `service_identity_ids` is set will return a list of user records, else returns a user dict
+        :raises ValueError: if neither `service_identity_id` nor `service_identity_ids` is provided.
+        :raises NotFound: if any ID does not exist or is not of this collection's identity type; no identity is changed.
         """
 
-        computed_identities = []
-        if service_identity_ids:
-            computed_identities += service_identity_ids
-        if service_identity_id:
-            computed_identities.append(service_identity_id)
-
-        # de-dup
-        computed_identities = list(set(computed_identities))
-        response = self.britive.post(f'{self.base_url}/enabled-statuses', json=computed_identities)
-        if not service_identity_ids:
-            return response[0]
-        return response
+        return self.__set_status(
+            'enabled', service_identity_id=service_identity_id, service_identity_ids=service_identity_ids
+        )
 
     def disable(self, service_identity_id: str = None, service_identity_ids: list = None) -> object:
         """
@@ -171,20 +175,34 @@ class ServiceIdentities:
         :param service_identity_id: The ID of the user you wish to disable.
         :param service_identity_ids: A list of user IDs that you wish to disable.
         :return: if `user_ids` is set will return a list of user records, else returns a user dict
+        :raises ValueError: if neither `service_identity_id` nor `service_identity_ids` is provided.
+        :raises NotFound: if any ID does not exist or is not of this collection's identity type; no identity is changed.
         """
 
-        computed_identities = []
-        if service_identity_ids:
-            computed_identities += service_identity_ids
+        return self.__set_status(
+            'disabled', service_identity_id=service_identity_id, service_identity_ids=service_identity_ids
+        )
+
+    def __set_status(self, status: str, service_identity_id: str = None, service_identity_ids: list = None) -> object:
+        computed_identities = list(service_identity_ids or [])
         if service_identity_id:
             computed_identities.append(service_identity_id)
 
-        # de-dup
-        computed_identities = list(set(computed_identities))
-        response = self.britive.post(f'{self.base_url}/disabled-statuses', json=computed_identities)
-        if not service_identity_ids:
-            return response[0]
-        return response
+        # de-dup, preserving order
+        computed_identities = list(dict.fromkeys(computed_identities))
+        if not computed_identities:
+            raise ValueError('service_identity_id or service_identity_ids is required.')
+
+        # the statuses endpoints accept any identity type and skip unknown ids, so check every id first
+        for computed_identity in computed_identities:
+            self.get(computed_identity)
+
+        response = self.britive.post(f'{self.base_url}/{status}-statuses', json=computed_identities)
+        if service_identity_ids:
+            return response
+        if not response:
+            raise NotFound(f'{service_identity_id} was not {status}.')
+        return response[0]
 
 
 class ServiceIdentityTokens:

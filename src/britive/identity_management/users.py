@@ -1,4 +1,5 @@
 from britive.exceptions import (
+    NotFound,
     UserDoesNotHaveMFAEnabled,
     UserNotAllowedToChangePassword,
     UserNotAssociatedWithDefaultIdentityProvider,
@@ -40,9 +41,14 @@ class Users:
 
         :param user_id: The ID  of the user.
         :return: Details of the specified user.
+        :raises NotFound: if the ID does not exist or is not a user.
         """
 
-        return self.britive.get(f'{self.base_url}/{user_id}')
+        # the platform returns any identity type for this ID, so check it is a user
+        user = self.britive.get(f'{self.base_url}/{user_id}')
+        if user.get('type') != 'User':
+            raise NotFound(f'{user_id} is not a user.')
+        return user
 
     def get_by_name(self, name: str) -> list:
         """
@@ -147,10 +153,12 @@ class Users:
         """
         Delete a user.
 
-        :param user_id: The ID of the user to update
+        :param user_id: The ID of the user to delete
         :return: None
+        :raises NotFound: if the ID does not exist or is not a user.
         """
 
+        self.get(user_id)
         self.britive.delete(f'{self.base_url}/{user_id}')
 
     def enable(self, user_id: str = None, user_ids: list = None) -> object:
@@ -163,20 +171,11 @@ class Users:
         :param user_id: The ID of the user you wish to enable.
         :param user_ids: A list of user IDs that you wish to enable.
         :return: if `user_ids` is set will return a list of user records, else returns a user dict
+        :raises ValueError: if neither `user_id` nor `user_ids` is provided.
+        :raises NotFound: if any ID does not exist or is not a user; no identity is changed.
         """
 
-        computed_users = []
-        if user_ids:
-            computed_users += user_ids
-        if user_id:
-            computed_users.append(user_id)
-
-        # de-dup
-        computed_users = list(set(computed_users))
-        response = self.britive.post(f'{self.base_url}/enabled-statuses', json=computed_users)
-        if not user_ids:
-            return response[0]
-        return response
+        return self.__set_status('enabled', user_id=user_id, user_ids=user_ids)
 
     def disable(self, user_id: str = None, user_ids: list = None) -> object:
         """
@@ -188,20 +187,32 @@ class Users:
         :param user_id: The ID of the user you wish to disable.
         :param user_ids: A list of user IDs that you wish to disable.
         :return: if `user_ids` is set will return a list of user records, else returns a user dict
+        :raises ValueError: if neither `user_id` nor `user_ids` is provided.
+        :raises NotFound: if any ID does not exist or is not a user; no identity is changed.
         """
 
-        computed_users = []
-        if user_ids:
-            computed_users += user_ids
+        return self.__set_status('disabled', user_id=user_id, user_ids=user_ids)
+
+    def __set_status(self, status: str, user_id: str = None, user_ids: list = None) -> object:
+        computed_users = list(user_ids or [])
         if user_id:
             computed_users.append(user_id)
 
-        # de-dup
-        computed_users = list(set(computed_users))
-        response = self.britive.post(f'{self.base_url}/disabled-statuses', json=computed_users)
-        if not user_ids:
-            return response[0]
-        return response
+        # de-dup, preserving order
+        computed_users = list(dict.fromkeys(computed_users))
+        if not computed_users:
+            raise ValueError('user_id or user_ids is required.')
+
+        # the statuses endpoints accept any identity type and skip unknown ids, so check every id first
+        for computed_user in computed_users:
+            self.get(computed_user)
+
+        response = self.britive.post(f'{self.base_url}/{status}-statuses', json=computed_users)
+        if user_ids:
+            return response
+        if not response:
+            raise NotFound(f'{user_id} was not {status}.')
+        return response[0]
 
     def reset_password(self, user_id: str, password: str) -> None:
         """

@@ -1,6 +1,6 @@
 import pyotp
 
-from britive.exceptions import UserDoesNotHaveMFAEnabled
+from britive.exceptions import NotFound, UserDoesNotHaveMFAEnabled
 
 from .cache import *  # will also import some globals like `britive`
 
@@ -99,6 +99,35 @@ def test_enable_list(cached_user):
     user = britive.identity_management.users.enable(user_id=cached_user['userId'], user_ids=[cached_user['userId']])
     assert isinstance(user, list)
     assert user[0]['status'] == 'active'
+
+
+def test_get_wrong_identity_type(cached_service_identity):
+    with pytest.raises(NotFound):
+        britive.identity_management.users.get(cached_service_identity['userId'])
+
+
+def test_enable_disable_wrong_identity_type(cached_service_identity):
+    with pytest.raises(NotFound):
+        britive.identity_management.users.disable(user_id=cached_service_identity['userId'])
+    assert britive.identity_management.service_identities.get(cached_service_identity['userId'])['status'] == 'active'
+
+
+def test_enable_disable_no_ids():
+    with pytest.raises(ValueError):
+        britive.identity_management.users.disable()
+    with pytest.raises(ValueError):
+        britive.identity_management.users.enable(user_ids=[])
+
+
+def test_enable_disable_unknown_id():
+    with pytest.raises(NotFound):
+        britive.identity_management.users.disable(user_id='00000000unknown0000')
+
+
+def test_delete_wrong_identity_type(cached_service_identity):
+    with pytest.raises(NotFound):
+        britive.identity_management.users.delete(cached_service_identity['userId'])
+    assert britive.identity_management.service_identities.get(cached_service_identity['userId'])
 
 
 def test_reset_password(cached_user):
