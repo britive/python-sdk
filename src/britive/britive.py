@@ -8,6 +8,7 @@ from .access_broker import AccessBroker
 from .application_management import ApplicationManagement
 from .audit_logs import AuditLogs
 from .exceptions import (
+    BritiveException,
     RootEnvironmentGroupNotFound,
     TenantMissingError,
     TenantUnderMaintenance,
@@ -276,9 +277,20 @@ class Britive:
             match _pagination_type:
                 case 'inline':
                     return_data += result['data']
+                    # Unpaged summaries can omit pagination fields or return them as null.
+                    if any(result.get(key) is None for key in ('page', 'size', 'count')):
+                        break
                     if result['size'] * (result['page'] + 1) >= result['count']:
                         break
                     params['page'] = result['page'] + 1
+                case 'cursor':
+                    return_data += result['data']
+                    if not (cursor := result.get('lastEvaluatedKey')):
+                        break
+                    # Endpoints that ignore the start key echo back the cursor they were sent.
+                    if cursor == params.get('exclusiveStartKey'):
+                        raise BritiveException('Pagination did not advance: the API returned a repeated cursor.')
+                    params['exclusiveStartKey'] = cursor
                 case 'report':
                     return_data += result['data']
                     if not (url := response.headers.get('next-page')):
