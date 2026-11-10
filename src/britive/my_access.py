@@ -621,7 +621,10 @@ class MyAccess:
         :return: List of profiles.
         """
 
-        return self.britive.get(f'{self.base_url}/favorites')
+        # GET /access/favorites returns an empty list, so use the same query as the My Access favorites filter. It
+        # reports a page size of 0 and ignores `page`, so read it as a single page.
+        params = {'paginated': 'true', 'filter': 'favorites'}
+        return self.britive.get(self.base_url, params=params, pagination='none')['data']
 
     def create_filter(self, filter_name: str, filter_properties: str) -> dict:
         """

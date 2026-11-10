@@ -570,9 +570,9 @@ class MyResources:
         :return: Details of the favorite resource.
         """
 
-        data = {'resource-id': resource_id, 'profile-id': profile_id}
+        data = {'resourceId': resource_id, 'profileId': profile_id}
 
-        return self.post(f'{self.base_url}/favorites', json=data, headers=headers)
+        return self.britive.post(f'{self.base_url}/favorites', json=data, headers=headers)
 
     def delete_favorite(self, favorite_id: str, headers: dict = None) -> None:
         """
@@ -588,7 +588,7 @@ class MyResources:
         :return: None
         """
 
-        return self.delete(f'{self.base_url}/favorites/{favorite_id}', headers=headers)
+        return self.britive.delete(f'{self.base_url}/favorites/{favorite_id}', headers=headers)
 
     def get_profile_settings(self, profile_id: str, resource_id: str, headers: dict = None) -> dict:
         """
