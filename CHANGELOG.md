@@ -1,5 +1,38 @@
 # Change Log (v2.8.1+)
 
+## v4.8.0b1 [2026-11-09]
+
+__What's New:__
+
+* Added `my_devices` for the My Devices page: list devices, check out, check in, and request and withdraw approval.
+* Added `my_managed_tags` for the My Managed Tags page: list owned tags, list members, available members, matched
+  members and requested memberships, add and remove members, manage attribute based membership criteria, and list
+  the identity attributes criteria can use.
+
+__Enhancements:__
+
+* `my_access.checkout` and `my_resources.checkout` accept `checkout_variable_values` for profiles with checkout
+  variable prompts.
+* Added `my_access.get_approvers`, `my_resources.get_approvers` and `my_resources.list_resource_templates`.
+* Added `my_requests.get_approver_group`.
+* `my_approvals.list` accepts `active_status`, `created_within_days` and `filter_text`.
+* Added `my_approvals.get`, `my_approvals.revoke_request`, `my_approvals.revoke_requests`,
+  `my_approvals.get_profile_permissions`, `my_approvals.get_resource_labels` and `my_approvals.list_tag_request_grants`.
+
+__Bug Fixes:__
+
+* Fixed `my_access.favorites` always returning an empty list.
+* Fixed `my_resources.add_favorite`, which failed with an `AttributeError`, and `my_resources.delete_favorite`, which
+  called the endpoint for deleting a dynamic resource.
+
+__Dependencies:__
+
+* None
+
+__Other:__
+
+* None
+
 ## v4.8.0b0 [2026-09-16]
 
 __What's New:__
