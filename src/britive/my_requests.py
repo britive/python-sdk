@@ -58,6 +58,23 @@ class MyRequests:
 
         return self.britive.get(f'{self.base_url}/{request_id}', headers=headers)
 
+    def get_approver_group(self, request_id: str, approver_group_id: str, headers: dict = None) -> dict:
+        """
+        Return the members of one of the approver groups on an approval request.
+
+        :param request_id: The ID of the approval request.
+        :param approver_group_id: The ID of the approver group.
+        :param headers: Any additional headers
+            Example:
+                {
+                    "X-On-Behalf-Of": "Bearer ... | user@... | username",
+                    ...
+                }
+        :return: Dict of the approver group and its members.
+        """
+
+        return self.britive.get(f'{self.base_url}/{request_id}/approver-groups/{approver_group_id}', headers=headers)
+
     def withdraw_approval_request(self, request_id: str, headers: dict = None) -> None:
         """
         Withdraws a pending approval request.
