@@ -163,8 +163,15 @@ pytest tests/600-britive-01-my_access.py -v
 pytest tests/600-britive-02-my_secrets.py -v
 pytest tests/600-britive-03-my_requests.py -v
 pytest tests/600-britive-04-my_approvals.py -v
+pytest tests/600-britive-05-my_devices.py -v
+pytest tests/600-britive-06-my_managed_tags.py -v
+pytest tests/600-britive-07-my_resources.py -v
 pytest tests/999-cleanup-01-delete_all_resources.py -v
 ```
+
+The device tests require `BRITIVE_TEST_DEVICE_APP_ID` and `BRITIVE_TEST_DEVICE_HOSTNAME` pointing to test fixtures.
+They create a script-free device profile and do not perform a successful checkout. Tests that execute device grant
+or revoke scripts remain skipped and must only be exercised with a disposable device.
 
 Or you can simply run `pytest -v` to test everything all at once. The above commands however allow you to halt testing
 to fix issues that might arise.

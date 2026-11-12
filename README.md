@@ -48,9 +48,33 @@ The environment variable name is `BRITIVE_TENANT`.
 > _In order to obtain the tenant name, reference the Britive URL used to log into the UI._
 > _If the URL is `https://example.britive-app.com` then the tenant name will be `example`._
 
+### Temporary bearer tokens
+
+An authenticated client with `securityadmin.temptoken.create` permission can create a temporary bearer token:
+
+```python
+from britive.britive import Britive
+
+client = Britive()
+temporary = client.security.temp_tokens.create(duration_seconds=900)
+
+# Revoke it when no longer needed. Pass the token value, not a token ID.
+client.security.temp_tokens.revoke(token=temporary['accessToken'])
+```
+
+Revocation authenticates `DELETE /api/auth` with the supplied temporary token. It does not change the client's
+normal credentials. Temporary-token listing and metadata retrieval are not supported yet; `list` and `get`
+raise `NotImplementedError`. Keep token values secret. The SDK does not persist them.
+
 ## Pagination
 
-All pagination is handled by the package. The caller will never have to deal with paginated responses.
+The SDK automatically follows recognized paginated list responses. Methods documented as returning an API summary
+dictionary preserve that summary instead:
+
+* `my_devices.list` returns one page with records under `data`. Use `page` and `size` to select a page.
+* Managed-tag list methods return records under `data`. Omit `page` and `size` for all matches, or provide both
+  for one page. Sorting is applied when paging.
+* `my_resources.list_resource_templates` preserves the API's `templates` summary and optional paging details.
 
 ## Assumptions
 
@@ -71,6 +95,7 @@ The SDK includes clients for these main Britive areas:
 * Global settings, including notification mediums, firewall settings, and ITSM
 * Identity management, including users, service identities, AI identities, tags, and identity providers
 * My Access, My Approvals, My Requests, My Resources, and My Secrets
+* My Devices and My Managed Tags
 * Reports
 * Secrets Manager
 * Security, including SAML, security policies, active sessions, and step-up authentication
