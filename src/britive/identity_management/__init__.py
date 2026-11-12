@@ -1,3 +1,4 @@
+from .ai_identities import AIIdentities, AIIdentityTokens
 from .identity_attributes import IdentityAttributes
 from .identity_providers import IdentityProviders
 from .service_identities import ServiceIdentities, ServiceIdentityTokens
@@ -8,7 +9,8 @@ from .workload import Workload
 
 class IdentityManagement:
     def __init__(self, britive) -> None:
-        self.ai_identities = ServiceIdentities(britive, identity_type='AIIdentity')
+        self.ai_identities = AIIdentities(britive)
+        self.ai_identity_tokens = AIIdentityTokens(britive)
         self.identity_attributes = IdentityAttributes(britive)
         self.identity_providers = IdentityProviders(britive)
         self.service_identities = ServiceIdentities(britive)
