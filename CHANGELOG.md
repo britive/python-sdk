@@ -1,25 +1,51 @@
 # Change Log (v2.8.1+)
 
-## v4.8.0b0 [2026-09-16]
+## v4.8.0 [2026-11-12]
 
 __What's New:__
 
-* Added `security.temp_tokens` for temporary bearer tokens.
+* Added `my_devices` for self-service device access.
+* Added `my_managed_tags` for tag-owner membership management.
+* Added `identity_management.ai_identity_tokens`.
+* Added `security.temp_tokens` for temporary bearer token creation and revocation.
+* Dropped Python 3.10 support, EOL 2026-10-01.
+* Added `python3.15` support.
 
 __Enhancements:__
 
-* None
+* Added `checkout_variable_values` to app and resource checkout methods, including `checkout_by_name`.
+* Added `my_access.get_approvers`, `my_resources.get_approvers`, and `my_resources.list_resource_templates`.
+* Added approval detail, revocation, and review methods to `my_approvals`.
+* Added `my_requests.get_approver_group`.
+* Added `active_status`, `created_within_days`, and `filter_text` to `my_approvals.list`.
+* Added `minimized_identity_details` to service and AI identity clients.
 
 __Bug Fixes:__
 
-* None
+* Fixed access broker pagination and list responses, including broker and pool cursor pagination.
+* Fixed `my_access.favorites` and `my_resources` favorite requests.
+* Fixed resource checkout approval handling and request ID forwarding for approval withdrawal.
+* Fixed delegated header forwarding in app, resource, and secret access.
+* Fixed identity status input validation and single ID requests.
+* Fixed AI identity updates to send `AIIdentity`.
+* Fixed identity token expiration updates to preserve the existing token.
+* Fixed `users.reset_mfa` for user IDs. Usernames are not supported.
 
 __Dependencies:__
 
-* None
+* Raised minimum dependencies to `requests>=2.33.0` and `urllib3>=2.8.0`.
+* Added `aws` extra with `boto3>=1.41.0`.
+* Set minimum cloud dependencies to `azure-identity>=1.16.1` and `google-auth>=2.16.1`.
+* Set minimum build dependencies to `setuptools>=84.1.0` and `wheel>=0.46.2`.
+* Set minimum test dependencies to `pytest>=9.1.0`, `tox>=4.58.0`, and `virtualenv>=21.14.13`.
 
 __Other:__
 
+* Added `identity_management.users.enable_mfa` for TOTP registration. Deprecated `enable_mfa.enable`.
+* `identity_management.users.minimized_user_details` lookups no longer modify caller-provided ID lists.
+* AI identity methods use `ai_identity_id` and `ai_identity_ids` instead of `service_identity_*` keywords.
+* Identity token `update` returns `None`. `get` returns token metadata.
+* Identity-token expiration requires an integer from 1 through 90.
 * Updated github workflows python version to `python3.11`
 * Updated CONTRIBUTING python version to match project minimum.
 
