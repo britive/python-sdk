@@ -5,12 +5,20 @@ Python client for the [Britive API](https://docs.britive.com/apidocs).
 The SDK provides Python methods for Britive APIs. It generally passes values to the API for validation, but some methods
 combine related API operations or normalize responses for Python callers.
 
-This package supports Python versions `>= 3.10`.
+This package supports Python versions `>= 3.11`.
 
 ## Installation
 
 ```sh
 pip install britive
+```
+
+Install cloud federation dependencies as needed:
+
+```sh
+pip install "britive[aws]"
+pip install "britive[azure]"
+pip install "britive[gcp]"
 ```
 
 To install the current source from GitHub instead of PyPI, run:

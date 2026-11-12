@@ -7,7 +7,7 @@ can consume a native Python library.
 
 ## Python Version Support
 
-_CURRENT SUPPORTED VERSION(S):_ `>= 3.10`
+_CURRENT SUPPORTED VERSION(S):_ `>= 3.11`
 
 We use [typing](https://docs.python.org/3/library/typing.html) and dictionary unpacking, e.g. `{**dict1, **dict2}`,
 which requires Python 3.5 or greater.
@@ -67,6 +67,9 @@ process itself is also working as expected.
 To run just execute `tox` on the command line or if you want to clean the environment `tox -r` which will rebuild the
 entire virtualenv. There are some issues with pytest caching that have been found so cleaning the virtualenv helps clear
 that up.
+
+Tox runs integration tests across all supported Python versions. Install the matching interpreters, or select one
+environment with `tox -e py311`.
 
 `pytest` is being used to test the SDK. Run the following commands in order to test the full library.
 
