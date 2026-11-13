@@ -58,6 +58,16 @@ class MyRequests:
 
         return self.britive.get(f'{self.base_url}/{request_id}', headers=headers)
 
+    def get_approver_group(self, request_id: str, approver_group_id: str, headers: dict = None) -> dict:
+        """Return an approval request's approver group and its members.
+
+        :param request_id: The ID of the approval request.
+        :param approver_group_id: The ID of the approver group.
+        :param headers: Additional headers, including `X-On-Behalf-Of` for delegated requests.
+        :return: Dict of the approver group and its members.
+        """
+        return self.britive.get(f'{self.base_url}/{request_id}/approver-groups/{approver_group_id}', headers=headers)
+
     def withdraw_approval_request(self, request_id: str, headers: dict = None) -> None:
         """
         Withdraws a pending approval request.
@@ -349,6 +359,7 @@ class MyAccessRequests(MyRequests):
         Withdraws a pending approval request.
 
         Either `request_id` or (`profile_id` AND `environment_id`) are required.
+        If both forms are provided, `request_id` takes precedence.
 
         :param request_id: The ID of the approval request.
         :param profile_id: The ID of the profile.
@@ -365,7 +376,11 @@ class MyAccessRequests(MyRequests):
             raise ValueError('profile_id and environment_id are required')
 
         return self._withdraw_approval_request(
-            profile_id=profile_id, entity_id=environment_id, entity_type='papservice', headers=headers
+            request_id=request_id,
+            profile_id=profile_id,
+            entity_id=environment_id,
+            entity_type='papservice',
+            headers=headers,
         )
 
 
@@ -518,6 +533,7 @@ class MyResourcesRequests(MyRequests):
         Withdraws a pending approval request.
 
         Either `request_id` or (`profile_id` AND `resource_id`) are required.
+        If both forms are provided, `request_id` takes precedence.
 
         :param request_id: The ID of the approval request.
         :param profile_id: The ID of the profile.
@@ -535,5 +551,9 @@ class MyResourcesRequests(MyRequests):
             raise ValueError('profile_id and resource_id are required')
 
         return self._withdraw_approval_request(
-            profile_id=profile_id, entity_id=resource_id, entity_type='resourceprofile', headers=headers
+            request_id=request_id,
+            profile_id=profile_id,
+            entity_id=resource_id,
+            entity_type='resourceprofile',
+            headers=headers,
         )

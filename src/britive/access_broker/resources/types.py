@@ -47,7 +47,7 @@ class Types:
         :return: List of resource types.
         """
 
-        return self.britive.get(self.base_url)['data']
+        return self.britive.get(self.base_url)
 
     def update(self, resource_type_id: str, description: str = None, fields: list = None) -> dict:
         """
@@ -126,9 +126,16 @@ class Types:
 
         return self.britive.get(f'{self.scheduled_scan_base_url}/resource-types/{resource_type_id}')
 
-    def create_scheduled_scan(self, resource_type_id: str, name: str, description: str = '',
-                              frequency: str = 'Daily', frequency_interval: int = None,
-                              start_time: str = '12:00', resource_labels: list = None) -> dict:
+    def create_scheduled_scan(
+        self,
+        resource_type_id: str,
+        name: str,
+        description: str = '',
+        frequency: str = 'Daily',
+        frequency_interval: int = None,
+        start_time: str = '12:00',
+        resource_labels: list = None,
+    ) -> dict:
         """
         Create a new scheduled scan task for a resource type.
 

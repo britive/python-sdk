@@ -49,14 +49,14 @@ def handle_response(response):
 
 def pagination_type(headers: dict[str, str], result: object) -> str:
     match result:
-        case {'count': _, 'page': _, 'size': _, 'data': _}:
-            return 'inline'
         case {'data': _, 'reportId': _}:
             return 'report'
         case {'records': _}:
             return 'audit'
         case {'result': _, 'pagination': _}:
             return 'secmgr'
+        case {'count': _, 'data': _}:
+            return 'inline'
         case _:
             return 'none'
 

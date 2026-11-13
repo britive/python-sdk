@@ -52,7 +52,7 @@ class ResponseTemplates:
 
         params = {**({'searchText': search_text} if search_text else {})}
 
-        return self.britive.get(self.base_url, params=params)['data']
+        return self.britive.get(self.base_url, params=params)
 
     def update(
         self,
