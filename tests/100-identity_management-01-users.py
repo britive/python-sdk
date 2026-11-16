@@ -1,7 +1,5 @@
 import pyotp
 
-from britive.exceptions import UserDoesNotHaveMFAEnabled
-
 from .cache import *  # will also import some globals like `britive`
 
 user_keys = {
@@ -107,8 +105,8 @@ def test_reset_password(cached_user):
 
 
 def test_reset_mfa(cached_user):
-    with pytest.raises(UserDoesNotHaveMFAEnabled):
-        britive.identity_management.users.reset_mfa(cached_user['userId'])
+    response = britive.identity_management.users.reset_mfa(cached_user['userId'])
+    assert response is None
 
 
 def test_set_custom_identity_attributes(cached_user, cached_identity_attribute):
@@ -164,7 +162,7 @@ def test_minimized_user_details(cached_user):
 
 
 def test_stepup_mfa():
-    challenge = britive.identity_management.users.enable_mfa.enable()
+    challenge = britive.identity_management.users.enable_mfa()
     if challenge_key := challenge.get('additionalDetails', {}).get('key'):
         totp = pyotp.TOTP(challenge_key)
         totp = totp.now()

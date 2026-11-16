@@ -36,10 +36,10 @@ class MySecrets:
         self.britive = britive
         self.base_url = f'{self.britive.base_url}/v1/secretmanager'
 
-    def __get_vault_id(self) -> str:
+    def __get_vault_id(self, headers: dict = None) -> str:
         # only 1 vault is allowed per tenant, so we can reliably grab the ID of that vault
         try:
-            return self.britive.get(f'{self.base_url}/vault')['id']
+            return self.britive.get(f'{self.base_url}/vault', headers=headers)['id']
         except KeyError as e:
             if 'id' in str(e):
                 raise NoSecretsVaultFound from e
@@ -68,7 +68,7 @@ class MySecrets:
             params['filter'] = f"name co '{search}'"
 
         return self.britive.get(
-            f'{self.base_url}/vault/{self.__get_vault_id()}/secrets', params=params, headers=headers
+            f'{self.base_url}/vault/{self.__get_vault_id(headers=headers)}/secrets', params=params, headers=headers
         )
 
     def view(
@@ -105,7 +105,7 @@ class MySecrets:
         :raises StepUpAuthRequiredButNotProvided: if step up authentication is required but no otp is provided.
         """
 
-        vault_id = self.__get_vault_id()
+        vault_id = self.__get_vault_id(headers=headers)
         quit_time = datetime.now(timezone.utc) + timedelta(seconds=max_wait_time)
         params = {'path': path}
         data = {'justification': justification}
@@ -119,7 +119,7 @@ class MySecrets:
 
                 # handle stepup totp
                 if otp:
-                    response = self.britive.security.step_up_auth.authenticate(otp=otp)
+                    response = self.britive.security.step_up_auth.authenticate(otp=otp, headers=headers)
                     if response.get('result') == 'FAILED':
                         raise StepUpAuthFailed
 
@@ -184,13 +184,13 @@ class MySecrets:
         :raises StepUpAuthRequiredButNotProvided: if step up authentication is required but no otp is provided.
         """
 
-        vault_id = self.__get_vault_id()
+        vault_id = self.__get_vault_id(headers=headers)
         params = {'path': path}
 
         try:
             # handle stepup totp
             if otp:
-                response = self.britive.security.step_up_auth.authenticate(otp=otp)
+                response = self.britive.security.step_up_auth.authenticate(otp=otp, headers=headers)
                 if response.get('result') == 'FAILED':
                     raise StepUpAuthFailed
 
@@ -202,7 +202,14 @@ class MySecrets:
         except ApprovalRequiredError:
             # justification is required which means we have an approval workflow to deal with
             # lets call view so we can go through the full approval process
-            self.view(path=path, justification=justification, otp=otp, wait_time=wait_time, max_wait_time=max_wait_time)
+            self.view(
+                path=path,
+                justification=justification,
+                otp=otp,
+                wait_time=wait_time,
+                max_wait_time=max_wait_time,
+                headers=headers,
+            )
             # and then we can get the file again
             return self.britive.get(f'{self.base_url}/vault/{vault_id}/downloadfile', params=params, headers=headers)
         except StepUpAuthenticationRequiredError as e:

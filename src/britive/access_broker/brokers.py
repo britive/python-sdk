@@ -15,7 +15,8 @@ class Brokers:
         """
 
         params = {
+            'pageSize': 100,
             'status': status,
         }
 
-        return self.britive.get(self.base_url, params=params)['data']
+        return self.britive.get(self.base_url, params=params, pagination='cursor')

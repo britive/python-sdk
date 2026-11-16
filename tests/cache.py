@@ -121,8 +121,12 @@ def cached_service_identity_token(pytestconfig, cached_service_identity):
 
 @pytest.fixture(scope='session')
 @cached_resource(name='service-identity-token-updated')
-def cached_service_identity_token_updated(pytestconfig, cached_service_identity):
-    return britive.identity_management.service_identity_tokens.update(cached_service_identity['userId'], 45)
+def cached_service_identity_token_updated(pytestconfig, cached_service_identity, cached_service_identity_token):
+    result = britive.identity_management.service_identity_tokens.update(cached_service_identity['userId'], 45)
+    assert result is None
+    token = britive.identity_management.service_identity_tokens.get(cached_service_identity['userId'])
+    assert token['id'] == cached_service_identity_token['id']
+    return token
 
 
 @pytest.fixture(scope='session')
@@ -283,11 +287,14 @@ def cached_profile_approval_policy(pytestconfig, cached_profile, cached_service_
 
 @pytest.fixture(scope='session')
 @cached_resource(name='profile-checkout-request')
-def cached_profile_checkout_request(pytestconfig, cached_profile, cached_service_identity_token):
+def cached_profile_checkout_request(pytestconfig, cached_profile, cached_environment, cached_service_identity_token):
     other_britive = Britive(token=cached_service_identity_token['token'], query_features=False)
-    return other_britive.my_access.request_approval(
-        profile_id=cached_profile['papId'], environment_id=cached_environment['id'], justification='reject me'
-    )
+    try:
+        return other_britive.my_access.request_approval(
+            profile_id=cached_profile['papId'], environment_id=cached_environment['id'], justification='reject me'
+        )
+    finally:
+        other_britive.session.close()
 
 
 @pytest.fixture(scope='session')
