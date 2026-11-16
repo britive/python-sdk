@@ -43,12 +43,19 @@ class TempTokens:
 
         raise NotImplementedError('Viewing temporary tokens is not implemented in the SDK; awaiting the API contract.')
 
-    def revoke(self, token_id: str) -> None:
+    def revoke(self, token: str) -> None:
         """
-        Placeholder for revoking a temporary token. Makes no HTTP request.
+        Revoke a temporary bearer token using DELETE /api/auth.
 
-        :param token_id: Provisional token identifier, subject to the future API contract.
-        :raises NotImplementedError: This SDK operation awaits the API contract.
+        The supplied token authenticates this request and is itself revoked. The client's normal credentials
+        are not used for this request or changed. No token lookup is performed.
+
+        :param token: The temporary token's accessToken value, without the Bearer prefix. This is not a token ID.
+        :return: None.
+        :raises ValueError: If token is not a non-empty string or contains whitespace.
         """
 
-        raise NotImplementedError('Revoking temporary tokens is not implemented in the SDK; awaiting the API contract.')
+        if not isinstance(token, str) or not token or any(character.isspace() for character in token):
+            raise ValueError('token must be a non-empty bearer token without whitespace.')
+
+        self.britive.delete(f'{self.britive.base_url}/auth', headers={'Authorization': f'Bearer {token}'})

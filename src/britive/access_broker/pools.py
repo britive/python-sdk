@@ -41,11 +41,9 @@ class Pools:
         :return: List of broker pools.
         """
 
-        params = {
-            'name': name_filter,
-        }
+        params = {'pageSize': 100, **({'name': name_filter} if name_filter else {})}
 
-        return self.britive.get(self.base_url, params=params)['data']
+        return self.britive.get(self.base_url, params=params, pagination='cursor')
 
     def list_brokers(self, pool_id: str) -> list:
         """

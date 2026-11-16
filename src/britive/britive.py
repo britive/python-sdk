@@ -8,6 +8,7 @@ from .access_broker import AccessBroker
 from .application_management import ApplicationManagement
 from .audit_logs import AuditLogs
 from .exceptions import (
+    BritiveException,
     RootEnvironmentGroupNotFound,
     TenantMissingError,
     TenantUnderMaintenance,
@@ -26,6 +27,8 @@ from .helpers.utils import (
 from .identity_management import IdentityManagement
 from .my_access import MyAccess
 from .my_approvals import MyApprovals
+from .my_devices import MyDevices
+from .my_managed_tags import MyManagedTags
 from .my_requests import MyRequests
 from .my_resources import MyResources
 from .my_secrets import MySecrets
@@ -161,6 +164,8 @@ class Britive:
         self.feature_flags = self.features() if query_features else {}
         self.my_access = MyAccess(self)
         self.my_approvals = MyApprovals(self)
+        self.my_devices = MyDevices(self)
+        self.my_managed_tags = MyManagedTags(self)
         self.my_requests = MyRequests(self)
         self.my_resources = MyResources(self)
         self.my_secrets = MySecrets(self)
@@ -276,9 +281,20 @@ class Britive:
             match _pagination_type:
                 case 'inline':
                     return_data += result['data']
+                    # Unpaged summaries can omit pagination fields or return them as null.
+                    if any(result.get(key) is None for key in ('page', 'size', 'count')):
+                        break
                     if result['size'] * (result['page'] + 1) >= result['count']:
                         break
                     params['page'] = result['page'] + 1
+                case 'cursor':
+                    return_data += result['data']
+                    if not (cursor := result.get('lastEvaluatedKey')):
+                        break
+                    # Endpoints that ignore the start key echo back the cursor they were sent.
+                    if cursor == params.get('exclusiveStartKey'):
+                        raise BritiveException('Pagination did not advance: the API returned a repeated cursor.')
+                    params['exclusiveStartKey'] = cursor
                 case 'report':
                     return_data += result['data']
                     if not (url := response.headers.get('next-page')):

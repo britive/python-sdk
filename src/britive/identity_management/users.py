@@ -1,38 +1,44 @@
+import warnings
+
 from britive.exceptions import (
-    UserDoesNotHaveMFAEnabled,
     UserNotAllowedToChangePassword,
     UserNotAssociatedWithDefaultIdentityProvider,
 )
 
-from .identity_attributes import CustomAttributes
-
-valid_statues = ['active', 'inactive']
+from ._identities import _Identities, _validate_identity_id
 
 
-class Users:
+class EnableMFA:
+    """`users.enable_mfa()`, kept as an object so the deprecated `users.enable_mfa.enable()` still works."""
+
     def __init__(self, britive) -> None:
         self.britive = britive
-        self.base_url = f'{self.britive.base_url}/users'
-        self.custom_attributes = CustomAttributes(britive)
+
+    def __call__(self) -> dict:
+        """Start TOTP registration for the authenticated user.
+
+        This request can return a step-up authentication challenge. Generating a secret does not complete enrollment;
+        the registration flow also requires OTP validation.
+
+        :return: Step-up authentication or TOTP registration challenge details.
+        """
+        return self.britive.post(f'{self.britive.base_url}/mfa/register/TOTP', json={'action': 'GENERATE_SECRET'})
+
+    def enable(self) -> dict:
+        """Deprecated alias for `users.enable_mfa()`, to be removed in the next major release."""
+        warnings.warn(
+            'users.enable_mfa.enable() is deprecated and will be removed in the next major release; '
+            'call users.enable_mfa() instead.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self()
+
+
+class Users(_Identities):
+    def __init__(self, britive) -> None:
+        super().__init__(britive, identity_type='User')
         self.enable_mfa = EnableMFA(britive)
-
-    def list(self, filter_expression: str = None, include_tags: bool = False) -> list:
-        """
-        Provide an optionally filtered list of all users.
-
-        :param filter_expression: filter list of users based on name, status, or role. The supported operators
-             are 'eq' and 'co'. Example: 'name co "Smith"'
-        :param include_tags: if this is set to true, tags/group memberships are returned.
-        :return: List of user records
-        """
-
-        params = {'type': 'User', 'page': 0, 'size': 100}
-        if filter_expression:
-            params['filter'] = filter_expression
-        if include_tags:
-            params['includeTags'] = 'true'
-
-        return self.britive.get(self.base_url, params)
 
     def get(self, user_id: str) -> dict:
         """
@@ -40,44 +46,10 @@ class Users:
 
         :param user_id: The ID  of the user.
         :return: Details of the specified user.
+        :raises NotFound: if the identity does not exist or is not a human user.
         """
 
-        return self.britive.get(f'{self.base_url}/{user_id}')
-
-    def get_by_name(self, name: str) -> list:
-        """
-        Return the list of users whose name contains `name`.
-
-        :param name: The name (or part of the name) of the user you wish to get
-        :return: Details of the specified users. If no user is found will return an empty list.
-        """
-
-        return self.list(filter_expression=f'name co "{name}"')
-
-    def get_by_status(self, status: str) -> list:
-        """
-        Return a list of users filtered to `status`.
-
-        :param status: valid values are `active` and `inactive`
-        :return: List of users.
-        """
-
-        if status not in valid_statues:
-            raise ValueError(f'status {status} not allowed.')
-
-        return self.list(filter_expression=f'status eq "{status}"')
-
-    def search(self, search_string: str) -> list:
-        """
-        Search all user fields for the given `search_string`.
-
-        :param search_string: String to search.
-        :return: List of user records.
-        """
-
-        params = {'type': 'User', 'page': 0, 'size': 100, 'searchText': search_string}
-
-        return self.britive.get(self.base_url, params)
+        return self._get(user_id)
 
     def create(self, idp: str = None, **kwargs) -> dict:
         """
@@ -93,6 +65,13 @@ class Users:
             firstName - required
             mobile
             phone
+            description
+            managerId
+            externalId
+            attributes
+            relationships
+            sharePasswordToUser
+            emailList
             status - valid values are active, inactive - if omitted then will default to active
             adminRoles - in format [{'name': 'TenantAdmin},]
         :return: Details of the newly created user.
@@ -100,58 +79,46 @@ class Users:
 
         required_fields = ['email', 'username', 'lastName', 'firstName', 'status']
 
-        kwargs['type'] = 'User'
         if idp:
             kwargs['identityProvider'] = {'id': idp}
         else:
             required_fields.append('password')
 
-        if 'status' not in kwargs:
-            kwargs['status'] = 'active'
-
-        if kwargs['status'] not in valid_statues:
-            raise ValueError(f'invalid status {kwargs["status"]}')
-
-        if not all(x in kwargs for x in required_fields):
-            raise ValueError('Not all required keyword arguments were provided.')
-
-        return self.britive.post(self.base_url, json=kwargs)
+        return self._create(kwargs, required_fields=required_fields)
 
     def update(self, user_id: str, **kwargs) -> dict:
         """
         Update the specified attributes of the provided user.
 
         :param user_id: The ID of the user to update
-        :param kwargs: The attributes to update for the user
+        :param kwargs: API fields to update, including `username`, `email`, `firstName`, `lastName`, `mobile`,
+            `phone`, `description`, `managerId`, `identityProvider`, `externalId`, `landingPage`, and `attributes`.
+            Use `enable` and `disable` to change status. The API treats `attributes` as a replacement list.
         :return: A dict containing the newly updated user details
+        :raises NotFound: if `username` or `email` is omitted and the identity does not exist or is not a human user.
+        :raises DoesNotExistError: if both are supplied and the identity does not exist.
+        :raises UserUpdateError: if both are supplied and the identity is not a human user. Nothing is changed.
         """
 
-        # we first have to get the existing user so we can inject the username and email into the update request
-        user = self.get(user_id)
+        return self._update(user_id, **kwargs)
 
-        # add some required elements to the kwargs passed in by the caller
-        kwargs['type'] = 'User'
-
-        if 'username' not in kwargs:
-            kwargs['username'] = user['username']
-
-        if 'email' not in kwargs:
-            kwargs['email'] = user['email']
-
-        self.britive.patch(f'{self.base_url}/{user_id}', json=kwargs)
-
-        # return the updated user record
-        return self.get(user_id)
+    def _prepare_update(self, identity_id: str, fields: dict) -> dict:
+        if 'username' not in fields or 'email' not in fields:
+            user = self._get(identity_id)
+            fields.setdefault('username', user['username'])
+            fields.setdefault('email', user['email'])
+        return fields
 
     def delete(self, user_id: str) -> None:
         """
         Delete a user.
 
-        :param user_id: The ID of the user to update
+        :param user_id: The ID of the user to delete
         :return: None
+        :raises NotFound: if the identity does not exist or is not a human user.
         """
 
-        self.britive.delete(f'{self.base_url}/{user_id}')
+        self._delete(user_id)
 
     def enable(self, user_id: str = None, user_ids: list = None) -> object:
         """
@@ -161,22 +128,14 @@ class Users:
         `user_id` and `user_ids` are provided they will be merged together into one list.
 
         :param user_id: The ID of the user you wish to enable.
-        :param user_ids: A list of user IDs that you wish to enable.
+        :param user_ids: A list of user IDs that you wish to enable. Usernames and emails are not accepted.
         :return: if `user_ids` is set will return a list of user records, else returns a user dict
+        :raises ValueError: if no IDs are provided or IDs are not non-empty strings in a list or single-ID argument.
+        :raises NotFound: without an ID list, if the identity does not exist or is not a human user.
+        :raises DoesNotExistError: with an ID list, if any identity does not exist or is not a human user.
         """
 
-        computed_users = []
-        if user_ids:
-            computed_users += user_ids
-        if user_id:
-            computed_users.append(user_id)
-
-        # de-dup
-        computed_users = list(set(computed_users))
-        response = self.britive.post(f'{self.base_url}/enabled-statuses', json=computed_users)
-        if not user_ids:
-            return response[0]
-        return response
+        return self._set_status('enabled', identity_id=user_id, identity_ids=user_ids)
 
     def disable(self, user_id: str = None, user_ids: list = None) -> object:
         """
@@ -186,22 +145,14 @@ class Users:
         If both `user_id` and `user_ids` are provided they will be merged together into one list.
 
         :param user_id: The ID of the user you wish to disable.
-        :param user_ids: A list of user IDs that you wish to disable.
+        :param user_ids: A list of user IDs that you wish to disable. Usernames and emails are not accepted.
         :return: if `user_ids` is set will return a list of user records, else returns a user dict
+        :raises ValueError: if no IDs are provided or IDs are not non-empty strings in a list or single-ID argument.
+        :raises NotFound: without an ID list, if the identity does not exist or is not a human user.
+        :raises DoesNotExistError: with an ID list, if any identity does not exist or is not a human user.
         """
 
-        computed_users = []
-        if user_ids:
-            computed_users += user_ids
-        if user_id:
-            computed_users.append(user_id)
-
-        # de-dup
-        computed_users = list(set(computed_users))
-        response = self.britive.post(f'{self.base_url}/disabled-statuses', json=computed_users)
-        if not user_ids:
-            return response[0]
-        return response
+        return self._set_status('disabled', identity_id=user_id, identity_ids=user_ids)
 
     def reset_password(self, user_id: str, password: str) -> None:
         """
@@ -230,19 +181,17 @@ class Users:
 
     def reset_mfa(self, user_id: str) -> None:
         """
-        Reset a user's MFA.
+        Reset a user's MFA by deleting all of the user's MFA factor registrations.
 
-        The user will be prompted to re-establish MFA at next login.
+        The user will be prompted to re-establish MFA the next time it is required.
 
-        :param user_id: The ID of the user for which MFA will be reset.
+        :param user_id: The ID of the user for which MFA will be reset. Usernames and other identifiers are not
+            accepted.
         :return: None
         """
 
-        user = self.get(user_id)
-        if not user['identityProvider'].get('mfaEnabled'):
-            raise UserDoesNotHaveMFAEnabled
-
-        return self.britive.patch(f'{self.base_url}/{user_id}/resetmfa')
+        _validate_identity_id(user_id)
+        self.britive.delete(f'{self.britive.base_url}/mfa/admin/registrations/users/{user_id}')
 
     def minimized_user_details(self, user_id: str = None, user_ids: list = None) -> list:
         """
@@ -251,28 +200,7 @@ class Users:
         :param user_id: The ID of the user. Will be combined with `user_ids`.
         :param user_ids: The list of user ids. Will be combined with `user_id`.
         :return: List of users with a small set of attributes.
+
+        The API also accepts service and AI identity IDs. It does not filter by identity type and omits unknown IDs.
         """
-        if user_ids is None:
-            user_ids = []
-        if user_id and user_id not in user_ids:
-            user_ids.append(user_id)
-        if len(user_ids) == 0:
-            return []
-
-        return self.britive.post(f'{self.base_url}/minimized-user-details', json=user_ids)
-
-
-class EnableMFA:
-    def __init__(self, britive) -> None:
-        self.britive = britive
-        self.base_url = f'{self.britive.base_url}/mfa/register/TOTP'
-
-    def enable(self) -> dict:
-        """
-        Enable MFA for user
-
-        :return: Challenge details
-        """
-
-        data = {'action': 'GENERATE_SECRET'}
-        return self.britive.post(self.base_url, json=data)
+        return self._minimized_details(user_id, user_ids)

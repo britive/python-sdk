@@ -1,9 +1,11 @@
 -r common.txt
-azure-identity
-boto3
+azure-identity>=1.16.1
+boto3>=1.41.0
+google-auth>=2.16.1
 pymarkdownlnt
 pyotp
-pytest
+pytest>=9.1.0
 ruff
-tox>=4.12.0
+tox>=4.58.0
 twine
+virtualenv>=21.14.13

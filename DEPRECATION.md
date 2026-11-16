@@ -2,6 +2,12 @@
 
 This document holds the items which are deprecated and/or warrant specific call out with each major release.
 
+## Deprecations in Major Release 4.x.x (Retire in Major Release 5.0.0)
+
+### `identity_management.users.enable_mfa.enable()`
+
+Call `identity_management.users.enable_mfa()` instead. The old form issues a `DeprecationWarning`.
+
 
 ## Moved methods in `v4.0.0`
 

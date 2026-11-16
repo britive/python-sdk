@@ -10,7 +10,7 @@ def test_service_identity_tokens_create(cached_service_identity_token):
 def test_service_identity_tokens_update(cached_service_identity_token_updated):
     assert isinstance(cached_service_identity_token_updated, dict)
     assert cached_service_identity_token_updated['tokenExpirationDays'] == 45
-    assert 'token' in cached_service_identity_token_updated
+    assert 'id' in cached_service_identity_token_updated
 
 
 def test_service_identity_tokens_get(cached_service_identity):

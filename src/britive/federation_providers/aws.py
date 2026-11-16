@@ -62,7 +62,7 @@ class AwsFederationProvider(FederationProvider):
         region = session.region_name or 'us-east-1'  # default to us-east-1 if no region available
         endpoint = f'https://sts.{region}.amazonaws.com/'
         request_body = 'Action=GetCallerIdentity&Version=2011-06-15'
-        t = datetime.datetime.utcnow()
+        t = datetime.datetime.now(datetime.UTC)
         date_stamp = t.strftime('%Y%m%d')  # Date w/o time, used in credential scope
 
         # these are all possible headers for 1) canonical/signed 2) actual request
